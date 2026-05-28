@@ -1,0 +1,13 @@
+baseURL = "https://podcast-demo.example.org/"
+title = "Podcast Demo Site"
+languageCode = "en-us"
+
+# Import the local module for development
+[module]
+  [[module.imports]]
+    path = "github.com/radio-t/hugo-podcast-shortcode"
+
+[params]
+  [params.podcastPlayer]
+    persistent = true
+    defaultPreload = "metadata"

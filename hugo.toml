@@ -1,0 +1,22 @@
+# Hugo Podcast Shortcode Module
+# This is a Hugo module that provides a podcast player shortcode.
+# See: https://gohugo.io/hugo-modules/
+
+[module]
+  # Module path for Go module resolution
+  # Users import via: github.com/radio-t/hugo-podcast-shortcode
+  [module.hugoVersion]
+    min = "0.146.0"
+
+[params]
+  [params.podcastPlayer]
+    # Default audio type
+    defaultType = "audio/mpeg"
+    # Default preload strategy
+    defaultPreload = "metadata"
+    # Enable persistence by default
+    persistent = true
+    # Default source adapter
+    defaultSource = "local"
+    # Enable playback rate control by default
+    showRateControl = true
