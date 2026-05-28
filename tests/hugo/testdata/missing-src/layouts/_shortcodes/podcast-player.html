@@ -1,1 +1,103 @@
-<podcast-player></podcast-player>
+{{- /*
+  podcast-player — Hugo shortcode for a persistent podcast/radio audio player.
+
+  Usage:
+    {{< podcast-player
+      src="https://example.com/audio.mp3"
+      title="Episode 42"
+      poster="https://example.com/cover.jpg"
+      description="Optional description with **Markdown**."
+      chapters="00:00:00-Intro,00:05:30-News"
+      persistent="true"
+    >}}
+
+  Named parameters:
+    src         (required) Audio URL or local file path.
+    title       (optional) Episode title — rendered as attribute.
+    poster      (optional) Cover image URL.
+    description (optional) Markdown description (rendered as <span slot="description">).
+    type        (optional) MIME type.  Auto-detected for local resources.
+                           Default "audio/mpeg".
+    source      (optional) Source adapter hint: "local", "azuracast", "ivoox".
+                           Default "local".
+    persistent  (optional) Disable navigation persistence with "false".
+                           Default "true".
+    preload     (optional) <audio> preload hint.  Default "metadata".
+    chapters    (optional) Comma-separated "timestamp-label" pairs, e.g.
+                           "00:00:00-Intro,00:05:30-News".
+    autoplay    (optional) Auto-play on load.  Default "false".
+    rate        (optional) Show playback rate control.  Default "true".
+*/ -}}
+
+{{- /* ---- 1. Validate required params ---- */ -}}
+{{- $src := .Get "src" -}}
+{{- if not $src -}}
+  {{- errorf "podcast-player: required 'src' parameter is missing. See %s" .Position -}}
+{{- end -}}
+
+{{- /* ---- 2. Named params with defaults ---- */ -}}
+{{- $title       := .Get "title"       | default "" -}}
+{{- $poster      := .Get "poster"      | default "" -}}
+{{- $description := .Get "description" | default "" -}}
+{{- $type        := .Get "type"        | default "audio/mpeg" -}}
+{{- $source      := .Get "source"      | default "local" -}}
+{{- $preload     := .Get "preload"     | default "metadata" -}}
+{{- $chapters    := .Get "chapters"    | default "" -}}
+{{- $autoplay    := .Get "autoplay"    | default "false" -}}
+{{- $showRate    := .Get "rate"        | default "true" -}}
+
+{{- /* persistent defaults to true — explicit "false" disables it */ -}}
+{{- $persistent := ne (.Get "persistent" | default "true") "false" -}}
+
+{{- /* ---- 3. Resolve local vs remote source ---- */ -}}
+{{- $audioURL  := $src -}}
+{{- $audioType := $type -}}
+
+{{- /* Try page-scoped resource first, then global */ -}}
+{{- $localAudio := .Page.Resources.GetMatch $src -}}
+{{- if not $localAudio -}}
+  {{- $localAudio = resources.GetMatch $src -}}
+{{- end -}}
+
+{{- if $localAudio -}}
+  {{- $audioURL  = $localAudio.RelPermalink -}}
+  {{- $audioType = $localAudio.MediaType.Type -}}
+{{- end -}}
+
+{{- /* ---- 4. Assets — loaded exactly once per page ---- */ -}}
+{{- if not (.Page.Store.Get "podcastPlayerAssetsLoaded") -}}
+  {{- .Page.Store.Set "podcastPlayerAssetsLoaded" true -}}
+
+  {{- /* JS — link directly if asset exists, else inline fallback */ -}}
+  {{- $js := resources.Get "js/podcast-player.js" -}}
+  {{- if $js -}}
+    <script src="{{ $js.RelPermalink }}" type="module" defer></script>
+  {{- else -}}
+    <script type="module">
+      console.warn("podcast-player: JS asset not found — check your Hugo module setup.");
+    </script>
+  {{- end -}}
+
+  {{- /* CSS — link directly if asset exists */ -}}
+  {{- $css := resources.Get "css/podcast-player.css" -}}
+  {{- if $css -}}
+    <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+  {{- end -}}
+{{- end -}}
+
+{{- /* ---- 5. Render the custom element ---- */ -}}
+<podcast-player
+  src="{{ $audioURL }}"
+  title="{{ $title }}"
+  {{- with $poster }} poster="{{ . }}"{{ end }}
+  {{- with $chapters }} chapters="{{ . }}"{{ end }}
+  type="{{ $audioType }}"
+  data-source="{{ $source }}"
+  data-preload="{{ $preload }}"
+  {{- if $persistent }} persistent{{ end }}
+  {{- if eq $autoplay "true" }} autoplay{{ end }}
+  {{- if eq $showRate "true" }} data-rate-control{{ end }}>
+  {{- if $description -}}
+    <span slot="description">{{ $description | .Page.RenderString }}</span>
+  {{- end -}}
+</podcast-player>

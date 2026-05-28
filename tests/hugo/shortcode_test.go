@@ -132,16 +132,17 @@ func TestPodcastPlayerShortcode_WithChapters(t *testing.T) {
 		`chapters="00:00:00-Intro,00:05:30-News"`)
 }
 
-func TestPodcastPlayerShortcode_WithInnerContent(t *testing.T) {
-	outputDir := buildHugoSite(t, "with-inner-content")
+func TestPodcastPlayerShortcode_WithDescription(t *testing.T) {
+	outputDir := buildHugoSite(t, "with-description")
 	assertFileContent(t, outputDir, "posts/test-episode/index.html", `slot="description"`)
+	assertFileContent(t, outputDir, "posts/test-episode/index.html", `<strong>bold</strong>`)
 }
 
 func TestPodcastPlayerShortcode_AssetsLoadedOnce(t *testing.T) {
 	outputDir := buildHugoSite(t, "assets-loaded-once")
-	// The JS <script type="module"> tag should appear exactly once
+	// The JS module script tag should appear exactly once (handled by .Page.Store guard)
 	assertFileContentOnce(t, outputDir, "posts/test-episode/index.html",
-		`<script type="module"`)
+		`type="module"`)
 }
 
 func TestPodcastPlayerShortcode_PersistentFlag(t *testing.T) {
