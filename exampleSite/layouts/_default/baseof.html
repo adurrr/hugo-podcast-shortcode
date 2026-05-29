@@ -8,6 +8,8 @@
   {{ with .OutputFormats.Get "rss" -}}
     {{ printf `<link rel=%q type=%q href=%q title=%q>` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
   {{ end -}}
+  {{ $turbolinks := resources.Get "js/vendor/turbolinks.js" | fingerprint }}
+  <script src="{{ $turbolinks.RelPermalink }}" integrity="{{ $turbolinks.Data.Integrity }}"></script>
   <style>
     /* ── Reset & base ── */
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -96,24 +98,39 @@
     </div>
   </footer>
 
-  <podcast-footer></podcast-footer>
+  <podcast-footer id="podcast-footer" data-turbolinks-permanent data-turbo-permanent hx-preserve></podcast-footer>
 
   <script>
     (function() {
-      const btn = document.getElementById('theme-toggle');
-      const html = document.documentElement;
-      const STORAGE_KEY = 'podcast-demo-theme';
+      'use strict';
+      var STORAGE_KEY = 'podcast-demo-theme';
 
-      function getPreferred() { return localStorage.getItem(STORAGE_KEY) || 'light'; }
+      function getPreferred() { try { return localStorage.getItem(STORAGE_KEY) || 'light'; } catch(e) { return 'light'; } }
       function apply(theme) {
-        html.setAttribute('data-theme', theme);
-        localStorage.setItem(STORAGE_KEY, theme);
-        btn.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+        var btn = document.getElementById('theme-toggle');
+        if (btn) btn.textContent = theme === 'dark' ? '\u2600\uFE0F Light' : '\uD83C\uDF19 Dark';
       }
-      function toggle() { apply(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+      function toggle() {
+        apply(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      }
+      function bindToggle() {
+        var btn = document.getElementById('theme-toggle');
+        if (btn) {
+          btn.removeEventListener('click', toggle);
+          btn.addEventListener('click', toggle);
+        }
+      }
 
+      // Apply stored theme and bind on every page view
+      // turbolinks:load fires on initial load AND after every Turbolinks navigation
       apply(getPreferred());
-      btn.addEventListener('click', toggle);
+      bindToggle();
+      document.addEventListener('turbolinks:load', function() {
+        apply(getPreferred());
+        bindToggle();
+      });
     })();
   </script>
 </body>

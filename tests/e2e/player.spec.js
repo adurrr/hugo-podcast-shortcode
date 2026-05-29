@@ -73,5 +73,25 @@ test.describe("Podcast Player E2E", () => {
       await footer.locator("[part='close-btn']").click();
       await expect(footer).not.toHaveAttribute("active");
     });
+
+    test("Turbolinks: audio persists across navigation", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+
+      // Activate footer via play
+      const playBtn = page.locator("podcast-player").first()
+        .locator("[part='play-btn']");
+      await playBtn.click();
+      await page.waitForTimeout(1000);
+
+      // Navigate via Turbolinks (click an internal link)
+      await page.locator('header nav a', { hasText: 'Second Episode' }).click();
+      await page.waitForTimeout(1000);
+
+      // Footer should still be active and playing
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toHaveAttribute("active", "");
+      // The play button should show "⏸" (pause icon) indicating audio is playing
+      await expect(footer.locator("[part='play-btn']")).toHaveText("⏸");
+    });
   });
 });

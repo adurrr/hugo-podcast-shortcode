@@ -1063,13 +1063,27 @@ class PodcastFooter extends HTMLElement {
     // Persist on page unload
     window.addEventListener("beforeunload", this._onBeforeUnload);
 
-    // Mark for Turbolinks/Turbo/htmx persistence
-    this.setAttribute("data-turbolinks-permanent", "");
-    this.setAttribute("data-turbo-permanent", "");
-    this.setAttribute("hx-preserve", "true");
-
     // Try to restore any previously saved playback state
     this._restorePlaybackState();
+
+    // Sync UI with current audio state (audio may have survived reconnection)
+    this._syncUI();
+  }
+
+  /** Sync all UI elements with the current audio state. */
+  _syncUI() {
+    if (this._audio.paused) {
+      this._els.playBtn.textContent = "▶";
+      this._els.playBtn.setAttribute("aria-label", "Play");
+      this._els.playBtn.title = "Play";
+    } else {
+      this._els.playBtn.textContent = "⏸";
+      this._els.playBtn.setAttribute("aria-label", "Pause");
+      this._els.playBtn.title = "Pause";
+    }
+    this._els.muteBtn.textContent = this._audio.muted ? "🔇" : this._audio.volume === 0 ? "🔇" : this._audio.volume < 0.5 ? "🔉" : "🔊";
+    this._els.volume.value = this._audio.muted ? 0 : this._audio.volume;
+    this._onTimeUpdate(); // sync progress/time display
   }
 
   disconnectedCallback() {
@@ -1390,20 +1404,25 @@ class PodcastFooter extends HTMLElement {
         this._els.cover.removeAttribute("hidden");
       }
 
-      // Load the source and defer position restore to loadedmetadata
-      this._pendingRestoreState = state;
-      this._audio.src = state.src;
+      // If audio already has the same source loaded, it survived reconnection
+      // (e.g. Turbolinks permanent element). Don't re-set src — that would
+      // reset currentTime and trigger a fresh load. Just restore position.
+      if (this._audio.src && this._audio.src === state.src) {
+        this._applyPositionAndResume(state);
+      } else {
+        // Cold load: set src and defer position restore to loadedmetadata
+        this._pendingRestoreState = state;
+        this._audio.src = state.src;
+      }
 
       // Show the footer
       this.setAttribute("active", "");
     } catch (_) {}
   }
 
-  _applyRestoredPosition() {
-    const state = this._pendingRestoreState;
+  /** Apply saved position and resume playback if it was active. */
+  _applyPositionAndResume(state) {
     if (!state) return;
-    this._pendingRestoreState = null;
-
     const elapsed = (state.timestamp != null)
       ? (Date.now() - state.timestamp) / 1000
       : Infinity;
@@ -1425,6 +1444,13 @@ class PodcastFooter extends HTMLElement {
     if (!state.paused) {
       this._audio.play()?.catch(() => {});
     }
+  }
+
+  _applyRestoredPosition() {
+    const state = this._pendingRestoreState;
+    if (!state) return;
+    this._pendingRestoreState = null;
+    this._applyPositionAndResume(state);
   }
 
   /* ---- Helpers ---- */
