@@ -181,12 +181,12 @@ class PodcastPlayer extends HTMLElement {
       this._persistenceSetup();
     }
 
-    // Phase 5: Resume playback if the player was reconnected (e.g. Turbolinks).
-    // After disconnect we pause the audio but preserve the src. The persistence
-    // layer saved state with paused=false, so _restorePlaybackState deferred
-    // autoplay to loadedmetadata. If metadata is already loaded (because the
-    // audio element was the same across reconnection), we need to apply the
-    // restored position eagerly — the loadedmetadata event won't fire again.
+    // Phase 5: Apply restored position if the player was reconnected
+    // (e.g. Turbolinks). The persistence layer saved the position but
+    // marked paused=true (set in disconnectedCallback), so this only
+    // restores time/progress without autoplaying — the user sees "▶" and
+    // can click to resume from where they left off. If metadata is already
+    // loaded (audio element survived reconnection), apply eagerly.
     if (this._pendingRestoreState && this._audio.readyState >= HTMLMediaElement.HAVE_METADATA) {
       this._applyRestoredPosition(this._pendingRestoreState);
     }
@@ -196,6 +196,19 @@ class PodcastPlayer extends HTMLElement {
     // Save state before we lose the audio context
     if (this._persistenceActive) {
       this._savePlaybackState();
+      // Override to paused=true — prevents autoplay on reconnect. When the user
+      // navigates away while playing, they may start listening to something else
+      // on the next page. Autoplaying on return would steal the audio from
+      // whatever is currently playing in the footer.
+      try {
+        const key = this._persistenceKey();
+        const raw = sessionStorage.getItem(key);
+        if (raw) {
+          const state = JSON.parse(raw);
+          state.paused = true;
+          sessionStorage.setItem(key, JSON.stringify(state));
+        }
+      } catch (_) {}
     }
     // Unbind audio events FIRST so our pause doesn't trigger _onPause
     // (which would dispatch podcast-pause to the footer, incorrectly stopping it).
