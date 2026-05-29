@@ -1,7 +1,6 @@
 baseURL = "https://adurrr.github.io/hugo-podcast-shortcode/"
 title = "Hugo Podcast Shortcode Demo"
 languageCode = "en-us"
-description = "Live demo for the hugo-podcast-shortcode module — a persistent <podcast-player> Web Component for Hugo"
 ignoreLogs = ["warning-goldmark-raw-html"]
 
 # Allow raw HTML in Markdown (used in demo page layout)
@@ -18,6 +17,8 @@ ignoreLogs = ["warning-goldmark-raw-html"]
 # Site-wide defaults for podcast-player shortcode params.
 # Per-shortcode params override these; these override the built-in defaults.
 [params]
+  description = "Live demo for the hugo-podcast-shortcode module — a persistent <podcast-player> Web Component for Hugo"
+
   [params.podcastPlayer]
     source = "local"
     persistent = true

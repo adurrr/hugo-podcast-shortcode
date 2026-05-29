@@ -48,18 +48,35 @@ cd hugo-podcast-shortcode/exampleSite
 hugo server --port 1313
 ```
 
+Open your browser to the URL shown in the server output (e.g. `http://localhost:1313/hugo-podcast-shortcode/`). The first demo player uses a local audio file (`assets/demo/demo-audio.wav`) so it should work immediately with no external dependencies.
+
 ## Quick start
+
+### With a remote audio URL
 
 ```markdown
 {{< podcast-player
-  src="https://example.com/audio/episode.mp3"
+  src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
   title="Episode 42: Hello World"
-  poster="https://example.com/cover.jpg"
+  poster="https://picsum.photos/seed/podcast/400/400"
   description="Show notes with **Markdown**."
   chapters="00:00:00-Intro,00:05:30-News,00:15:00-Interview"
   persistent="true"
 >}}
 ```
+
+### With a local asset
+
+Place your audio file in your Hugo project's `assets/` directory (or your module's), then reference it by path:
+
+```markdown
+{{< podcast-player
+  src="episodes/my-episode.mp3"
+  title="Episode 42: Hello World"
+>}}
+```
+
+The shortcode resolves local files via `resources.GetMatch` — it checks page-scoped resources first, then the global `assets/` directory. Remote URLs are passed through as-is to the `<audio>` element.
 
 ## Site-wide configuration
 
@@ -307,6 +324,31 @@ tests/
   e2e/                      # Playwright E2E tests (11)
 exampleSite/                # Runnable demo site
 ```
+
+## Troubleshooting
+
+**Player doesn't appear (empty area where it should be)**
+- Check the browser console for JavaScript errors. The `<podcast-player>` custom element must be registered — if the module script fails to load, the player won't render.
+- Verify the JS asset is accessible. In your browser's Network tab, look for `podcast-player.js`. With `hugo server` it's typically at `/hugo-podcast-shortcode/js/podcast-player.js`.
+- Some ad-blockers or script blockers may prevent module scripts from loading.
+
+**Audio doesn't play**
+- Click the play button — the player doesn't autoplay by default (browsers block autoplay).
+- Check the browser console for CORS errors. The audio source must either be same-origin or have permissive CORS headers. For development, use the demo audio file at `assets/demo/demo-audio.wav`.
+- Ensure the `src` URL is valid and points to a playable audio file.
+- Check that the `type` attribute matches the audio format (e.g. `audio/mpeg` for MP3, `audio/wav` for WAV). When omitted, the browser auto-detects.
+
+**Poster image doesn't appear**
+- The poster URL must be accessible. Check for CORS or 404 errors in the browser console.
+- The component hides the poster `<img>` when no `poster` attribute is set.
+
+**Shortcode not found (`errorf` message on page)**
+- Hugo v0.146.0+ is required for the `_shortcodes/` directory naming convention.
+- Verify the module is imported in your site's `hugo.toml` under `[module.imports]`.
+
+**Persistence doesn't work**
+- `persistent` must be present as an attribute on the element. By default it's enabled, but setting `persistent="false"` in a shortcode param or globally in `[params.podcastPlayer]` disables it.
+- State is stored in `sessionStorage` — it persists only within the same browser tab.
 
 ## License
 

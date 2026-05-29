@@ -9,19 +9,19 @@ title: "Podcast Player Demo"
 
 <section class="demo-section">
   <h2>📻 Basic Player</h2>
-  <p class="desc">Minimal usage — just a <code>src</code> and <code>title</code>.</p>
+  <p class="desc">Minimal usage — just a <code>src</code> and <code>title</code>. This example uses a local <code>.wav</code> asset served from <code>assets/demo/</code>.</p>
   <div class="demo-player">
     <div class="player-wrapper">
       {{< podcast-player
-        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-        title="SoundHelix: Ambient Demo"
+        src="demo/demo-audio.wav"
+        title="Demo: 440Hz Sine Tone"
       >}}
     </div>
   </div>
   <div class="demo-code">
     <code>\{\{&lt; podcast-player
-  src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-  title="SoundHelix: Ambient Demo"
+  src="demo/demo-audio.wav"
+  title="Demo: 440Hz Sine Tone"
 &gt;\}\}</code>
   </div>
 </section>
