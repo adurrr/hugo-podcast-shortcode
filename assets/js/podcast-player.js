@@ -20,11 +20,113 @@
  *
  * @element podcast-player
  */
+
+/* ------------------------------------------------------------------ */
+/*  Source Adapters (inlined to avoid ES module import issues          */
+/*  when Hugo serves the file via resources.Get without js.Build)      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Detect the source type from a URL string.
+ * @param {string} url
+ * @returns {"local"|"azuracast"|"ivoox"}
+ */
+export function detectSourceType(url) {
+  if (!url) return "local";
+  if (/ivoox\.com/i.test(url)) return "ivoox";
+  if (/azuracast/i.test(url) || /\.stream\./i.test(url)) return "azuracast";
+  return "local";
+}
+
+/**
+ * Create the appropriate SourceAdapter for a <podcast-player> element.
+ * @param {HTMLElement} element
+ * @returns {SourceAdapter}
+ */
+export function createSourceAdapter(element) {
+  const type = element.getAttribute("data-source") || detectSourceType(
+    element.getAttribute("src") || "",
+  );
+  switch (type) {
+    case "azuracast": return new AzuracastAdapter(element);
+    case "ivoox":     return new IvooxAdapter(element);
+    default:          return new LocalAdapter(element);
+  }
+}
+
+export class LocalAdapter {
+  constructor(element) { this.element = element; }
+  async resolve() {
+    const src = this.element.getAttribute("src");
+    if (!src) throw new Error("LocalAdapter: missing src attribute");
+    return src;
+  }
+  async enrich() { return null; }
+}
+
+export class AzuracastAdapter {
+  constructor(element) { this.element = element; }
+  async resolve() {
+    const src = this.element.getAttribute("src");
+    if (src) return src;
+    const apiUrl = this.element.getAttribute("azuracast-api-url");
+    if (!apiUrl) throw new Error("AzuracastAdapter: missing azuracast-api-url attribute");
+    const resp = await fetch(apiUrl);
+    if (!resp.ok) throw new Error(`AzuracastAdapter: API error ${resp.status}`);
+    const data = await resp.json();
+    const listenUrl = data?.station?.listen_url;
+    if (!listenUrl) throw new Error("AzuracastAdapter: no listen_url in API response");
+    this._cachedData = data;
+    return listenUrl;
+  }
+  async enrich() {
+    if (!this._cachedData) return null;
+    const np = this._cachedData.now_playing;
+    if (!np?.song) return null;
+    const meta = {};
+    if (np.song.title) meta.title = np.song.title;
+    if (np.song.artist) meta.artist = np.song.artist;
+    return Object.keys(meta).length > 0 ? meta : null;
+  }
+}
+
+export class IvooxAdapter {
+  constructor(element) { this.element = element; }
+  async resolve() {
+    const src = this.element.getAttribute("src");
+    if (!/ivoox\.com/i.test(src)) return src;
+    try {
+      const resp = await fetch(src);
+      if (!resp.ok) return src;
+      const html = await resp.text();
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const ogAudio = doc.querySelector('meta[property="og:audio"]');
+      if (ogAudio?.content) return ogAudio.content;
+      const dataUrl = doc.querySelector("[data-audio-url]");
+      if (dataUrl?.getAttribute("data-audio-url")) return dataUrl.getAttribute("data-audio-url");
+      const audioSrc = doc.querySelector("audio source");
+      if (audioSrc?.src) return audioSrc.src;
+    } catch { /* fall through */ }
+    return src;
+  }
+  async enrich() { return null; }
+}
+
 class PodcastPlayer extends HTMLElement {
   /** Attributes the component should react to. */
   static get observedAttributes() {
-    return ["src", "title", "poster", "chapters", "type", "autoplay", "data-preload"];
+    return ["src", "title", "poster", "chapters", "type", "autoplay",
+      "data-preload", "persistent", "data-source"];
   }
+
+  /** Prefix for sessionStorage state key (instance ID appended). */
+  static get PERSISTENCE_KEY() { return "podcastPlayerState"; }
+
+  /** Minimum interval (ms) between throttled sessionStorage writes. */
+  static get SAVE_INTERVAL_MS() { return 30000; }
+
+  /** Staleness threshold (seconds) — discard saved position older than this. */
+  static get STATE_TTL_SECONDS() { return 3600; }
 
   constructor() {
     super();
@@ -297,17 +399,46 @@ class PodcastPlayer extends HTMLElement {
 
   _applySrc(src) {
     if (!src) return;
-    // If src changed and we were playing, keep playing with new source
+
+    const dataSource = this.getAttribute("data-source");
+    const sourceType = dataSource || detectSourceType(src);
+
+    if (sourceType !== "local") {
+      this._resolveAdapterSource();
+      return;
+    }
+
+    this._setAudioSrc(src);
+  }
+
+  /** Directly assign a URL to the internal <audio> element. */
+  _setAudioSrc(src, { updateAttribute = true } = {}) {
     const wasPlaying = !this._audio.paused;
     this._audio.src = src;
     this._audio.load();
     if (wasPlaying) {
       this._audio.play()?.catch(() => {});
     }
-    // Reflect to attribute
-    if (this.getAttribute("src") !== src) {
+    if (updateAttribute && this.getAttribute("src") !== src) {
       this.setAttribute("src", src);
     }
+  }
+
+  /** Create the appropriate source adapter and resolve the real audio URL. */
+  async _resolveAdapterSource() {
+    const adapter = createSourceAdapter(this);
+    try {
+      const resolved = await adapter.resolve();
+      this._setAudioSrc(resolved, { updateAttribute: false });
+      await adapter.enrich();
+    } catch (err) {
+      this._showError(err.message);
+    }
+  }
+
+  _showError(msg) {
+    this._els.error.textContent = msg;
+    this._els.error.hidden = false;
   }
 
   _updateTitle(val) {
