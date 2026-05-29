@@ -11,6 +11,7 @@ npm-debug.log*
 # Test output
 /coverage/
 /test-results/
+tests/test-results/
 /playwright-report/
 
 # OS
