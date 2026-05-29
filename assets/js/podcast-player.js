@@ -243,6 +243,10 @@ class PodcastPlayer extends HTMLElement {
           --pp-text-muted: var(--podcast-player-text-muted, #888);
           --pp-radius: var(--podcast-player-radius, 12px);
           --pp-accent: var(--podcast-player-accent, #a78bfa);
+          --pp-progress-height: var(--podcast-player-progress-height, 5px);
+          --pp-thumb-size: var(--podcast-player-thumb-size, 14px);
+          --pp-focus-ring: var(--podcast-player-focus-ring, 0 0 0 3px rgba(99,102,241,.45));
+          --pp-border: var(--podcast-player-border, rgba(255,255,255,.06));
           background: var(--pp-bg);
           color: var(--pp-text);
           border-radius: var(--pp-radius);
@@ -268,7 +272,7 @@ class PodcastPlayer extends HTMLElement {
                         width: 36px; height: 36px; border-radius: 50%;
                         cursor: pointer; display: inline-flex; align-items: center;
                         justify-content: center; font-size: 1.1rem;
-                        transition: background .15s, transform .1s; }
+                        transition: background .15s, transform .1s, box-shadow .15s; }
         .btn:hover   { background: var(--pp-primary); color: #fff; }
         .btn:active  { transform: scale(.92); }
         .btn-play    { width: 44px; height: 44px; font-size: 1.3rem;
@@ -276,17 +280,19 @@ class PodcastPlayer extends HTMLElement {
         .btn-play:hover { background: var(--pp-accent); }
         .progress-wrap { flex: 1; min-width: 100px; position: relative; }
         input[type="range"] { -webkit-appearance: none; appearance: none;
-                               width: 100%; height: 5px; border-radius: 3px;
-                               background: var(--pp-surface); outline: none;
+                               width: 100%; height: var(--pp-progress-height); border-radius: 3px;
+                               background: linear-gradient(to right, var(--pp-primary) var(--progress, 0%), var(--pp-surface) var(--progress, 0%));
+                               outline: none;
                                cursor: pointer; margin: 0; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none;
-          width: 14px; height: 14px; border-radius: 50%;
+          width: var(--pp-thumb-size); height: var(--pp-thumb-size); border-radius: 50%;
           background: var(--pp-primary); border: 2px solid var(--pp-bg);
-          cursor: pointer; transition: transform .1s; }
-        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-        input[type="range"]::-moz-range-thumb { width: 14px; height: 14px;
+          cursor: pointer; transition: transform .15s ease; }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+        input[type="range"]::-moz-range-thumb { width: var(--pp-thumb-size); height: var(--pp-thumb-size);
           border-radius: 50%; background: var(--pp-primary); border: 2px solid var(--pp-bg);
-          cursor: pointer; }
+          cursor: pointer; transition: transform .15s ease; }
+        input[type="range"]::-moz-range-thumb:hover { transform: scale(1.25); }
         .time        { font-size: .8rem; font-variant-numeric: tabular-nums;
                         color: var(--pp-text-muted); white-space: nowrap; }
         .extras      { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -301,34 +307,37 @@ class PodcastPlayer extends HTMLElement {
         .chapter-chip:hover { background: var(--pp-primary); color: #fff; }
         .chapter-chip.active { background: var(--pp-primary); color: #fff; }
         .error-msg   { color: #f87171; font-size: .8rem; padding: 4px 0; }
+        .error-msg:not([hidden]) { animation: error-in .25s ease; }
+        @keyframes error-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+        .btn:focus-visible, .chapter-chip:focus-visible, input[type="range"]:focus-visible { outline: none; box-shadow: var(--pp-focus-ring); }
         [hidden]     { display: none !important; }
       </style>
       <div class="player" part="player">
-        <div class="header">
+        <div class="header" part="header">
           <img class="poster" part="poster" src="" alt="Cover" hidden>
           <div class="info">
             <p class="title" part="title"></p>
             <slot name="description"></slot>
           </div>
         </div>
-        <div class="controls">
+        <div class="controls" part="controls">
           <button class="btn btn-skip-back"  part="skip-back-btn"
                   title="Rewind 15s" aria-label="Rewind 15 seconds">⏪</button>
           <button class="btn btn-play" part="play-btn"
                   title="Play" aria-label="Play">▶</button>
           <button class="btn btn-skip-fwd"  part="skip-fwd-btn"
                   title="Forward 15s" aria-label="Forward 15 seconds">⏩</button>
-          <div class="progress-wrap">
+          <div class="progress-wrap" part="progress-wrap">
             <input type="range" class="progress" part="progress"
                    min="0" max="100" value="0"
                    aria-label="Seek position">
           </div>
           <span class="time time-current" part="time-current">--:--</span>
-          <span class="time time-sep">/</span>
+          <span class="time time-sep" part="time-sep">/</span>
           <span class="time time-duration" part="time-duration">--:--</span>
         </div>
-        <div class="extras">
-          <div class="vol-wrap">
+        <div class="extras" part="extras">
+          <div class="vol-wrap" part="vol-wrap">
             <button class="btn btn-mute" part="mute-btn"
                     title="Mute" aria-label="Toggle mute">🔊</button>
             <input type="range" class="volume" part="volume"

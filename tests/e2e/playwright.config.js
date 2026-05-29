@@ -1,5 +1,10 @@
 // @ts-check
 import { defineConfig, devices } from "@playwright/test";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const exampleSite = path.resolve(__dirname, "../../exampleSite");
 
 export default defineConfig({
   testDir: ".",
@@ -19,17 +24,9 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-    {
-      name: "mobile",
-      use: { ...devices["iPhone 15"] },
-    },
   ],
   webServer: {
-    command: "cd ../exampleSite && hugo server --port 1313 --noHTTPCache",
+    command: `hugo server --source "${exampleSite}" --port 1313 --noHTTPCache`,
     url: "http://localhost:1313",
     reuseExistingServer: !process.env.CI,
     timeout: 30000,

@@ -1,7 +1,195 @@
-/* podcast-player — Styles
-   Phase 6 implementation.  Placeholder ensures Hugo Pipes has something
-   to process. */
+/* ==========================================================================
+   podcast-player — External Styles (Phase 6)
+   Additive theming, responsive layout, and accessibility enhancements.
+   ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   1. Host element base & CSS-reset isolation
+   -------------------------------------------------------------------------- */
 podcast-player {
   display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 1.5rem 0;
+
+  /* Light theme (default) — clean, modern palette for typical Hugo pages */
+  --podcast-player-primary: #4f46e5;
+  --podcast-player-bg: #ffffff;
+  --podcast-player-surface: #f3f4f6;
+  --podcast-player-text: #111827;
+  --podcast-player-text-muted: #6b7280;
+  --podcast-player-radius: 12px;
+  --podcast-player-accent: #7c3aed;
+  --podcast-player-border: #e5e7eb;
+  --podcast-player-progress-height: 5px;
+  --podcast-player-thumb-size: 14px;
+  --podcast-player-focus-ring: 0 0 0 3px rgba(79, 70, 229, 0.35);
 }
+
+/* Dark theme opt-in ------------------------------------------------------- */
+[data-theme="dark"] podcast-player,
+.theme-dark podcast-player,
+podcast-player[data-theme="dark"] {
+  --podcast-player-primary: #6366f1;
+  --podcast-player-bg: #1e1e2e;
+  --podcast-player-surface: #2a2a3e;
+  --podcast-player-text: #e0e0e0;
+  --podcast-player-text-muted: #888;
+  --podcast-player-accent: #a78bfa;
+  --podcast-player-border: rgba(255, 255, 255, 0.06);
+  --podcast-player-focus-ring: 0 0 0 3px rgba(167, 139, 250, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   2. ::part() overrides — structural & decorative
+   -------------------------------------------------------------------------- */
+
+/* Player shell */
+podcast-player::part(player) {
+  border: 1px solid var(--podcast-player-border);
+}
+
+[data-theme="dark"] podcast-player::part(player),
+.theme-dark podcast-player::part(player),
+podcast-player[data-theme="dark"]::part(player) {
+  border-color: transparent;
+}
+
+/* Poster — rounded corners, subtle border & shadow */
+podcast-player::part(poster) {
+  border-radius: 10px;
+  border: 1px solid var(--podcast-player-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Title readability */
+podcast-player::part(title) {
+  line-height: 1.3;
+  min-height: 1.2em;
+}
+
+/* Time numerals */
+podcast-player::part(time-current),
+podcast-player::part(time-duration) {
+  font-feature-settings: "tnum";
+}
+
+/* Chapters — horizontal scroll container on narrow viewports */
+podcast-player::part(chapters) {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Error — reserve space to reduce layout shift */
+podcast-player::part(error) {
+  min-height: 1.2em;
+}
+
+/* --------------------------------------------------------------------------
+   3. Focus styles (keyboard accessibility)
+   -------------------------------------------------------------------------- */
+podcast-player::part(play-btn):focus-visible,
+podcast-player::part(skip-back-btn):focus-visible,
+podcast-player::part(skip-fwd-btn):focus-visible,
+podcast-player::part(mute-btn):focus-visible,
+podcast-player::part(rate-btn):focus-visible,
+podcast-player::part(progress):focus-visible,
+podcast-player::part(volume):focus-visible {
+  outline: none;
+  box-shadow: var(--podcast-player-focus-ring);
+}
+
+/* --------------------------------------------------------------------------
+   4. Animation & transition refinements
+   -------------------------------------------------------------------------- */
+
+/* Progress / volume — smooth height changes when custom properties shift */
+podcast-player::part(progress),
+podcast-player::part(volume) {
+  transition: height 0.2s ease;
+}
+
+/* Button hover / focus ring transitions */
+podcast-player::part(play-btn),
+podcast-player::part(skip-back-btn),
+podcast-player::part(skip-fwd-btn),
+podcast-player::part(mute-btn),
+podcast-player::part(rate-btn) {
+  transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+/* --------------------------------------------------------------------------
+   5. Responsive breakpoints (< 480px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 479px) {
+  podcast-player {
+    --podcast-player-radius: 10px;
+    --podcast-player-progress-height: 8px;
+    --podcast-player-thumb-size: 18px;
+  }
+
+  /* Reflow controls: progress bar drops to its own full-width row */
+  podcast-player::part(controls) {
+    gap: 10px;
+  }
+
+  podcast-player::part(progress-wrap) {
+    flex: 1 1 100%;
+    min-width: 100%;
+    order: 1;
+  }
+
+  podcast-player::part(time-current),
+  podcast-player::part(time-sep),
+  podcast-player::part(time-duration) {
+    order: 2;
+    font-size: 0.75rem;
+  }
+
+  /* Larger primary button for thumb-friendly tapping */
+  podcast-player::part(play-btn) {
+    width: 52px;
+    height: 52px;
+    font-size: 1.5rem;
+  }
+
+  /* Ensure all control buttons meet 44 px touch target */
+  podcast-player::part(skip-back-btn),
+  podcast-player::part(skip-fwd-btn),
+  podcast-player::part(mute-btn) {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Chapters: horizontal scroll, no wrapping */
+  podcast-player::part(chapters) {
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding-bottom: 4px;
+  }
+
+  /* Rate button touch target */
+  podcast-player::part(rate-btn) {
+    min-height: 32px;
+    padding: 0 12px;
+  }
+
+  /* Tighter header gap */
+  podcast-player::part(header) {
+    gap: 10px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. Edge-case resilience
+   -------------------------------------------------------------------------- */
+
+/* When no poster is present the header still aligns; .info already has
+   flex:1.  We just ensure the component never overflows its column. */
+podcast-player::part(player) {
+  min-width: 0;
+}
+
+/* Description is line-clamped inside the shadow DOM; no external override
+   needed unless a theme wants to change the clamp depth. */
