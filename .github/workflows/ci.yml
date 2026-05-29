@@ -66,5 +66,8 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium
 
+      - name: Warm Hugo module cache
+        run: hugo --source "${{ github.workspace }}/exampleSite" --quiet 2>/dev/null || true
+
       - name: Run E2E tests
         run: npx playwright test --config tests/e2e/playwright.config.js

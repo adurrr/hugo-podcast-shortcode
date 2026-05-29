@@ -29,6 +29,6 @@ export default defineConfig({
     command: `hugo server --source "${exampleSite}" --port 1313 --noHTTPCache`,
     url: "http://localhost:1313",
     reuseExistingServer: !process.env.CI,
-    timeout: 30000,
+    timeout: 120000,
   },
 });
