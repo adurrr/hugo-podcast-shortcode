@@ -61,16 +61,23 @@
     .link-list li{margin-bottom:0.5rem}
     .link-list a{color:var(--accent);text-decoration:none;font-weight:500}
     .link-list a:hover{text-decoration:underline}
+
+    /* ── Nav buttons ── */
+    .nav-buttons{display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1.5rem;align-items:center}
+    .nav-button{display:inline-flex;align-items:center;gap:0.4rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:0.9rem;font-weight:500;padding:0.5rem 1.1rem;text-decoration:none;transition:all .15s;cursor:pointer}
+    .nav-button:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+    .nav-button-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+    .nav-button-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
   </style>
 </head>
 <body>
   <header>
     <div class="container">
-      <a href="/" class="site-title">{{ .Site.Title }}</a>
+      <a href="{{ .Site.Home.RelPermalink }}" class="site-title">{{ .Site.Title }}</a>
       <nav>
-        <a href="/">Home</a>
-        <a href="/posts/test-episode/">Test Episode</a>
-        <a href="/posts/second-episode/">Second Episode</a>
+        <a href="{{ .Site.Home.RelPermalink }}">Home</a>
+        <a href="{{ "posts/test-episode.md" | relref . }}">Test Episode</a>
+        <a href="{{ "posts/second-episode.md" | relref . }}">Second Episode</a>
         <a href="https://github.com/adurrr/hugo-podcast-shortcode" target="_blank" rel="noopener">GitHub</a>
       </nav>
       <button id="theme-toggle" aria-label="Toggle color theme">🌙 Dark</button>

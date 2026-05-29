@@ -11,6 +11,7 @@ draft: false
   persistent="true"
 >}}
 
-<p style="margin-top:1rem">
-  <a href="/" style="color:var(--accent, #4f46e5)">← Back to Home</a>
-</p>
+<div class="nav-buttons">
+  <a href="{{< relref "/" >}}" class="nav-button">← Back to Home</a>
+  <a href="{{< relref "posts/test-episode.md" >}}" class="nav-button nav-button-primary">Test Episode →</a>
+</div>
