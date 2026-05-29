@@ -1,6 +1,14 @@
-baseURL = "https://podcast-demo.example.org/"
-title = "Podcast Demo Site"
+baseURL = "https://adurrr.github.io/hugo-podcast-shortcode/"
+title = "Hugo Podcast Shortcode Demo"
 languageCode = "en-us"
+description = "Live demo for the hugo-podcast-shortcode module — a persistent <podcast-player> Web Component for Hugo"
+ignoreLogs = ["warning-goldmark-raw-html"]
+
+# Allow raw HTML in Markdown (used in demo page layout)
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
 
 # Import the local module for development
 [module]
