@@ -14,7 +14,7 @@ Check out this amazing episode!
   src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"
   title="Episode 43: Deep Dive"
   poster="https://picsum.photos/seed/ep43/400/400"
-  chapters="00:00:00-Intro,00:03:15-News,00:15:30-Main Topic,00:42:00-Wrap Up"
+  chapters="00:00:00-Intro,00:02:15-News,00:03:30-Main Topic,00:04:50-Wrap Up"
   persistent="true"
 >}}
 

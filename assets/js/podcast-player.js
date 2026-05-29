@@ -795,7 +795,11 @@ class PodcastPlayer extends HTMLElement {
 
   /** Respond to a pause event from the footer or another inline player. */
   _onExternalPause(e) {
-    // Force-pause this inline player regardless of src
+    const src = e.detail && e.detail.src;
+    const mySrc = this._audio.src || this.getAttribute("src") || "";
+    // Only react if the event matches our source (or if unknown — backward compat)
+    if (src && src !== mySrc && !src.endsWith(mySrc) && !mySrc.endsWith(src)) return;
+
     if (this._audio.src && !this._audio.paused) {
       this._audio.pause();
       // _onPause will update our UI
@@ -820,19 +824,25 @@ class PodcastPlayer extends HTMLElement {
     this._els.playBtn.title = "Play";
   }
 
-  /** Respond to a play event from the footer (same source → sync UI). */
+  /** Respond to a play event from the footer or another inline player.
+   *  Same source → sync button. Different source → stop our playback
+   *  (only one audio plays at a time). */
   _onExternalPlay(e) {
     const detail = e.detail || {};
     const src = detail.src || "";
     const mySrc = this._audio.src || this.getAttribute("src") || "";
     if (!mySrc || !src) return;
-    // Only react if we share the same source
+
     if (mySrc === src || src.endsWith(mySrc) || mySrc.endsWith(src)) {
-      // Footer is the active audio source — just sync our button to show ⏸
+      // Same source: someone else started our track — sync button to show ⏸
       this._els.playBtn.textContent = "⏸";
       this._els.playBtn.setAttribute("aria-label", "Pause");
       this._els.playBtn.setAttribute("aria-pressed", "true");
       this._els.playBtn.title = "Pause";
+    } else if (!this._audio.paused) {
+      // Different source: stop our playback (only one song at a time)
+      this._audio.pause();
+      // _onPause will update our button + dispatch podcast-pause
     }
   }
 
@@ -1356,9 +1366,15 @@ class PodcastFooter extends HTMLElement {
     this.setAttribute("active", "");
   }
 
-  /** React to pause events from inline <podcast-player> elements. */
+  /** React to pause events from inline <podcast-player> elements.
+   *  Only acts if the event's source matches what the footer is currently playing. */
   _onExternalPause(e) {
-    // Pause footer playback regardless of source match
+    const src = e.detail && e.detail.src;
+    const mySrc = this._audio.src || "";
+    // Ignore pauses from a different source (avoids incorrectly stopping when
+    // one player replaces another)
+    if (src && mySrc && src !== mySrc && !src.endsWith(mySrc) && !mySrc.endsWith(src)) return;
+
     if (this._audio.src && !this._audio.paused) {
       this._audio.pause();
       // _onPause handler will update UI and dispatch its own event
