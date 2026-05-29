@@ -156,6 +156,9 @@ class PodcastPlayer extends HTMLElement {
     this._onEnded = this._onEnded.bind(this);
     this._onError = this._onError.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
+    this._onExternalPause = this._onExternalPause.bind(this);
+    this._onExternalPlay = this._onExternalPlay.bind(this);
+    this._onPodcastClose = this._onPodcastClose.bind(this);
     this._onBeforeUnload = this._onBeforeUnload.bind(this);
   }
 
@@ -168,6 +171,9 @@ class PodcastPlayer extends HTMLElement {
     this._bindAudioEvents();
     this._bindUIEvents();
     document.addEventListener("keydown", this._onKeyDown);
+    document.addEventListener("podcast-pause", this._onExternalPause);
+    document.addEventListener("podcast-play", this._onExternalPlay);
+    document.addEventListener("podcast-close", this._onPodcastClose);
     this._applyAttributes();
 
     // Phase 4: persistence — only when the persistent attribute is present
@@ -184,6 +190,9 @@ class PodcastPlayer extends HTMLElement {
     this._unbindAudioEvents();
     this._teardownPersistence();
     document.removeEventListener("keydown", this._onKeyDown);
+    document.removeEventListener("podcast-pause", this._onExternalPause);
+    document.removeEventListener("podcast-play", this._onExternalPlay);
+    document.removeEventListener("podcast-close", this._onPodcastClose);
   }
 
   attributeChangedCallback(name, oldVal, newVal) {
@@ -709,6 +718,18 @@ class PodcastPlayer extends HTMLElement {
       this._lastSaveTs = Date.now();
       this._savePlaybackState();
     }
+
+    // Notify footer (and other listeners) that playback paused
+    this.dispatchEvent(new CustomEvent("podcast-pause", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        src: this._audio.src || this.getAttribute("src") || "",
+        title: this.getAttribute("title") || "",
+        poster: this.getAttribute("poster") || "",
+        currentTime: this._audio.currentTime,
+      },
+    }));
   }
 
   _onEnded() {
@@ -765,6 +786,53 @@ class PodcastPlayer extends HTMLElement {
         e.preventDefault();
         this._toggleMute();
         break;
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  External event handlers (sync with podcast-footer)                  */
+  /* ------------------------------------------------------------------ */
+
+  /** Respond to a pause event from the footer or another inline player. */
+  _onExternalPause(e) {
+    // Force-pause this inline player regardless of src
+    if (this._audio.src && !this._audio.paused) {
+      this._audio.pause();
+      // _onPause will update our UI
+    } else {
+      // Ensure button shows play icon
+      this._els.playBtn.textContent = "▶";
+      this._els.playBtn.setAttribute("aria-label", "Play");
+      this._els.playBtn.setAttribute("aria-pressed", "false");
+      this._els.playBtn.title = "Play";
+    }
+  }
+
+  /** Respond to close event from the footer — force-stop playback. */
+  _onPodcastClose(e) {
+    if (this._audio.src && !this._audio.paused) {
+      this._audio.pause();
+    }
+    // Always show play icon on close
+    this._els.playBtn.textContent = "▶";
+    this._els.playBtn.setAttribute("aria-label", "Play");
+    this._els.playBtn.setAttribute("aria-pressed", "false");
+    this._els.playBtn.title = "Play";
+  }
+
+  /** Respond to a play event from the footer (same source → sync UI). */
+  _onExternalPlay(e) {
+    const detail = e.detail || {};
+    const src = detail.src || "";
+    const mySrc = this._audio.src || this.getAttribute("src") || "";
+    if (!mySrc || !src) return;
+    // Only react if we share the same source
+    if (mySrc === src || src.endsWith(mySrc) || mySrc.endsWith(src)) {
+      // Footer is the active audio source — just sync our button to show ⏸
+      this._els.playBtn.textContent = "⏸";
+      this._els.playBtn.setAttribute("aria-label", "Pause");
+      this._els.playBtn.setAttribute("aria-pressed", "true");
+      this._els.playBtn.title = "Pause";
     }
   }
 
@@ -1050,6 +1118,7 @@ class PodcastFooter extends HTMLElement {
     this._onLoadedMetadata = this._onLoadedMetadata.bind(this);
     this._onBeforeUnload = this._onBeforeUnload.bind(this);
     this._onPodcastPlay = this._onPodcastPlay.bind(this);
+    this._onExternalPause = this._onExternalPause.bind(this);
   }
 
   connectedCallback() {
@@ -1057,8 +1126,9 @@ class PodcastFooter extends HTMLElement {
     this._bindAudioEvents();
     this._bindUIEvents();
 
-    // Listen for play events from any podcast-player on the page
+    // Listen for events from inline players
     document.addEventListener("podcast-play", this._onPodcastPlay);
+    document.addEventListener("podcast-pause", this._onExternalPause);
 
     // Persist on page unload
     window.addEventListener("beforeunload", this._onBeforeUnload);
@@ -1089,6 +1159,7 @@ class PodcastFooter extends HTMLElement {
   disconnectedCallback() {
     this._savePlaybackState();
     document.removeEventListener("podcast-play", this._onPodcastPlay);
+    document.removeEventListener("podcast-pause", this._onExternalPause);
     window.removeEventListener("beforeunload", this._onBeforeUnload);
     this._unbindAudioEvents();
     this._unbindUIEvents();
@@ -1285,6 +1356,15 @@ class PodcastFooter extends HTMLElement {
     this.setAttribute("active", "");
   }
 
+  /** React to pause events from inline <podcast-player> elements. */
+  _onExternalPause(e) {
+    // Pause footer playback regardless of source match
+    if (this._audio.src && !this._audio.paused) {
+      this._audio.pause();
+      // _onPause handler will update UI and dispatch its own event
+    }
+  }
+
   _togglePlay() {
     if (this._audio.paused) {
       this._audio.play()?.catch(() => {});
@@ -1322,6 +1402,12 @@ class PodcastFooter extends HTMLElement {
   /** Hide the footer and stop playback. */
   _close() {
     this._audio.pause();
+    // Notify inline players to stop — dispatches BEFORE src is cleared
+    this.dispatchEvent(new CustomEvent("podcast-close", {
+      bubbles: true,
+      composed: true,
+      detail: { src: this._audio.src || "" },
+    }));
     this._audio.removeAttribute("src");
     this._audio.load();
     this.removeAttribute("active");
@@ -1332,12 +1418,36 @@ class PodcastFooter extends HTMLElement {
     this._els.playBtn.textContent = "⏸";
     this._els.playBtn.setAttribute("aria-label", "Pause");
     this._els.playBtn.title = "Pause";
+
+    // Notify inline players to sync their UI
+    this.dispatchEvent(new CustomEvent("podcast-play", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        src: this._audio.src || "",
+        title: this._els.title.textContent,
+        poster: this._els.cover.getAttribute("src") || "",
+        currentTime: this._audio.currentTime,
+      },
+    }));
   }
 
   _onPause() {
     this._els.playBtn.textContent = "▶";
     this._els.playBtn.setAttribute("aria-label", "Play");
     this._els.playBtn.title = "Play";
+
+    // Notify inline players to sync their UI
+    this.dispatchEvent(new CustomEvent("podcast-pause", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        src: this._audio.src || "",
+        title: this._els.title.textContent,
+        poster: this._els.cover.getAttribute("src") || "",
+        currentTime: this._audio.currentTime,
+      },
+    }));
   }
 
   _onTimeUpdate() {

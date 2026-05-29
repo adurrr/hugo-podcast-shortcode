@@ -93,5 +93,95 @@ test.describe("Podcast Player E2E", () => {
       // The play button should show "⏸" (pause icon) indicating audio is playing
       await expect(footer.locator("[part='play-btn']")).toHaveText("⏸");
     });
+
+    test.describe("Bidirectional play/pause sync", () => {
+      test("pause on inline player pauses both", async ({ page }) => {
+        await page.goto("posts/test-episode/");
+        const footer = page.locator("podcast-footer");
+        const playBtn = page.locator("podcast-player").first()
+          .locator("[part='play-btn']");
+
+        // Play on inline
+        await playBtn.click();
+        await expect(footer).toHaveAttribute("active", "");
+        await expect(footer.locator("[part='play-btn']")).toHaveText("⏸");
+        await expect(playBtn).toHaveText("⏸");
+
+        // Pause on inline
+        await playBtn.click();
+        await expect(footer.locator("[part='play-btn']")).toHaveText("▶");
+        await expect(playBtn).toHaveText("▶");
+      });
+
+      test("pause on footer pauses both", async ({ page }) => {
+        await page.goto("posts/test-episode/");
+        const footer = page.locator("podcast-footer");
+        const playBtn = page.locator("podcast-player").first()
+          .locator("[part='play-btn']");
+        const footerPlayBtn = footer.locator("[part='play-btn']");
+
+        // Play on inline
+        await playBtn.click();
+        await expect(playBtn).toHaveText("⏸");
+        await expect(footerPlayBtn).toHaveText("⏸");
+
+        // Pause on footer
+        await footerPlayBtn.click();
+        await expect(footerPlayBtn).toHaveText("▶");
+        await expect(playBtn).toHaveText("▶");
+      });
+
+      test("play on footer after pause resumes both", async ({ page }) => {
+        await page.goto("posts/test-episode/");
+        const footer = page.locator("podcast-footer");
+        const playBtn = page.locator("podcast-player").first()
+          .locator("[part='play-btn']");
+        const footerPlayBtn = footer.locator("[part='play-btn']");
+
+        // Play on inline
+        await playBtn.click();
+        await page.waitForTimeout(500);
+        await expect(footerPlayBtn).toHaveText("⏸");
+        await expect(playBtn).toHaveText("⏸");
+
+        // Pause on footer
+        await footerPlayBtn.click();
+        await page.waitForTimeout(500);
+        await expect(footerPlayBtn).toHaveText("▶");
+        await expect(playBtn).toHaveText("▶");
+
+        // Play on footer — both resume
+        await footerPlayBtn.click();
+        await page.waitForTimeout(1500);
+        await expect(footerPlayBtn).toHaveText("⏸");
+        await expect(playBtn).toHaveText("⏸");
+      });
+
+      test("close footer pauses inline player", async ({ page }) => {
+        await page.goto("posts/test-episode/");
+        const footer = page.locator("podcast-footer");
+        const firstInline = page.locator("podcast-player").first();
+        const playBtn = firstInline.locator("[part='play-btn']");
+
+        // Play on inline
+        await playBtn.click();
+        await expect(playBtn).toHaveText("⏸");
+        await expect(footer).toHaveAttribute("active", "");
+
+        // Verify inline player audio is actually playing
+        const playing = await firstInline.evaluate(el => !el._audio.paused);
+        expect(playing).toBe(true);
+
+        // Close footer
+        await footer.locator("[part='close-btn']").click();
+        await expect(footer).not.toHaveAttribute("active");
+
+        // Inline player audio should now be paused
+        const paused = await firstInline.evaluate(el => el._audio.paused);
+        expect(paused).toBe(true);
+        // Button should show play icon
+        await expect(playBtn).toHaveText("▶");
+      });
+    });
   });
 });
