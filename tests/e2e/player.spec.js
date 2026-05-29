@@ -12,13 +12,13 @@ test.describe("Podcast Player E2E", () => {
   test("player has src attribute from shortcode", async ({ page }) => {
     await page.goto("/posts/test-episode/");
     const player = page.locator("podcast-player").first();
-    await expect(player).toHaveAttribute("src", /example\.com\/audio/);
+    await expect(player).toHaveAttribute("src", /soundhelix|SoundHelix/);
   });
 
   test("player title is rendered", async ({ page }) => {
     await page.goto("/posts/test-episode/");
     const player = page.locator("podcast-player").first();
-    await expect(player).toHaveAttribute("title", /Episode 42/);
+    await expect(player).toHaveAttribute("title", /Hello World/);
   });
 
   test("player has shadow DOM with controls", async ({ page }) => {

@@ -5,6 +5,13 @@ title: "Podcast Player Demo"
 <section class="hero">
   <h1>Hugo Podcast Shortcode</h1>
   <p>A reusable <strong>&lt;podcast-player&gt;</strong> Web Component for Hugo — persistent audio playback with chapter navigation, poster support, and full accessibility. Drop it into any post with a single shortcode.</p>
+  <p style="margin-top:0.75rem;font-size:0.92rem">
+    <a href="/posts/test-episode/">📻 Test Episode</a>
+    &nbsp;·&nbsp;
+    <a href="/posts/second-episode/">▶️ Second Episode</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/adurrr/hugo-podcast-shortcode" target="_blank" rel="noopener">📖 GitHub</a>
+  </p>
 </section>
 
 <section class="demo-section">
@@ -103,7 +110,7 @@ title: "Podcast Player Demo"
   <div class="demo-code">
     <code>\{\{&lt; podcast-player src="…" title="SoundHelix: Non-Persistent" &gt;\}\}</code>
   </div>
-  <p class="desc" style="margin-top:0.75rem;font-size:0.85rem">💡 Play some of Player A, then reload the page — your position, volume, mute, and speed are remembered. Player B always starts fresh.</p>
+  <p class="desc" style="margin-top:0.75rem;font-size:0.85rem">💡 Play some of Player A, then <a href="/posts/second-episode/">navigate to the second page</a> and come back — your position, volume, mute, and speed are remembered. Player B always starts fresh. You can also try navigating between <a href="/posts/test-episode/">Test Episode</a> and <a href="/posts/second-episode/">Second Episode</a>.</p>
 </section>
 
 <section class="demo-section">
@@ -147,8 +154,11 @@ title: "Podcast Player Demo"
 </section>
 
 <section class="demo-section">
-  <h2>🔗 Links</h2>
+  <h2>🔗 Demo Pages</h2>
   <ul class="link-list">
+    <li><a href="/">Home</a> — this page (all demo variations)</li>
+    <li><a href="/posts/test-episode/">Test Episode</a> — basic player + player with chapters and poster</li>
+    <li><a href="/posts/second-episode/">Second Episode</a> — player with persistence enabled for cross-page testing</li>
     <li><a href="https://github.com/adurrr/hugo-podcast-shortcode" target="_blank" rel="noopener">GitHub Repository</a> — source code, issues, contributing</li>
     <li><a href="https://github.com/adurrr/hugo-podcast-shortcode#readme" target="_blank" rel="noopener">README</a> — full documentation, install guide, all CSS custom properties and <code>::part()</code> selectors</li>
     <li><a href="https://github.com/adurrr/hugo-podcast-shortcode?tab=readme-ov-file#keyboard-shortcuts" target="_blank" rel="noopener">Keyboard Shortcuts</a> — Space, arrows, M, and more</li>
