@@ -312,7 +312,7 @@ class PodcastPlayer extends HTMLElement {
         .btn:focus-visible, .chapter-chip:focus-visible, input[type="range"]:focus-visible { outline: none; box-shadow: var(--pp-focus-ring); }
         [hidden]     { display: none !important; }
       </style>
-      <div class="player" part="player">
+      <div class="player" part="player" role="region" aria-label="Podcast Player">
         <div class="header" part="header">
           <img class="poster" part="poster" src="" alt="Cover" hidden>
           <div class="info">
@@ -324,13 +324,13 @@ class PodcastPlayer extends HTMLElement {
           <button class="btn btn-skip-back"  part="skip-back-btn"
                   title="Rewind 15s" aria-label="Rewind 15 seconds">⏪</button>
           <button class="btn btn-play" part="play-btn"
-                  title="Play" aria-label="Play">▶</button>
+                  title="Play" aria-label="Play" aria-pressed="false">▶</button>
           <button class="btn btn-skip-fwd"  part="skip-fwd-btn"
                   title="Forward 15s" aria-label="Forward 15 seconds">⏩</button>
           <div class="progress-wrap" part="progress-wrap">
             <input type="range" class="progress" part="progress"
                    min="0" max="100" value="0"
-                   aria-label="Seek position">
+                   aria-label="Seek position" aria-valuetext="0:00 of 0:00">
           </div>
           <span class="time time-current" part="time-current">--:--</span>
           <span class="time time-sep" part="time-sep">/</span>
@@ -339,7 +339,7 @@ class PodcastPlayer extends HTMLElement {
         <div class="extras" part="extras">
           <div class="vol-wrap" part="vol-wrap">
             <button class="btn btn-mute" part="mute-btn"
-                    title="Mute" aria-label="Toggle mute">🔊</button>
+                    title="Mute" aria-label="Toggle mute" aria-pressed="false">🔊</button>
             <input type="range" class="volume" part="volume"
                    min="0" max="1" step="0.05" value="1"
                    aria-label="Volume">
@@ -348,7 +348,7 @@ class PodcastPlayer extends HTMLElement {
                   title="Playback speed" aria-label="Playback speed">1×</button>
           <div class="chapters" part="chapters" hidden></div>
         </div>
-        <div class="error-msg" part="error" hidden></div>
+        <div class="error-msg" part="error" role="alert" hidden></div>
       </div>
     `;
 
@@ -488,6 +488,8 @@ class PodcastPlayer extends HTMLElement {
     if (val) {
       this._els.poster.src = val;
       this._els.poster.hidden = false;
+      const title = this.getAttribute("title") || "";
+      this._els.poster.alt = title ? `Cover: ${title}` : "Cover";
     } else {
       this._els.poster.src = "";
       this._els.poster.hidden = true;
@@ -584,6 +586,7 @@ class PodcastPlayer extends HTMLElement {
   _toggleMute() {
     this._audio.muted = !this._audio.muted;
     this._updateMuteIcon(this._audio.muted ? 0 : this._audio.volume);
+    this._els.muteBtn.setAttribute("aria-pressed", this._audio.muted ? "true" : "false");
   }
 
   _updateMuteIcon(vol) {
@@ -608,6 +611,7 @@ class PodcastPlayer extends HTMLElement {
     const next = rates[(idx + 1) % rates.length];
     this._audio.playbackRate = next;
     this._els.rateBtn.textContent = next + "×";
+    this._els.rateBtn.setAttribute("aria-label", `Playback speed ${next}×`);
   }
 
   /* ------------------------------------------------------------------ */
@@ -620,6 +624,8 @@ class PodcastPlayer extends HTMLElement {
     this._els.progress.value = pct;
     this._els.progress.style.setProperty("--progress", pct + "%");
     this._els.timeCurrent.textContent = this._fmtTime(this._audio.currentTime);
+    this._els.progress.setAttribute("aria-valuetext",
+      `${this._fmtTime(this._audio.currentTime)} of ${this._fmtTime(this._audio.duration)}`);
 
     // Highlight active chapter
     this._updateActiveChapter();
@@ -665,6 +671,7 @@ class PodcastPlayer extends HTMLElement {
   _onPlay() {
     this._els.playBtn.textContent = "⏸";
     this._els.playBtn.setAttribute("aria-label", "Pause");
+    this._els.playBtn.setAttribute("aria-pressed", "true");
     this._els.playBtn.title = "Pause";
     this._dispatchState();
     this._updateMediaSessionPlayback();
@@ -679,6 +686,7 @@ class PodcastPlayer extends HTMLElement {
   _onPause() {
     this._els.playBtn.textContent = "▶";
     this._els.playBtn.setAttribute("aria-label", "Play");
+    this._els.playBtn.setAttribute("aria-pressed", "false");
     this._els.playBtn.title = "Play";
     this._dispatchState();
     this._updateMediaSessionPlayback();
