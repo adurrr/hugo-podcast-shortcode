@@ -61,6 +61,23 @@ hugo server --port 1313
 >}}
 ```
 
+## Site-wide configuration
+
+Set defaults for all shortcode invocations in your `hugo.toml`. Per-shortcode params override site config; site config overrides built-in defaults.
+
+```toml
+[params]
+  [params.podcastPlayer]
+    source = "azuracast"
+    persistent = false
+    preload = "metadata"
+    type = "audio/mpeg"
+    autoplay = "false"
+    rate = "true"
+```
+
+Supported site config keys match the shortcode parameter names (except `src`, `title`, `poster`, `description`, and `chapters`, which are always per-episode).
+
 ## Shortcode parameters
 
 | Parameter | Required | Default | Description |

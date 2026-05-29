@@ -11,7 +11,11 @@
       persistent="true"
     >}}
 
-  Named parameters:
+  Named parameters + site config defaults.
+    Per-shortcode params take precedence over site config
+    ([params.podcastPlayer] in hugo.toml), which in turn
+    take precedence over the built-in defaults.
+
     src         (required) Audio URL or local file path.
     title       (optional) Episode title — rendered as attribute.
     poster      (optional) Cover image URL.
@@ -35,21 +39,28 @@
   {{- errorf "podcast-player: required 'src' parameter is missing. See %s" .Position -}}
 {{- end -}}
 
-{{- /* ---- 2. Named params with defaults ---- */ -}}
+{{- /* ---- 2. Site config defaults ---- */ -}}
+{{- $siteCfg := site.Params.podcastPlayer | default dict -}}
+
+{{- /* ---- 3. Named params: explicit > site config > hardcoded default ---- */ -}}
 {{- $title       := .Get "title"       | default "" -}}
 {{- $poster      := .Get "poster"      | default "" -}}
 {{- $description := .Get "description" | default "" -}}
-{{- $type        := .Get "type"        | default "audio/mpeg" -}}
-{{- $source      := .Get "source"      | default "local" -}}
-{{- $preload     := .Get "preload"     | default "metadata" -}}
+{{- $type        := .Get "type"        | default ($siteCfg.type        | default "audio/mpeg") -}}
+{{- $source      := .Get "source"      | default ($siteCfg.source      | default "local") -}}
+{{- $preload     := .Get "preload"     | default ($siteCfg.preload     | default "metadata") -}}
 {{- $chapters    := .Get "chapters"    | default "" -}}
-{{- $autoplay    := .Get "autoplay"    | default "false" -}}
-{{- $showRate    := .Get "rate"        | default "true" -}}
+{{- $autoplay    := .Get "autoplay"    | default ($siteCfg.autoplay    | default "false") -}}
+{{- $showRate    := .Get "rate"        | default ($siteCfg.rate        | default "true") -}}
 
-{{- /* persistent defaults to true — explicit "false" disables it */ -}}
-{{- $persistent := ne (.Get "persistent" | default "true") "false" -}}
+{{- /* persistent is special: Boolean in site config, string in shortcode param */ -}}
+{{- $persistentDefault := "true" -}}
+{{- if isset $siteCfg "persistent" -}}
+  {{- $persistentDefault = cond $siteCfg.persistent "true" "false" -}}
+{{- end -}}
+{{- $persistent := ne (.Get "persistent" | default $persistentDefault) "false" -}}
 
-{{- /* ---- 3. Resolve local vs remote source ---- */ -}}
+{{- /* ---- 4. Resolve local vs remote source ---- */ -}}
 {{- $audioURL  := $src -}}
 {{- $audioType := $type -}}
 
@@ -64,7 +75,7 @@
   {{- $audioType = $localAudio.MediaType.Type -}}
 {{- end -}}
 
-{{- /* ---- 4. Assets — loaded exactly once per page ---- */ -}}
+{{- /* ---- 5. Assets — loaded exactly once per page ---- */ -}}
 {{- if not (.Page.Store.Get "podcastPlayerAssetsLoaded") -}}
   {{- .Page.Store.Set "podcastPlayerAssetsLoaded" true -}}
 
@@ -85,7 +96,7 @@
   {{- end -}}
 {{- end -}}
 
-{{- /* ---- 5. Render the custom element ---- */ -}}
+{{- /* ---- 6. Render the custom element ---- */ -}}
 <podcast-player
   src="{{ $audioURL }}"
   title="{{ $title }}"
