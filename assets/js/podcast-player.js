@@ -300,8 +300,9 @@ class PodcastPlayer extends HTMLElement {
         }
         .player      { display: flex; flex-direction: column; gap: 12px; }
         .header      { display: flex; gap: 14px; align-items: flex-start; }
-        .poster      { width: 64px; height: 64px; border-radius: 8px;
-                        object-fit: cover; flex-shrink: 0; background: var(--pp-surface); }
+        .poster      { width: clamp(64px, 10vw, 110px); aspect-ratio: 1;
+                         border-radius: 8px; object-fit: cover; flex-shrink: 0;
+                         background: var(--pp-surface); }
         .info        { flex: 1; min-width: 0; }
         .title       { font-weight: 600; font-size: 1rem; margin: 0 0 4px;
                         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
