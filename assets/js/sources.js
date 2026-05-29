@@ -16,4 +16,6 @@ export {
   LocalAdapter,
   AzuracastAdapter,
   IvooxAdapter,
+  PodcastPlayer,
+  PodcastFooter,
 } from "./podcast-player.js";

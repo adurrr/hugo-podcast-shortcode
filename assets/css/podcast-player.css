@@ -194,3 +194,28 @@ podcast-player::part(player) {
 
 /* Description is line-clamped inside the shadow DOM; no external override
    needed unless a theme wants to change the clamp depth. */
+
+/* --------------------------------------------------------------------------
+   7. <podcast-footer> — fixed bottom mini-player bar
+   -------------------------------------------------------------------------- */
+podcast-footer[active]::part(footer) {
+  /* Theme variables for the fixed footer bar — cascades into Shadow DOM */
+  --podcast-player-bg: #ffffff;
+  --podcast-player-text: #111827;
+  --podcast-player-text-muted: #6b7280;
+  --podcast-player-surface: #f3f4f6;
+  --podcast-player-primary: #4f46e5;
+  --podcast-player-accent: #7c3aed;
+  --podcast-player-border: #e5e7eb;
+}
+
+[data-theme="dark"] podcast-footer[active]::part(footer),
+.theme-dark podcast-footer[active]::part(footer) {
+  --podcast-player-bg: #1e1e2e;
+  --podcast-player-text: #e0e0e0;
+  --podcast-player-text-muted: #888;
+  --podcast-player-surface: #2a2a3e;
+  --podcast-player-primary: #6366f1;
+  --podcast-player-accent: #a78bfa;
+  --podcast-player-border: rgba(255, 255, 255, 0.06);
+}
