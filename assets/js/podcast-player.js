@@ -180,6 +180,16 @@ class PodcastPlayer extends HTMLElement {
     if (this.hasAttribute("persistent")) {
       this._persistenceSetup();
     }
+
+    // Phase 5: Resume playback if the player was reconnected (e.g. Turbolinks).
+    // After disconnect we pause the audio but preserve the src. The persistence
+    // layer saved state with paused=false, so _restorePlaybackState deferred
+    // autoplay to loadedmetadata. If metadata is already loaded (because the
+    // audio element was the same across reconnection), we need to apply the
+    // restored position eagerly — the loadedmetadata event won't fire again.
+    if (this._pendingRestoreState && this._audio.readyState >= HTMLMediaElement.HAVE_METADATA) {
+      this._applyRestoredPosition(this._pendingRestoreState);
+    }
   }
 
   disconnectedCallback() {
@@ -187,7 +197,16 @@ class PodcastPlayer extends HTMLElement {
     if (this._persistenceActive) {
       this._savePlaybackState();
     }
+    // Unbind audio events FIRST so our pause doesn't trigger _onPause
+    // (which would dispatch podcast-pause to the footer, incorrectly stopping it).
     this._unbindAudioEvents();
+    // Stop playback: when Turbolinks replaces <body>, non-permanent inline players
+    // are removed from DOM but their internal <audio> keeps playing in memory.
+    // pause() stops the audio without clearing the src — preserving it for
+    // Turbolinks permanent elements that get detached/reattached.
+    if (!this._audio.paused) {
+      this._audio.pause();
+    }
     this._teardownPersistence();
     document.removeEventListener("keydown", this._onKeyDown);
     document.removeEventListener("podcast-pause", this._onExternalPause);
@@ -1168,6 +1187,12 @@ class PodcastFooter extends HTMLElement {
 
   disconnectedCallback() {
     this._savePlaybackState();
+    // Don't pause or clear audio — the footer is designed to persist
+    // across Turbolinks navigation (data-turbolinks-permanent).
+    // Clearing the src here would break the persistence test: the
+    // disconnectedCallback fires during relocation, and after reconnection
+    // the audio would have no src, so loadedmetadata never fires and
+    // the deferred autoplay in _applyRestoredPosition is never called.
     document.removeEventListener("podcast-play", this._onPodcastPlay);
     document.removeEventListener("podcast-pause", this._onExternalPause);
     window.removeEventListener("beforeunload", this._onBeforeUnload);
