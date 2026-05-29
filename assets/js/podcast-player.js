@@ -141,6 +141,12 @@ class PodcastPlayer extends HTMLElement {
     this._chapters = [];
     /** @type {number} */
     this._currentChapterIndex = -1;
+    /** @type {string|null} detected navigation adapter */
+    this._persistenceAdapter = null;
+    /** @type {boolean} idempotency guard for _persistenceSetup */
+    this._persistenceActive = false;
+    /** @type {object|null} deferred restore state, applied on loadedmetadata */
+    this._pendingRestoreState = null;
 
     // Bind handlers so we can add/remove them
     this._onTimeUpdate = this._onTimeUpdate.bind(this);
@@ -150,6 +156,7 @@ class PodcastPlayer extends HTMLElement {
     this._onEnded = this._onEnded.bind(this);
     this._onError = this._onError.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
+    this._onBeforeUnload = this._onBeforeUnload.bind(this);
   }
 
   /* ------------------------------------------------------------------ */
@@ -162,10 +169,20 @@ class PodcastPlayer extends HTMLElement {
     this._bindUIEvents();
     document.addEventListener("keydown", this._onKeyDown);
     this._applyAttributes();
+
+    // Phase 4: persistence — only when the persistent attribute is present
+    if (this.hasAttribute("persistent")) {
+      this._persistenceSetup();
+    }
   }
 
   disconnectedCallback() {
+    // Save state before we lose the audio context
+    if (this._persistenceActive) {
+      this._savePlaybackState();
+    }
     this._unbindAudioEvents();
+    this._teardownPersistence();
     document.removeEventListener("keydown", this._onKeyDown);
   }
 
@@ -192,6 +209,19 @@ class PodcastPlayer extends HTMLElement {
         break;
       case "data-preload":
         this._audio.preload = newVal || "metadata";
+        break;
+      case "persistent":
+        if (newVal !== null && this.isConnected) {
+          this._persistenceSetup();
+        } else if (newVal === null) {
+          this._teardownPersistence();
+        }
+        break;
+      case "data-source":
+        if (this.isConnected) {
+          const src = this.getAttribute("src");
+          if (src) this._applySrc(src);
+        }
         break;
     }
   }
@@ -584,12 +614,31 @@ class PodcastPlayer extends HTMLElement {
 
     // Highlight active chapter
     this._updateActiveChapter();
+
+    // Persistence: save state periodically (throttled to ~every 30 s)
+    // so the restored position is reasonably fresh on full page reload.
+    if (this.hasAttribute("persistent")) {
+      this._savePlaybackStateThrottled();
+    }
+  }
+
+  /** Throttled wrapper around _savePlaybackState — respects SAVE_INTERVAL_MS. */
+  _savePlaybackStateThrottled() {
+    const now = Date.now();
+    if (this._lastSaveTs && (now - this._lastSaveTs) < PodcastPlayer.SAVE_INTERVAL_MS) return;
+    this._lastSaveTs = now;
+    this._savePlaybackState();
   }
 
   _onLoadedMetadata() {
     this._els.timeDuration.textContent = this._fmtTime(this._audio.duration);
     this._els.progress.max = "100";
     this._els.error.hidden = true;
+
+    // Apply deferred position restore (saved in _restorePlaybackState)
+    if (this._pendingRestoreState) {
+      this._applyRestoredPosition(this._pendingRestoreState);
+    }
 
     // Update Media Session metadata
     if ("mediaSession" in navigator) {
@@ -610,6 +659,12 @@ class PodcastPlayer extends HTMLElement {
     this._els.playBtn.title = "Pause";
     this._dispatchState();
     this._updateMediaSessionPlayback();
+
+    // Persistence: save play state immediately
+    if (this.hasAttribute("persistent")) {
+      this._lastSaveTs = Date.now();
+      this._savePlaybackState();
+    }
   }
 
   _onPause() {
@@ -618,6 +673,12 @@ class PodcastPlayer extends HTMLElement {
     this._els.playBtn.title = "Play";
     this._dispatchState();
     this._updateMediaSessionPlayback();
+
+    // Persistence: save pause state immediately
+    if (this.hasAttribute("persistent")) {
+      this._lastSaveTs = Date.now();
+      this._savePlaybackState();
+    }
   }
 
   _onEnded() {
@@ -674,6 +735,211 @@ class PodcastPlayer extends HTMLElement {
         e.preventDefault();
         this._toggleMute();
         break;
+    }
+  }
+
+  /* ================================================================== */
+  /*  Phase 4 — Persistence Layer                                        */
+  /* ================================================================== */
+  //
+  // Two-tier strategy:
+  //   1. DOM persistence via framework-specific markers
+  //      (Turbolinks data-turbolinks-permanent, Turbo data-turbo-permanent,
+  //       htmx hx-preserve + stable ID)
+  //   2. State persistence via sessionStorage as a vanilla safety net
+  //      (saves on beforeunload, restores on next connectedCallback)
+
+  /** Per-instance sessionStorage key derived from src or id. */
+  _persistenceKey() {
+    const tag = this.getAttribute("src") || this.id || "player";
+    return PodcastPlayer.PERSISTENCE_KEY + ":" + tag;
+  }
+
+  /**
+   * Enable persistence for this player instance.
+   * Called from connectedCallback when persistent attribute is present.
+   */
+  _persistenceSetup() {
+    // Idempotency guard — avoid double-setup from attributeChangedCallback
+    if (this._persistenceActive) return;
+    this._persistenceActive = true;
+
+    // 1. Generate a stable ID if none exists (required by htmx hx-preserve).
+    //    If another player on the page already has the same derived ID, append
+    //    a counter to avoid collisions.
+    if (!this.id) {
+      const base = "pp-" + (this.getAttribute("src") || "player")
+          .replace(/[^a-zA-Z0-9_-]/g, "")
+          .slice(0, 32) || "pp-player";
+      this.id = base;
+      // Resolve collisions: if we're in the DOM and another element already
+      // owns this ID, append a counter until we find a free one.
+      if (this.isConnected) {
+        let counter = 2;
+        while (this.ownerDocument.getElementById(this.id) !== null &&
+               this.ownerDocument.getElementById(this.id) !== this) {
+          this.id = base + "-" + counter++;
+        }
+      }
+    }
+
+    // 2. Sprinkle framework-specific DOM markers so the element survives
+    //    partial page swaps (these are no-ops if the library isn't loaded).
+    this.setAttribute("data-turbolinks-permanent", "");
+    this.setAttribute("data-turbo-permanent", "");
+    this.setAttribute("hx-preserve", "true");
+
+    // 3. Detect which navigation library is available (for logging / debugging)
+    if (window.Turbolinks) {
+      this._persistenceAdapter = "turbolinks";
+    } else if (window.Turbo) {
+      this._persistenceAdapter = "turbo";
+    } else if (window.htmx) {
+      this._persistenceAdapter = "htmx";
+    } else {
+      this._persistenceAdapter = "vanilla";
+    }
+
+    // 4. Vanilla safety net — save state before the page unloads
+    window.addEventListener("beforeunload", this._onBeforeUnload);
+
+    // 5. Attempt to restore any previously saved playback state
+    this._restorePlaybackState();
+  }
+
+  /** Tear down persistence listeners. Called from disconnectedCallback. */
+  _teardownPersistence() {
+    this._persistenceActive = false;
+    this._pendingRestoreState = null;
+    window.removeEventListener("beforeunload", this._onBeforeUnload);
+  }
+
+  /**
+   * beforeunload handler — persists the full player state to sessionStorage
+   * so it can be restored on the next page view.
+   */
+  _onBeforeUnload() {
+    this._savePlaybackState();
+  }
+
+  /**
+   * Serialize the player's current state into sessionStorage.
+   * Called automatically on beforeunload; also called periodically from
+   * play/pause/timeupdate so the saved position is always current.
+   */
+  _savePlaybackState() {
+    try {
+      const state = {
+        src:          this._audio.src || this.getAttribute("src") || "",
+        currentTime:  this._audio.currentTime,
+        paused:       this._audio.paused,
+        volume:       this._audio.volume,
+        muted:        this._audio.muted,
+        playbackRate: this._audio.playbackRate,
+        timestamp:    Date.now(),
+        title:        this.getAttribute("title") || "",
+        poster:       this.getAttribute("poster") || "",
+      };
+      sessionStorage.setItem(this._persistenceKey(), JSON.stringify(state));
+    } catch (_) {
+      // sessionStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  /**
+   * Restore a previously saved playback state from sessionStorage.
+   *
+   * Rules:
+   *   • Only restores if the saved `src` matches the current element's `src`
+   *     (prevents restoring a different episode's position).
+   *   • Restores volume, mute, playback rate unconditionally.
+   *   • Only restores position if the save is less than 1 hour old
+   *     (stale positions are discarded).
+   *   • Clears the saved state after restoring (one-shot).
+   */
+  /** Compare two URLs by their absolute form. */
+  _urlsMatch(a, b) {
+    try {
+      return new URL(a, document.baseURI).href === new URL(b, document.baseURI).href;
+    } catch {
+      return a === b;
+    }
+  }
+
+  _restorePlaybackState() {
+    try {
+      const raw = sessionStorage.getItem(this._persistenceKey());
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      sessionStorage.removeItem(this._persistenceKey());
+
+      // Restore audio properties eagerly (safe regardless of src or metadata)
+      if (state.volume != null)        this._audio.volume = state.volume;
+      if (state.muted != null)         this._audio.muted = state.muted;
+      if (state.playbackRate != null)  this._audio.playbackRate = state.playbackRate;
+
+      // Update UI immediately for volume/rate
+      this._els.volume.value = this._audio.muted ? 0 : this._audio.volume;
+      this._updateMuteIcon(this._audio.muted ? 0 : this._audio.volume);
+      this._els.rateBtn.textContent = this._audio.playbackRate + "\u00d7";
+
+      // Verify src matches (exact URL comparison) — if different, skip position
+      const currentSrc = this.getAttribute("src");
+      if (currentSrc && state.src && !this._urlsMatch(state.src, currentSrc)) {
+        return;
+      }
+
+      // Defer position + autoplay to loadedmetadata (where duration is known)
+      this._pendingRestoreState = state;
+    } catch (_) {
+      // Ignore parse / storage errors
+    }
+  }
+
+  /**
+   * Apply deferred position restore once metadata is loaded.
+   * Called from _onLoadedMetadata when _pendingRestoreState is set.
+   */
+  _applyRestoredPosition(state) {
+    this._pendingRestoreState = null;
+
+    // Restore display attributes if the element doesn't already have them
+    if (!this.getAttribute("title") && state.title) {
+      this._updateTitle(state.title);
+      this.setAttribute("title", state.title);
+    }
+    if (!this.getAttribute("poster") && state.poster) {
+      this._updatePoster(state.poster);
+      this.setAttribute("poster", state.poster);
+    }
+
+    // Position restore with staleness guard
+    const elapsed = (state.timestamp != null)
+      ? (Date.now() - state.timestamp) / 1000
+      : Infinity;
+
+    if (elapsed < PodcastPlayer.STATE_TTL_SECONDS
+        && state.currentTime != null
+        && state.currentTime > 0) {
+      // Only estimate forward if the audio was actively playing
+      let targetTime = state.currentTime;
+      if (!state.paused) {
+        targetTime = Math.min(
+          state.currentTime + elapsed,
+          this._audio.duration || Infinity,
+        );
+      }
+      if (targetTime < (this._audio.duration || Infinity)) {
+        this._audio.currentTime = targetTime;
+      }
+      // else: episode likely ended — don't restore position
+    }
+
+    // Resume playback if it was active (browser may block — update UI on catch)
+    if (!state.paused) {
+      this._audio.play()?.catch(() => {
+        this._onPause();
+      });
     }
   }
 

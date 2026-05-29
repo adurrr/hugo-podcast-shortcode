@@ -7,7 +7,8 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 // Import registers the custom element as a side-effect
-import "../../assets/js/podcast-player.js";
+// and gives us the class for static property access.
+import PodcastPlayer from "../../assets/js/podcast-player.js";
 
 describe("PodcastPlayer Web Component", () => {
   /** @type {HTMLElement} */
@@ -267,5 +268,292 @@ describe("PodcastPlayer Web Component", () => {
     el._audio.dispatchEvent(new Event("pause"));
     expect(handler).toHaveBeenCalledTimes(2);
     expect(handler.mock.calls[1][0].detail.paused).toBe(true);
+  });
+
+  /* ================================================================== */
+  /*  Persistence (Phase 4)                                              */
+  /* ================================================================== */
+
+  describe("persistence", () => {
+    beforeEach(() => {
+      sessionStorage.clear();
+      // Reset element to a clean state for each test
+      // (the outer beforeEach creates a plain element without attributes)
+    });
+
+    it("should add framework DOM markers when persistent attribute is present", () => {
+      el.setAttribute("src", "https://example.com/a.mp3");
+      el.setAttribute("persistent", ""); // triggers _persistenceSetup()
+
+      expect(el.hasAttribute("data-turbolinks-permanent")).toBe(true);
+      expect(el.hasAttribute("data-turbo-permanent")).toBe(true);
+      expect(el.getAttribute("hx-preserve")).toBe("true");
+      expect(el.id).toMatch(/^pp-/);
+    });
+
+    it("should detect 'vanilla' adapter when no navigation library is present", () => {
+      el.setAttribute("persistent", ""); // triggers _persistenceSetup()
+      expect(el._persistenceAdapter).toBe("vanilla");
+    });
+
+    it("should save playback state to sessionStorage with per-instance key", () => {
+      el.setAttribute("src", "https://example.com/a.mp3");
+      el.setAttribute("persistent", ""); // triggers _persistenceSetup()
+      el._audio.src = "https://example.com/a.mp3";
+      el._savePlaybackState();
+
+      const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
+      const raw = sessionStorage.getItem(key);
+      expect(raw).not.toBeNull();
+      const state = JSON.parse(raw);
+      expect(state.src).toContain("example.com/a.mp3");
+      expect(state.volume).toBe(1);
+      expect(typeof state.timestamp).toBe("number");
+    });
+
+    it("should isolate state per instance with different sessionStorage keys", () => {
+      // Save for one player
+      el.setAttribute("src", "https://example.com/a.mp3");
+      el.setAttribute("persistent", "");
+      el._audio.src = "https://example.com/a.mp3";
+      el._savePlaybackState();
+
+      const keyA = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
+      const keyB = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/b.mp3";
+      expect(sessionStorage.getItem(keyA)).not.toBeNull();
+      expect(sessionStorage.getItem(keyB)).toBeNull();
+    });
+
+    it("should restore volume and rate from saved state", () => {
+      // Seed sessionStorage FIRST, then set attributes
+      el.setAttribute("src", "https://example.com/a.mp3");
+      const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
+      const saved = {
+        src: "https://example.com/a.mp3",
+        currentTime: 120,
+        paused: true,
+        volume: 0.3,
+        muted: true,
+        playbackRate: 1.5,
+        timestamp: Date.now(),
+        title: "",
+        poster: "",
+      };
+      sessionStorage.setItem(key, JSON.stringify(saved));
+
+      el.setAttribute("persistent", ""); // triggers _persistenceSetup() which reads storage
+
+      expect(el._audio.volume).toBe(0.3);
+      expect(el._audio.muted).toBe(true);
+      expect(el._audio.playbackRate).toBe(1.5);
+    });
+
+    it("should still restore volume/rate even when src differs", () => {
+      // Seed storage with DIFFERENT src
+      el.setAttribute("src", "https://example.com/a.mp3");
+      const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
+      const saved = {
+        src: "https://other.com/different.mp3",
+        currentTime: 300,
+        paused: true,
+        volume: 0.3,
+        muted: true,
+        playbackRate: 1.5,
+        timestamp: Date.now(),
+        title: "",
+        poster: "",
+      };
+      sessionStorage.setItem(key, JSON.stringify(saved));
+
+      el.setAttribute("persistent", ""); // triggers restore — different src but volume/rate restored
+
+      expect(el._audio.volume).toBe(0.3);
+      expect(el._audio.muted).toBe(true);
+      expect(el._audio.playbackRate).toBe(1.5);
+    });
+
+    it("should NOT restore position for a different src", () => {
+      el.setAttribute("src", "https://example.com/a.mp3");
+      const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
+      const saved = {
+        src: "https://other.com/different.mp3",
+        currentTime: 300,
+        paused: true,
+        volume: 1,
+        muted: false,
+        playbackRate: 1,
+        timestamp: Date.now(),
+        title: "",
+        poster: "",
+      };
+      sessionStorage.setItem(key, JSON.stringify(saved));
+
+      el.setAttribute("persistent", "");
+
+      // currentTime should NOT be 300 since src doesn't match
+      expect(el._audio.currentTime).not.toBe(300);
+    });
+
+    it("should clear saved state after restoring", () => {
+      el.setAttribute("src", "https://example.com/a.mp3");
+      const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
+      const saved = {
+        src: "https://example.com/a.mp3",
+        currentTime: 0,
+        paused: true,
+        volume: 1,
+        muted: false,
+        playbackRate: 1,
+        timestamp: Date.now(),
+        title: "",
+        poster: "",
+      };
+      sessionStorage.setItem(key, JSON.stringify(saved));
+
+      el.setAttribute("persistent", "");
+
+      expect(sessionStorage.getItem(key)).toBeNull();
+    });
+
+    it("should save state on beforeunload when persistent", () => {
+      el.setAttribute("src", "https://example.com/a.mp3");
+      el.setAttribute("persistent", "");
+      el._audio.src = "https://example.com/a.mp3";
+
+      // Simulate beforeunload
+      window.dispatchEvent(new Event("beforeunload"));
+
+      const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
+      const raw = sessionStorage.getItem(key);
+      expect(raw).not.toBeNull();
+    });
+
+    it("should discard stale state older than STATE_TTL_SECONDS", () => {
+      el.setAttribute("src", "https://example.com/a.mp3");
+      const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
+      const saved = {
+        src: "https://example.com/a.mp3",
+        currentTime: 120,
+        paused: true,
+        volume: 1,
+        muted: false,
+        playbackRate: 1,
+        timestamp: Date.now() - 7200000, // 2 hours ago — beyond 1-hour TTL
+        title: "",
+        poster: "",
+      };
+      sessionStorage.setItem(key, JSON.stringify(saved));
+
+      el.setAttribute("persistent", ""); // saves _pendingRestoreState
+      // Simulate loadedmetadata so _applyRestoredPosition runs
+      Object.defineProperty(el._audio, "duration", { value: 600, configurable: true });
+      el._audio.dispatchEvent(new Event("loadedmetadata"));
+
+      expect(el._audio.currentTime).not.toBe(120);
+    });
+
+    it("should NOT estimate forward when audio was paused", () => {
+      el.setAttribute("src", "https://example.com/a.mp3");
+      const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
+      const saved = {
+        src: "https://example.com/a.mp3",
+        currentTime: 120,           // paused at 2:00
+        paused: true,               // was paused!
+        volume: 1,
+        muted: false,
+        playbackRate: 1,
+        timestamp: Date.now() - 300000, // 5 minutes ago
+        title: "",
+        poster: "",
+      };
+      sessionStorage.setItem(key, JSON.stringify(saved));
+
+      el.setAttribute("persistent", "");
+      Object.defineProperty(el._audio, "duration", { value: 600, configurable: true });
+      el._audio.dispatchEvent(new Event("loadedmetadata"));
+
+      // Position should be exactly 120 (not 120+300=420 since it was paused)
+      expect(el._audio.currentTime).toBe(120);
+    });
+
+    it("should estimate forward when audio was playing", () => {
+      el.setAttribute("src", "https://example.com/a.mp3");
+      const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
+      const saved = {
+        src: "https://example.com/a.mp3",
+        currentTime: 60,            // was at 1:00
+        paused: false,              // was playing!
+        volume: 1,
+        muted: false,
+        playbackRate: 1,
+        timestamp: Date.now() - 120000, // 2 minutes ago
+        title: "",
+        poster: "",
+      };
+      sessionStorage.setItem(key, JSON.stringify(saved));
+
+      el.setAttribute("persistent", "");
+      Object.defineProperty(el._audio, "duration", { value: 600, configurable: true });
+      el._audio.dispatchEvent(new Event("loadedmetadata"));
+
+      // Position should be estimated: ~60 + 120 = ~180
+      // (allow small floating-point drift from elapsed wall-clock time)
+      expect(el._audio.currentTime).toBeCloseTo(180, 0);
+    });
+
+    it("should not apply restore before loadedmetadata fires", () => {
+      el.setAttribute("src", "https://example.com/a.mp3");
+      const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
+      const saved = {
+        src: "https://example.com/a.mp3",
+        currentTime: 120,
+        paused: true,
+        volume: 0.3,
+        muted: true,
+        playbackRate: 1.5,
+        timestamp: Date.now(),
+        title: "",
+        poster: "",
+      };
+      sessionStorage.setItem(key, JSON.stringify(saved));
+
+      el.setAttribute("persistent", ""); // triggers _restorePlaybackState → sets _pendingRestoreState
+
+      // Pending state should exist but not yet applied
+      expect(el._pendingRestoreState).not.toBeNull();
+
+      // After loadedmetadata, it should be applied and cleared
+      Object.defineProperty(el._audio, "duration", { value: 600, configurable: true });
+      el._audio.dispatchEvent(new Event("loadedmetadata"));
+      expect(el._pendingRestoreState).toBeNull();
+    });
+
+    it("should be idempotent — calling _persistenceSetup twice is a no-op", () => {
+      el.setAttribute("src", "https://example.com/a.mp3");
+      el.setAttribute("persistent", ""); // first call via attributeChangedCallback
+      const idBefore = el.id;
+
+      // Call again manually — should be a no-op
+      el._persistenceSetup();
+      expect(el.id).toBe(idBefore);
+      expect(el._persistenceActive).toBe(true);
+    });
+
+    it("should generate unique IDs for same-src players", () => {
+      // Create two fresh elements with same src
+      const el1 = document.createElement("podcast-player");
+      el1.setAttribute("src", "https://example.com/a.mp3");
+      el1.setAttribute("persistent", "");
+      document.body.appendChild(el1);
+
+      const el2 = document.createElement("podcast-player");
+      el2.setAttribute("src", "https://example.com/a.mp3");
+      el2.setAttribute("persistent", "");
+      document.body.appendChild(el2);
+
+      expect(el1.id).not.toBe(el2.id);
+      el1.remove();
+      el2.remove();
+    });
   });
 });
