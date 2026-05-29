@@ -298,11 +298,12 @@ class PodcastPlayer extends HTMLElement {
           box-shadow: 0 4px 24px rgba(0,0,0,.25);
           transition: background .2s;
         }
-        .player      { display: flex; flex-direction: column; gap: 12px; }
-        .header      { display: flex; gap: 14px; align-items: flex-start; }
+        .player      { display: flex; gap: 14px; align-items: flex-start; }
         .poster      { width: clamp(64px, 10vw, 110px); aspect-ratio: 1;
                          border-radius: 8px; object-fit: cover; flex-shrink: 0;
                          background: var(--pp-surface); }
+        .body        { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+        .header      { display: flex; gap: 14px; align-items: flex-start; }
         .info        { flex: 1; min-width: 0; }
         .title       { font-weight: 600; font-size: 1rem; margin: 0 0 4px;
                         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -358,8 +359,9 @@ class PodcastPlayer extends HTMLElement {
         [hidden]     { display: none !important; }
       </style>
       <div class="player" part="player" role="region" aria-label="Podcast Player">
+        <img class="poster" part="poster" src="" alt="Cover" hidden>
+        <div class="body" part="body">
         <div class="header" part="header">
-          <img class="poster" part="poster" src="" alt="Cover" hidden>
           <div class="info">
             <p class="title" part="title"></p>
             <slot name="description"></slot>
@@ -394,6 +396,7 @@ class PodcastPlayer extends HTMLElement {
           <div class="chapters" part="chapters" hidden></div>
         </div>
         <div class="error-msg" part="error" role="alert" hidden></div>
+      </div>
       </div>
     `;
 
