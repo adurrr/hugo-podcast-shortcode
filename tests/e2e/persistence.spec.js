@@ -5,7 +5,7 @@ const KEY_PREFIX = "podcastPlayerState:";
 
 test.describe("Player Persistence", () => {
   test("player has persistent attribute when enabled", async ({ page }) => {
-    await page.goto("/posts/test-episode/");
+    await page.goto("posts/test-episode/");
     const player = page.locator("podcast-player").first();
 
     // The shortcode sets persistent="true" by default
@@ -13,7 +13,7 @@ test.describe("Player Persistence", () => {
   });
 
   test("player has framework DOM markers for persistence", async ({ page }) => {
-    await page.goto("/posts/test-episode/");
+    await page.goto("posts/test-episode/");
     const player = page.locator("podcast-player").first();
 
     // The Web Component adds these markers when persistent is present
@@ -23,20 +23,20 @@ test.describe("Player Persistence", () => {
   });
 
   test("player keeps a stable ID for hx-preserve", async ({ page }) => {
-    await page.goto("/posts/test-episode/");
+    await page.goto("posts/test-episode/");
     const player = page.locator("podcast-player").first();
     const id = await player.getAttribute("id");
     expect(id).toMatch(/^pp-/);
   });
 
   test("second player has chapters attribute", async ({ page }) => {
-    await page.goto("/posts/test-episode/");
+    await page.goto("posts/test-episode/");
     const player = page.locator("podcast-player").nth(1);
     await expect(player).toHaveAttribute("chapters", /Intro.*News.*Topic/);
   });
 
   test("player state is saved to sessionStorage with per-instance key", async ({ page }) => {
-    await page.goto("/posts/test-episode/");
+    await page.goto("posts/test-episode/");
     const player = page.locator("podcast-player").first();
     const src = await player.getAttribute("src");
 
@@ -68,7 +68,7 @@ test.describe("Player Persistence", () => {
   });
 
   test("two players have independent sessionStorage keys", async ({ page }) => {
-    await page.goto("/posts/test-episode/");
+    await page.goto("posts/test-episode/");
     const players = page.locator("podcast-player");
     await expect(players).toHaveCount(2);
 

@@ -6,6 +6,12 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const exampleSite = path.resolve(__dirname, "../../exampleSite");
 
+// Derive the subpath from Hugo's baseURL for local testing.
+// Hugo's server respects the baseURL subpath (e.g. /hugo-podcast-shortcode/)
+// when one is present, so we must match it in Playwright's URL config.
+const HUGO_PORT = 1313;
+const BASE_PATH = "/hugo-podcast-shortcode";
+
 export default defineConfig({
   testDir: ".",
   testMatch: "*.spec.js",
@@ -15,7 +21,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [["html", { outputFolder: "../test-results" }]],
   use: {
-    baseURL: "http://localhost:1313",
+    baseURL: `http://localhost:${HUGO_PORT}${BASE_PATH}/`,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -26,8 +32,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `hugo server --source "${exampleSite}" --port 1313 --noHTTPCache`,
-    url: "http://localhost:1313",
+    command: `hugo server --source "${exampleSite}" --port ${HUGO_PORT} --noHTTPCache`,
+    url: `http://localhost:${HUGO_PORT}${BASE_PATH}/`,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },
