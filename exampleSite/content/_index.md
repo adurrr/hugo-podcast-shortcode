@@ -24,10 +24,10 @@ title: "Podcast Player Demo"
     </div>
   </div>
   <div class="demo-code">
-    <code>\{\{&lt; podcast-player
+    <code>&#123;&#123;&lt; podcast-player
   src="demo/demo-audio.wav"
   title="Demo: 440Hz Sine Tone"
-&gt;\}\}</code>
+&gt;&#125;&#125;</code>
   </div>
 </section>
 
@@ -44,11 +44,11 @@ title: "Podcast Player Demo"
     </div>
   </div>
   <div class="demo-code">
-    <code>\{\{&lt; podcast-player
+    <code>&#123;&#123;&lt; podcast-player
   src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
   title="SoundHelix: Chilled Beats"
   poster="https://picsum.photos/seed/player1/400/400"
-&gt;\}\}</code>
+&gt;&#125;&#125;</code>
   </div>
 </section>
 
@@ -67,13 +67,13 @@ title: "Podcast Player Demo"
     </div>
   </div>
   <div class="demo-code">
-    <code>\{\{&lt; podcast-player
+    <code>&#123;&#123;&lt; podcast-player
   src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
   title="SoundHelix: Long Mix"
   poster="https://picsum.photos/seed/player2/400/400"
   chapters="00:00:00-Intro,00:00:45-Buildup,00:02:15-Main Theme,00:04:00-Bridge,00:05:30-Climax,00:06:45-Outro"
   persistent="true"
-&gt;\}\}</code>
+&gt;&#125;&#125;</code>
   </div>
 </section>
 
@@ -92,7 +92,7 @@ title: "Podcast Player Demo"
     </div>
   </div>
   <div class="demo-code" style="margin-bottom:1rem">
-    <code>\{\{&lt; podcast-player src="…" title="SoundHelix: Persistent Player" persistent="true" &gt;\}\}</code>
+    <code>&#123;&#123;&lt; podcast-player src="…" title="SoundHelix: Persistent Player" persistent="true" &gt;&#125;&#125;</code>
   </div>
 
   <div class="demo-player">
@@ -106,7 +106,7 @@ title: "Podcast Player Demo"
     </div>
   </div>
   <div class="demo-code">
-    <code>\{\{&lt; podcast-player src="…" title="SoundHelix: Non-Persistent" &gt;\}\}</code>
+    <code>&#123;&#123;&lt; podcast-player src="…" title="SoundHelix: Non-Persistent" &gt;&#125;&#125;</code>
   </div>
   <p class="desc" style="margin-top:0.75rem;font-size:0.85rem">💡 Play some of Player A, then <a href="{{< relref "posts/second-episode.md" >}}">navigate to the second page</a> and come back — your position, volume, mute, and speed are remembered. Player B always starts fresh. You can also try navigating between <a href="{{< relref "posts/test-episode.md" >}}">Test Episode</a> and <a href="{{< relref "posts/second-episode.md" >}}">Second Episode</a>.</p>
 </section>

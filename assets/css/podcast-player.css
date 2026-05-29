@@ -47,6 +47,7 @@ podcast-player[data-theme="dark"] {
 /* Player shell */
 podcast-player::part(player) {
   border: 1px solid var(--podcast-player-border);
+  padding: 12px;
 }
 
 [data-theme="dark"] podcast-player::part(player),
