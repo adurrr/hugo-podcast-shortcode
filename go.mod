@@ -1,4 +1,4 @@
-module github.com/radio-t/hugo-podcast-shortcode
+module github.com/adurrr/hugo-podcast-shortcode
 
 go 1.23.0
 
