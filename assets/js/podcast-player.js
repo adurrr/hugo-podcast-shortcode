@@ -158,6 +158,7 @@ class PodcastPlayer extends HTMLElement {
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onExternalPause = this._onExternalPause.bind(this);
     this._onExternalPlay = this._onExternalPlay.bind(this);
+    this._onExternalSeek = this._onExternalSeek.bind(this);
     this._onPodcastClose = this._onPodcastClose.bind(this);
     this._onBeforeUnload = this._onBeforeUnload.bind(this);
   }
@@ -173,6 +174,7 @@ class PodcastPlayer extends HTMLElement {
     document.addEventListener("keydown", this._onKeyDown);
     document.addEventListener("podcast-pause", this._onExternalPause);
     document.addEventListener("podcast-play", this._onExternalPlay);
+    document.addEventListener("podcast-seek", this._onExternalSeek);
     document.addEventListener("podcast-close", this._onPodcastClose);
     this._applyAttributes();
 
@@ -224,6 +226,7 @@ class PodcastPlayer extends HTMLElement {
     document.removeEventListener("keydown", this._onKeyDown);
     document.removeEventListener("podcast-pause", this._onExternalPause);
     document.removeEventListener("podcast-play", this._onExternalPlay);
+    document.removeEventListener("podcast-seek", this._onExternalSeek);
     document.removeEventListener("podcast-close", this._onPodcastClose);
   }
 
@@ -595,6 +598,12 @@ class PodcastPlayer extends HTMLElement {
     if (!this._audio.duration) return;
     const pct = parseFloat(this._els.progress.value) / 100;
     this._audio.currentTime = pct * this._audio.duration;
+    // Notify footer and other inline players to keep timeline in sync
+    this.dispatchEvent(new CustomEvent("podcast-seek", {
+      bubbles: true,
+      composed: true,
+      detail: { currentTime: this._audio.currentTime },
+    }));
   }
 
   /** Seek to a chapter by index. */
@@ -876,6 +885,15 @@ class PodcastPlayer extends HTMLElement {
       this._audio.pause();
       // _onPause will update our button + dispatch podcast-pause
     }
+  }
+
+  /** Respond to a seek event from the footer or another inline player. */
+  _onExternalSeek(e) {
+    const time = e.detail && e.detail.currentTime;
+    if (time == null || !isFinite(time)) return;
+    if (!this._audio.src || !this._audio.duration) return;
+    // Silently seek without dispatching our own seek event
+    this._audio.currentTime = Math.min(time, this._audio.duration);
   }
 
   /* ================================================================== */
@@ -1161,6 +1179,7 @@ class PodcastFooter extends HTMLElement {
     this._onBeforeUnload = this._onBeforeUnload.bind(this);
     this._onPodcastPlay = this._onPodcastPlay.bind(this);
     this._onExternalPause = this._onExternalPause.bind(this);
+    this._onExternalSeek = this._onExternalSeek.bind(this);
   }
 
   connectedCallback() {
@@ -1171,6 +1190,7 @@ class PodcastFooter extends HTMLElement {
     // Listen for events from inline players
     document.addEventListener("podcast-play", this._onPodcastPlay);
     document.addEventListener("podcast-pause", this._onExternalPause);
+    document.addEventListener("podcast-seek", this._onExternalSeek);
 
     // Persist on page unload
     window.addEventListener("beforeunload", this._onBeforeUnload);
@@ -1208,6 +1228,7 @@ class PodcastFooter extends HTMLElement {
     // the deferred autoplay in _applyRestoredPosition is never called.
     document.removeEventListener("podcast-play", this._onPodcastPlay);
     document.removeEventListener("podcast-pause", this._onExternalPause);
+    document.removeEventListener("podcast-seek", this._onExternalSeek);
     window.removeEventListener("beforeunload", this._onBeforeUnload);
     this._unbindAudioEvents();
     this._unbindUIEvents();
@@ -1330,8 +1351,8 @@ class PodcastFooter extends HTMLElement {
       source:     this._shadow.querySelector(".source"),
       playBtn:    this._shadow.querySelector(".btn-play"),
       progress:   this._shadow.querySelector(".progress"),
-      timeCur:    this._shadow.querySelector(".time-current"),
-      timeDur:    this._shadow.querySelector(".time-duration"),
+      timeCur:    this._shadow.querySelector('[part="time-current"]'),
+      timeDur:    this._shadow.querySelector('[part="time-duration"]'),
       volume:     this._shadow.querySelector(".volume"),
       muteBtn:    this._shadow.querySelector(".mute-btn"),
       closeBtn:   this._shadow.querySelector(".close"),
@@ -1438,6 +1459,20 @@ class PodcastFooter extends HTMLElement {
     if (!this._audio.duration) return;
     const pct = parseFloat(this._els.progress.value) / 100;
     this._audio.currentTime = pct * this._audio.duration;
+    // Notify inline players to keep their timeline in sync
+    this.dispatchEvent(new CustomEvent("podcast-seek", {
+      bubbles: true,
+      composed: true,
+      detail: { currentTime: this._audio.currentTime },
+    }));
+  }
+
+  /** Respond to seek events from inline players — keep footer in sync. */
+  _onExternalSeek(e) {
+    const time = e.detail && e.detail.currentTime;
+    if (time == null || !isFinite(time)) return;
+    if (!this._audio.src || !this._audio.duration) return;
+    this._audio.currentTime = Math.min(time, this._audio.duration);
   }
 
   _setVolume() {
