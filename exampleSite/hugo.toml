@@ -1,4 +1,4 @@
-baseURL = "http://localhost:1313/"
+baseURL = "https://adurrr.github.io/hugo-podcast-shortcode/"
 title = "Hugo Podcast Shortcode Demo"
 languageCode = "en-us"
 ignoreLogs = ["warning-goldmark-raw-html"]
