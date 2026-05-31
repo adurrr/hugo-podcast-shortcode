@@ -1736,7 +1736,15 @@ class PodcastFooter extends HTMLElement {
     } catch (_) {}
   }
 
-  /** Apply saved position and resume playback if it was active. */
+  /** Apply saved position and resume playback if it was active.
+   *
+   *  During Turbolinks navigation, the `<audio>` element survives (the footer
+   *  is `data-turbolinks-permanent`) and keeps playing.  The saved `currentTime`
+   *  is already close to real-time because the unbounded audio advanced during
+   *  navigation.  Unconditionally seeking would cause an audible interruption
+   *  (browser seeks the audio buffer), so we skip the seek when the correction
+   *  is trivial (< 500 ms).  Similarly, we only call `play()` if the audio is
+   *  actually paused — calling it on an already-playing element can glitch. */
   _applyPositionAndResume(state) {
     if (!state) return;
     const elapsed = (state.timestamp != null)
@@ -1754,10 +1762,18 @@ class PodcastFooter extends HTMLElement {
           this._audio.duration || Infinity,
         );
       }
-      this._audio.currentTime = targetTime;
+      // Only seek if the position differs meaningfully — the audio may have
+      // played through navigation uninterrupted, so currentTime is already
+      // accurate.  An unnecessary seek causes an audible gap (issue #8).
+      if (Math.abs(targetTime - this._audio.currentTime) > 0.5) {
+        this._audio.currentTime = targetTime;
+      }
     }
 
-    if (!state.paused) {
+    // Don't call play() if already playing — the audio likely survived
+    // reconnection and is still active.  Calling play() on an already-playing
+    // element can cause an audible interruption (issue #8).
+    if (!state.paused && this._audio.paused) {
       this._audio.play()?.catch(() => {});
     }
   }
