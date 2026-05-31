@@ -1,36 +1,78 @@
 # Wavecast
 
-A Hugo module for a persistent podcast/radio audio player with Web Component, multi-source support, and navigation survival.
+A persistent podcast/radio audio player for Hugo — drop `<podcast-player>` into any page with a single shortcode. Supports **local files**, **AzuraCast** radio streams, and **iVoox** episodes. Works as a **Hugo module** _and_ as a **Hugo theme**.
+
+## How It Works
+
+Wavecast provides two custom Web Components that work together:
+
+| Component | Where | What it does |
+|-----------|-------|-------------|
+| `<podcast-player>` | Inline (in your content) | Play/pause, skip, seek, volume, chapters, poster |
+| `<podcast-footer>` | Sticky footer | Persistent player bar at the bottom of every page |
+
+Both components are **bidirectionally synced** — pausing the footer pauses all inline players, and vice versa. Only one audio source plays at a time. Position, volume, mute, and speed are saved to `sessionStorage` and restored across page navigations.
 
 ## Features
 
-- **Web Component** (`<podcast-player>`) with Shadow DOM, framework-agnostic
-- **Audio controls**: play/pause, skip +/-15s, seekable progress, volume, mute, playback rate
-- **Chapters**: timestamp-labeled navigation chips
-- **Poster & description**: cover image and Markdown-rendered description
-- **Source adapters**: local files, AzuraCast radio stations, iVoox episodes
-- **Navigation persistence**: survives Turbolinks, Turbo, htmx, and vanilla page loads via sessionStorage
+- **Web Component** (`<podcast-player>`) with Shadow DOM — framework-agnostic, works anywhere
+- **Inline player**: play/pause, skip ±15s, seekable progress bar, volume slider, mute, playback rate (0.5×–2×)
+- **Sticky footer player**: radio-t style bottom bar with cover art, track name, skip, play/pause, wide progress bar, volume, mute, speed, close
+- **Bidirectional sync**: pausing any player pauses all audio; all play buttons stay in sync
+- **Single-stream**: playing a new source stops the previous one automatically
+- **Chapters**: timestamp-labelled navigation chips (`00:00:00-Intro, ...`)
+- **Poster & description**: cover image with responsive sizing, Markdown-rendered show notes
+- **Source adapters**: local files, AzuraCast radio stations, iVoox episodes (with auto-detection)
+- **Navigation persistence**: survives Turbolinks, Turbo, htmx, and vanilla page loads via `sessionStorage`
 - **Theming**: 12 CSS custom properties for light/dark themes, responsive on mobile (<480px)
+- **`::part()` selectors**: style individual Shadow DOM elements from outside
 - **Keyboard shortcuts**: Space (play/pause), Left/Right (skip), M (mute)
-- **Media Session API**: integrates with OS media controls
+- **Media Session API**: integrates with OS media controls (lock screen, notification centre)
 - **Accessible**: ARIA labels, `:focus-visible` rings, semantic controls
-- **100 tests**: Go integration (9), JS unit (80), Playwright E2E (11)
+- **Well tested**: Go integration tests, JS unit tests (Vitest), Playwright E2E
+
+---
 
 ## Installation
+
+Wavecast can be used in two ways. Choose the one that fits your project.
 
 ### Prerequisites
 
 - Hugo v0.146.0+
 - Go 1.23+
 
-### As a Hugo module
+### Option A: Install as a Hugo theme (recommended for most sites)
+
+Clone or copy the repo into the `themes/` directory of your Hugo site:
+
+```bash
+git clone git@github.com:adurrr/wavecast.git themes/wavecast
+```
+
+Then add to your site's `hugo.toml`, `hugo.yaml`, or `hugo.json`:
+
+```toml
+theme = "wavecast"
+```
+
+That's it. Hugo automatically discovers the shortcode (`layouts/_shortcodes/podcast-player.html`), JS (`assets/js/podcast-player.js`), and CSS (`assets/css/podcast-player.css`) from the theme directory.
+
+> **Tip:** Pin a specific version with a Git tag:
+> ```bash
+> cd themes/wavecast && git checkout v0.1.0
+> ```
+
+### Option B: Install as a Hugo module (for multi-module sites)
+
+If you're already using Hugo modules or need to compose Wavecast with other modules:
 
 ```bash
 hugo mod init github.com/yourusername/your-site
 hugo mod get github.com/adurrr/wavecast
 ```
 
-Then in your `hugo.toml`:
+Then in your site's `hugo.toml`:
 
 ```toml
 [module]
@@ -38,7 +80,19 @@ Then in your `hugo.toml`:
     path = "github.com/adurrr/wavecast"
 ```
 
-### Local development
+Hugo will resolve the module and make the shortcode, JS, and CSS available.
+
+### Which option should I choose?
+
+| You want... | Use |
+|-------------|-----|
+| Simple setup, one theme | **Theme** (`theme = "wavecast"`) |
+| To use Wavecast alongside other modules | **Module** (`[module.imports]`) |
+| To override Wavecast's templates in your own project theme | **Theme** (Hugo's theme cascade handles overrides) |
+| Pinned, reproducible builds | Either — both support version pinning |
+| No git submodule or clone in your repo | **Module** (`hugo mod get`) |
+
+### Local development / demo
 
 Clone the repo and use the included example site:
 
@@ -48,9 +102,11 @@ cd wavecast/exampleSite
 hugo server --port 1313
 ```
 
-Open your browser to the URL shown in the server output (e.g. `http://localhost:1313/wavecast/`). The first demo player uses a local audio file (`assets/demo/demo-audio.wav`) so it should work immediately with no external dependencies.
+Open your browser to the URL shown in the server output (e.g. `http://localhost:1313/wavecast/`). The first demo player uses a local `.wav` file so it works immediately with no external dependencies.
 
-## Quick start
+---
+
+## Quick Start
 
 ### With a remote audio URL
 
@@ -67,7 +123,7 @@ Open your browser to the URL shown in the server output (e.g. `http://localhost:
 
 ### With a local asset
 
-Place your audio file in your Hugo project's `assets/` directory (or your module's), then reference it by path:
+Place your audio file in your Hugo project's `assets/` directory, then reference it by path:
 
 ```markdown
 {{< podcast-player
@@ -78,7 +134,25 @@ Place your audio file in your Hugo project's `assets/` directory (or your module
 
 The shortcode resolves local files via `resources.GetMatch` — it checks page-scoped resources first, then the global `assets/` directory. Remote URLs are passed through as-is to the `<audio>` element.
 
-## Site-wide configuration
+---
+
+## Footer Player Setup
+
+The sticky footer player (`<podcast-footer>`) must be present in your site's base template for it to appear on every page.
+
+Add this element just before the closing `</body>` tag in `layouts/_default/baseof.html`:
+
+```html
+<podcast-footer id="podcast-footer" data-turbolinks-permanent data-turbo-permanent hx-preserve></podcast-footer>
+```
+
+The `data-turbolinks-permanent`, `data-turbo-permanent`, and `hx-preserve` attributes ensure the footer survives page navigation when using Turbolinks, Turbo, or htmx respectively. If you don't use any of those, omit the framework-specific attributes — the footer will still persist via `sessionStorage`.
+
+> **Important:** The footer player is **opt-in**. If you don't add `<podcast-footer>` to your template, only the inline `<podcast-player>` components will render, and no footer bar will appear. The project works perfectly without a footer.
+
+---
+
+## Site-Wide Configuration
 
 Set defaults for all shortcode invocations in your `hugo.toml`. Per-shortcode params override site config; site config overrides built-in defaults.
 
@@ -95,23 +169,27 @@ Set defaults for all shortcode invocations in your `hugo.toml`. Per-shortcode pa
 
 Supported site config keys match the shortcode parameter names (except `src`, `title`, `poster`, `description`, and `chapters`, which are always per-episode).
 
-## Shortcode parameters
+---
+
+## Shortcode Parameters
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
-| `src` | yes | -- | Audio URL or local file path. Local resources resolved via `.Resources.GetMatch` / `resources.GetMatch`. |
-| `title` | no | `""` | Episode title displayed in the player header. |
-| `poster` | no | `""` | Cover image URL displayed next to the title. |
-| `description` | no | `""` | Markdown description rendered into a `slot="description"` element. |
+| `src` | **yes** | — | Audio URL or local file path. Local resources resolved via `.Resources.GetMatch` / `resources.GetMatch`. |
+| `title` | no | `""` | Episode title displayed in the player header (and footer). |
+| `poster` | no | `""` | Cover image URL displayed next to the controls. Responsive size via `clamp(64px, 10vw, 110px)`. |
+| `description` | no | `""` | Markdown description rendered into a `slot="description"` element below the player controls. |
 | `type` | no | `"audio/mpeg"` | MIME type. Auto-detected for local resources. |
 | `source` | no | `"local"` | Source adapter hint: `"local"`, `"azuracast"`, or `"ivoox"`. Also auto-detected from URL. |
 | `persistent` | no | `"true"` | Set to `"false"` to disable navigation persistence. |
 | `preload` | no | `"metadata"` | `<audio>` preload attribute value. |
 | `chapters` | no | `""` | Comma-separated `HH:MM:SS-Label` pairs for chapter navigation. |
 | `autoplay` | no | `"false"` | Auto-play on page load. |
-| `rate` | no | `"true"` | Show the playback rate control button. |
+| `rate` | no | `"true"` | Show the playback rate control button (cycles 0.5× → 0.75× → 1× → 1.25× → 1.5× → 2×). |
 
-## Source adapters
+---
+
+## Source Adapters
 
 The `source` parameter controls how the player resolves its audio URL. When omitted, the source type is auto-detected from the `src` URL.
 
@@ -127,7 +205,7 @@ Plays the URL as-is. Use for direct audio file links or local Hugo resources.
 
 Fetches the AzuraCast nowplaying API to discover the stream URL and enriches the player with current song metadata (title, artist).
 
-Requires the `azuracast-api-url` attribute set on the element (passed through the shortcode as a data attribute).
+Requires the `data-azuracast-api-url` attribute set on the element:
 
 ```markdown
 {{< podcast-player
@@ -168,13 +246,15 @@ Auto-detected when the URL contains `ivoox.com`:
 {{< podcast-player src="https://www.ivoox.com/episode-title_12345_1.html" >}}
 ```
 
-## Navigation persistence
+---
 
-The player can survive page navigations in single-page-app frameworks. Enabled by default (`persistent="true"`).
+## Navigation Persistence
+
+The player survives page navigations in single-page-app frameworks. Enabled by default (`persistent="true"`).
 
 ### Framework support
 
-- **Turbolinks**: adds `data-turbolinks-permanent`
+- **Turbolinks**: adds `data-turbolinks-permanent` (both inline and footer)
 - **Turbo**: adds `data-turbo-permanent`
 - **htmx**: adds `hx-preserve` + a stable generated ID
 - **Vanilla JS**: saves state to `sessionStorage` on `beforeunload`, restores on next page load
@@ -185,7 +265,7 @@ The player can survive page navigations in single-page-app frameworks. Enabled b
 |-------|-------------|
 | `currentTime` | Playback position in seconds |
 | `paused` | Whether audio was paused |
-| `volume` | Volume level (0-1) |
+| `volume` | Volume level (0–1) |
 | `muted` | Mute state |
 | `playbackRate` | Playback speed multiplier |
 
@@ -201,29 +281,37 @@ The player can survive page navigations in single-page-app frameworks. Enabled b
 
 Multiple players on the same page use separate `sessionStorage` keys (`podcastPlayerState:<src>`), so they don't interfere with each other.
 
-## CSS theming
+### Cross-page behaviour
 
-The player renders in a Shadow DOM with a default dark theme. The external stylesheet provides a light theme that activates automatically. Both are fully customizable via CSS custom properties.
+- Navigating away from a page pauses inline audio (saves position)
+- Returning to a page does **not** autoplay — the player restores in paused state
+- The footer player persists across all pages without interruption
+
+---
+
+## CSS Theming
+
+The player renders in a Shadow DOM with a default dark theme. The external stylesheet provides a light theme that activates automatically. Both are fully customizable via CSS custom properties defined on `<podcast-player>` and `<podcast-footer>`.
 
 ### Custom properties
 
 | Property | Default (light) | Default (dark) | Description |
 |----------|-----------------|----------------|-------------|
-| `--podcast-player-primary` | `#4f46e5` | `#6366f1` | Accent color for buttons, active states |
-| `--podcast-player-bg` | `#ffffff` | `#1e1e2e` | Background color |
-| `--podcast-player-surface` | `#f3f4f6` | `#2a2a3e` | Surface color for buttons, containers |
-| `--podcast-player-text` | `#111827` | `#e0e0e0` | Primary text color |
-| `--podcast-player-text-muted` | `#6b7280` | `#888` | Muted text color (time, description) |
-| `--podcast-player-accent` | `#7c3aed` | `#a78bfa` | Hover/alt accent color |
+| `--podcast-player-primary` | `#4f46e5` | `#6366f1` | Accent colour for buttons, active states |
+| `--podcast-player-bg` | `#ffffff` | `#1e1e2e` | Background colour |
+| `--podcast-player-surface` | `#f3f4f6` | `#2a2a3e` | Surface colour for buttons, containers |
+| `--podcast-player-text` | `#111827` | `#e0e0e0` | Primary text colour |
+| `--podcast-player-text-muted` | `#6b7280` | `#888` | Muted text colour (time, description) |
+| `--podcast-player-accent` | `#7c3aed` | `#a78bfa` | Hover/alt accent colour |
 | `--podcast-player-radius` | `12px` | `12px` | Outer border radius |
-| `--podcast-player-border` | `#e5e7eb` | `rgba(255,255,255,0.06)` | Border color around the player |
+| `--podcast-player-border` | `#e5e7eb` | `rgba(255,255,255,0.06)` | Border colour around the player |
 | `--podcast-player-progress-height` | `5px` | `5px` | Progress bar track height |
 | `--podcast-player-thumb-size` | `14px` | `14px` | Progress bar thumb diameter |
 | `--podcast-player-focus-ring` | `0 0 0 3px rgba(79,70,229,0.35)` | `0 0 0 3px rgba(167,139,250,0.35)` | Focus-visible ring shadow |
 
 ### Light / dark mode
 
-The light theme is the default. For dark mode, wrap the player (or the page) in a container with `[data-theme="dark"]`, `.theme-dark`, or set `data-theme="dark"` directly on the element:
+The light theme is the default. For dark mode, wrap the player in a container with `[data-theme="dark"]`, `.theme-dark`, or set `data-theme="dark"` directly on the `<html>` element:
 
 ```css
 body.dark-mode podcast-player {
@@ -256,18 +344,25 @@ podcast-player::part(skip-fwd-btn):hover {
 }
 ```
 
-Available `part` attributes: `player`, `header`, `poster`, `title`, `controls`, `play-btn`, `skip-back-btn`, `skip-fwd-btn`, `progress-wrap`, `progress`, `time-current`, `time-sep`, `time-duration`, `extras`, `vol-wrap`, `mute-btn`, `volume`, `rate-btn`, `chapters`, `error`.
+Available `part` attributes:
 
-### Responsive behavior
+| Element | Parts |
+|---------|-------|
+| `<podcast-player>` (inline) | `player`, `header`, `poster`, `title`, `controls`, `play-btn`, `skip-back-btn`, `skip-fwd-btn`, `progress-wrap`, `progress`, `time-current`, `time-sep`, `time-duration`, `extras`, `vol-wrap`, `mute-btn`, `volume`, `rate-btn`, `chapters`, `error` |
+| `<podcast-footer>` (footer) | `footer`, `poster`, `title`, `play-btn`, `skip-back-btn`, `skip-fwd-btn`, `progress`, `time-current`, `time-duration`, `mute-btn`, `volume`, `rate-btn`, `close-btn` |
+
+### Responsive behaviour
 
 Below 480px the player adapts:
 
 - Progress bar drops to its own full-width row
-- Play button grows to 52x52px; other buttons to 44x44px
+- Play button grows to 52×52px; other buttons to 44×44px
 - Slider thumbs enlarge for easier touch targeting
 - Chapters switch to horizontal scroll
 
-## Keyboard shortcuts
+---
+
+## Keyboard Shortcuts
 
 | Key | Action |
 |-----|--------|
@@ -275,6 +370,10 @@ Below 480px the player adapts:
 | `Left` | Skip back 15 seconds |
 | `Right` | Skip forward 15 seconds |
 | `M` | Toggle mute |
+
+Works on both inline and footer players when the player is focused.
+
+---
 
 ## Events
 
@@ -287,10 +386,36 @@ document.querySelector("podcast-player")
   });
 ```
 
-- `player-state` -- fired on play, pause, and seek
-- `podcast-play` -- fired on play (compat); `{ src, title, url }`
+| Event | Fired on | Detail payload |
+|-------|----------|----------------|
+| `player-state` | play, pause, seek | `{ paused, src, currentTime, duration }` |
+| `podcast-play` | play (compat) | `{ src, title, url }` |
+| `podcast-pause` | pause | `{ src }` |
+| `podcast-close` | footer close button | `{ src }` |
+| `podcast-seek` | seek on any player | `{ src, currentTime }` |
+
+---
 
 ## Development
+
+### Project structure
+
+```
+assets/
+  css/podcast-player.css    # External stylesheet (light theme, responsive, focus-visible)
+  js/podcast-player.js      # Web Component + source adapters + persistence (~1790 lines)
+  js/sources.js             # Re-exports for test imports
+  demo/demo-audio.wav       # Demo audio file for the example site
+layouts/
+  _shortcodes/
+    podcast-player.html     # Hugo shortcode template
+tests/
+  hugo/                     # Go integration tests (builds Hugo sites per case)
+  js/                       # Vitest unit tests (80)
+  e2e/                      # Playwright E2E tests (21)
+exampleSite/                # Runnable demo site
+theme.toml                  # Hugo theme manifest
+```
 
 ### Test suites
 
@@ -308,27 +433,20 @@ npm run test:e2e
 npm test && go test ./tests/hugo/... && npm run test:e2e
 ```
 
-### Project structure
+### Adding a new source adapter
 
-```
-assets/
-  css/podcast-player.css    # External stylesheet (light theme, responsive)
-  js/podcast-player.js      # Web Component + source adapters + persistence
-  js/sources.js             # Re-exports for test imports
-layouts/
-  _shortcodes/
-    podcast-player.html     # Hugo shortcode template
-tests/
-  hugo/                     # Go integration tests (9)
-  js/                       # Vitest unit tests (80)
-  e2e/                      # Playwright E2E tests (11)
-exampleSite/                # Runnable demo site
-```
+1. Create a new class in `assets/js/podcast-player.js` that implements `fetchStreamUrl()` and/or `fetchMetadata()`
+2. Register it in the `sourceAdapters` map
+3. Add auto-detection rules in `_detectSource()`
+4. Write JS unit tests in `tests/js/` and E2E tests in `tests/e2e/`
+5. Run all three test suites
+
+---
 
 ## Troubleshooting
 
 **Player doesn't appear (empty area where it should be)**
-- Check the browser console for JavaScript errors. The `<podcast-player>` custom element must be registered — if the module script fails to load, the player won't render.
+- Check the browser console for JavaScript errors. The `<podcast-player>` custom element must be registered — if the JS asset fails to load, the player won't render.
 - Verify the JS asset is accessible. In your browser's Network tab, look for `podcast-player.js`. With `hugo server` it's typically at `/wavecast/js/podcast-player.js`.
 - Some ad-blockers or script blockers may prevent module scripts from loading.
 
@@ -344,11 +462,19 @@ exampleSite/                # Runnable demo site
 
 **Shortcode not found (`errorf` message on page)**
 - Hugo v0.146.0+ is required for the `_shortcodes/` directory naming convention.
-- Verify the module is imported in your site's `hugo.toml` under `[module.imports]`.
+- If using as a **theme**, verify `theme = "wavecast"` is set in your site's `hugo.toml`.
+- If using as a **module**, verify the import is listed under `[module.imports]` in `hugo.toml`.
+
+**Footer player doesn't appear**
+- The `<podcast-footer>` element must be present in your `baseof.html` template. It won't appear automatically.
+- Add `<podcast-footer id="podcast-footer" data-turbolinks-permanent data-turbo-permanent hx-preserve></podcast-footer>` just before `</body>`.
 
 **Persistence doesn't work**
 - `persistent` must be present as an attribute on the element. By default it's enabled, but setting `persistent="false"` in a shortcode param or globally in `[params.podcastPlayer]` disables it.
 - State is stored in `sessionStorage` — it persists only within the same browser tab.
+- The footer player persists automatically; no `persistent` attribute needed on `<podcast-footer>`.
+
+---
 
 ## License
 

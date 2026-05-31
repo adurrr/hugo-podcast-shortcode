@@ -17,7 +17,7 @@ ignoreLogs = ["warning-goldmark-raw-html"]
 # Site-wide defaults for podcast-player shortcode params.
 # Per-shortcode params override these; these override the built-in defaults.
 [params]
-  description = "Live demo for the Wavecast module — a persistent <podcast-player> Web Component for Hugo"
+  description = "Live demo for Wavecast — a persistent <podcast-player> Web Component for Hugo. Works as a module and as a theme."
 
   [params.podcastPlayer]
     source = "local"

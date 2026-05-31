@@ -1,0 +1,12 @@
+name = "Wavecast"
+license = "AGPL-3.0"
+licenselink = "https://github.com/adurrr/wavecast/blob/main/LICENSE"
+description = "A persistent podcast/radio audio player Web Component for Hugo — drop <podcast-player> into any page with a single shortcode. Supports local files, AzuraCast streams, and iVoox episodes. Works as a Hugo module and as a Hugo theme."
+homepage = "https://github.com/adurrr/wavecast"
+tags = ["podcast", "radio", "audio", "player", "shortcode", "web-component", "streaming"]
+features = ["persistent playback", "azuracast", "ivoox", "chapters", "navigation survival", "turbolinks", "radio-t style footer"]
+min_version = "0.146.0"
+
+[author]
+  name = "adurrr"
+  homepage = "https://github.com/adurrr"
