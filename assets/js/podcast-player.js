@@ -1216,17 +1216,29 @@ class PodcastFooter extends HTMLElement {
   /** Sync all UI elements with the current audio state. */
   _syncUI() {
     if (this._audio.paused) {
-      this._els.playBtn.textContent = "▶";
+      this._els.playBtn.innerHTML = `<svg viewBox="0 0 512 512" width="22" height="22"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z"/></svg>`;
       this._els.playBtn.setAttribute("aria-label", "Play");
       this._els.playBtn.title = "Play";
     } else {
-      this._els.playBtn.textContent = "⏸";
+      this._els.playBtn.innerHTML = `<svg viewBox="0 0 512 512" width="22" height="22"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm-16 328c0 8.8-7.2 16-16 16h-48c-8.8 0-16-7.2-16-16V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v160zm112 0c0 8.8-7.2 16-16 16h-48c-8.8 0-16-7.2-16-16V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v160z"/></svg>`;
       this._els.playBtn.setAttribute("aria-label", "Pause");
       this._els.playBtn.title = "Pause";
     }
-    this._els.muteBtn.textContent = this._audio.muted ? "🔇" : this._audio.volume === 0 ? "🔇" : this._audio.volume < 0.5 ? "🔉" : "🔊";
+    this._setMuteIcon();
     this._els.volume.value = this._audio.muted ? 0 : this._audio.volume;
+    this._els.rateBtn.textContent = this._audio.playbackRate + "×";
     this._onTimeUpdate(); // sync progress/time display
+  }
+
+  /** Set the mute button icon based on current muted/volume state. */
+  _setMuteIcon() {
+    if (this._audio.muted || this._audio.volume === 0) {
+      this._els.muteBtn.innerHTML = `<svg viewBox="0 0 576 512" width="18" height="18"><path fill="currentColor" d="M215 71l-89 89H24a24 24 0 0 0-24 24v144a24 24 0 0 0 24 24h102.06L215 441c15 15 41 4.47 41-17V88c0-21.47-26-32-41-17z"/></svg>`;
+    } else if (this._audio.volume < 0.5) {
+      this._els.muteBtn.innerHTML = `<svg viewBox="0 0 576 512" width="18" height="18"><path fill="currentColor" d="M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zm233.32-51.08c-11.17-7.33-26.18-4.24-33.51 6.95-7.34 11.17-4.22 26.18 6.95 33.51 66.27 43.49 105.82 116.6 105.82 195.58 0 78.98-39.55 152.09-105.82 195.58-11.17 7.32-14.29 22.34-6.95 33.5 7.04 10.71 21.93 14.56 33.51 6.95C528.27 439.58 576 351.33 576 256S528.27 72.43 448.35 19.97zM480 256c0-63.53-32.06-121.94-85.77-156.24-11.19-7.14-26.03-3.82-33.12 7.46s-3.78 26.21 7.41 33.36C408.27 165.97 432 209.11 432 256s-23.73 90.03-63.48 115.42c-11.19 7.14-14.5 22.07-7.41 33.36 6.51 10.36 21.12 15.14 33.12 7.46C447.94 377.94 480 319.54 480 256z"/></svg>`;
+    } else {
+      this._els.muteBtn.innerHTML = `<svg viewBox="0 0 576 512" width="18" height="18"><path fill="currentColor" d="M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zm233.32-51.08c-11.17-7.33-26.18-4.24-33.51 6.95-7.34 11.17-4.22 26.18 6.95 33.51 66.27 43.49 105.82 116.6 105.82 195.58 0 78.98-39.55 152.09-105.82 195.58-11.17 7.32-14.29 22.34-6.95 33.5 7.04 10.71 21.93 14.56 33.51 6.95C528.27 439.58 576 351.33 576 256S528.27 72.43 448.35 19.97zM480 256c0-63.53-32.06-121.94-85.77-156.24-11.19-7.14-26.03-3.82-33.12 7.46s-3.78 26.21 7.41 33.36C408.27 165.97 432 209.11 432 256s-23.73 90.03-63.48 115.42c-11.19 7.14-14.5 22.07-7.41 33.36 6.51 10.36 21.12 15.14 33.12 7.46C447.94 377.94 480 319.54 480 256z"/></svg>`;
+    }
   }
 
   disconnectedCallback() {
@@ -1256,40 +1268,48 @@ class PodcastFooter extends HTMLElement {
           position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
           background: var(--podcast-player-bg, #1e1e2e);
           border-top: 1px solid var(--podcast-player-border, rgba(255,255,255,.06));
-          padding: 8px 16px;
-          display: flex; align-items: center; gap: 10px;
+          padding: 6px 12px;
+          display: flex; align-items: center; gap: 8px;
           font-family: system-ui, -apple-system, sans-serif;
           font-size: .85rem;
           color: var(--podcast-player-text, #e0e0e0);
           box-shadow: 0 -2px 12px rgba(0,0,0,.3);
           min-height: 52px;
           box-sizing: border-box;
+          justify-content: center;
         }
         .cover {
           width: 36px; height: 36px; border-radius: 4px;
           object-fit: cover; flex-shrink: 0; background: var(--podcast-player-surface, #2a2a3e);
         }
         .cover[hidden] { display: none; }
-        .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .info {
+          flex: 0 0 auto; max-width: 140px; min-width: 0;
+          display: flex; flex-direction: column; gap: 2px;
+        }
         .title {
           font-weight: 600; font-size: .85rem;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .source { font-size: .7rem; color: var(--podcast-player-text-muted, #888);
                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .controls { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
         .btn {
           background: transparent; border: none; color: var(--podcast-player-text, #e0e0e0);
           width: 32px; height: 32px; border-radius: 50%;
           cursor: pointer; display: inline-flex; align-items: center;
-          justify-content: center; font-size: 1rem;
+          justify-content: center;
           transition: background .15s;
         }
         .btn:hover { background: var(--podcast-player-surface, #2a2a3e); }
-        .btn-play { width: 36px; height: 36px; font-size: 1.1rem;
+        .btn-play { width: 36px; height: 36px;
                      background: var(--podcast-player-primary, #6366f1); color: #fff; }
         .btn-play:hover { background: var(--podcast-player-accent, #a78bfa); }
-        .progress-wrap { width: 100px; min-width: 60px; }
+        .btn-skip-back,
+        .btn-skip-fwd { width: 28px; height: 28px; }
+        .btn-skip-back svg,
+        .btn-skip-fwd svg { display: block; }
+        .progress-wrap { flex: 1; min-width: 80px; max-width: 400px; }
         input[type="range"] {
           -webkit-appearance: none; appearance: none;
           width: 100%; height: 4px; border-radius: 2px;
@@ -1310,23 +1330,43 @@ class PodcastFooter extends HTMLElement {
           cursor: pointer;
         }
         .time { font-size: .75rem; color: var(--podcast-player-text-muted, #888);
-                font-variant-numeric: tabular-nums; white-space: nowrap; }
+                font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; }
+        .time-sep { color: var(--podcast-player-text-muted, #888); font-size: .75rem;
+                    flex-shrink: 0; }
+        .vol-wrap { display: flex; align-items: center; gap: 2px; width: 70px; flex-shrink: 0; }
+        .vol-wrap[hidden] { display: none; }
+        .mute-btn { width: 28px; height: 28px; }
+        .mute-btn svg { display: block; }
+        .rate-btn {
+          font-size: .7rem; font-weight: 600; width: auto; height: 24px;
+          border-radius: 12px; padding: 0 6px; background: transparent; border: none;
+          color: var(--podcast-player-text, #e0e0e0); cursor: pointer;
+          display: inline-flex; align-items: center; justify-content: center;
+          transition: background .15s; flex-shrink: 0;
+        }
+        .rate-btn:hover { background: var(--podcast-player-surface, #2a2a3e); }
         .close {
           background: transparent; border: none; color: var(--podcast-player-text-muted, #888);
-          cursor: pointer; font-size: 1rem; padding: 4px 6px; border-radius: 4px;
-          transition: background .15s, color .15s;
+          cursor: pointer; padding: 4px; border-radius: 4px;
+          transition: background .15s, color .15s; display: inline-flex; align-items: center;
+          justify-content: center; flex-shrink: 0;
         }
         .close:hover { background: var(--podcast-player-surface, #2a2a3e); color: var(--podcast-player-text, #e0e0e0); }
-        .vol-wrap { display: flex; align-items: center; gap: 4px; width: 70px; }
-        .vol-wrap[hidden] { display: none; }
-        .mute-btn { width: 28px; height: 28px; font-size: .85rem; }
+        .close svg { display: block; }
 
-        @media (max-width: 640px) {
-          .footer { gap: 6px; padding: 6px 10px; font-size: .8rem; min-height: 48px; }
+        @media (max-width: 768px) {
+          .footer { gap: 6px; padding: 4px 8px; font-size: .8rem; min-height: 48px; }
           .cover { width: 28px; height: 28px; }
-          .progress-wrap { width: 60px; }
-          .vol-wrap { display: none; }
+          .info { max-width: 100px; }
+          .progress-wrap { min-width: 60px; }
+          .vol-wrap { width: 50px; }
           .time { font-size: .7rem; }
+        }
+        @media (max-width: 480px) {
+          .info { display: none; }
+          .vol-wrap { display: none; }
+          .time-sep { display: none; }
+          .time + .time { margin-left: 4px; }
         }
       </style>
       <div class="footer" part="footer">
@@ -1336,21 +1376,38 @@ class PodcastFooter extends HTMLElement {
           <div class="source" part="source"></div>
         </div>
         <div class="controls">
-          <button class="btn btn-play" part="play-btn" title="Play" aria-label="Play">▶</button>
-          <div class="progress-wrap">
-            <input type="range" class="progress" part="progress" min="0" max="100" value="0"
-                   aria-label="Seek position" aria-valuetext="0:00 of 0:00">
-          </div>
-          <span class="time" part="time-current">--:--</span>
-          <span class="time-sep" style="color:var(--podcast-player-text-muted,#888);font-size:.75rem">/</span>
-          <span class="time" part="time-duration">--:--</span>
-          <div class="vol-wrap" part="vol-wrap">
-            <button class="btn mute-btn" part="mute-btn" title="Mute" aria-label="Toggle mute">🔊</button>
-            <input type="range" class="volume" part="volume" min="0" max="1" step="0.05" value="1"
-                   aria-label="Volume">
-          </div>
+          <button class="btn btn-skip-back" part="skip-back-btn"
+                  title="Rewind 15s" aria-label="Rewind 15 seconds">
+            <svg viewBox="0 0 20 20" width="16" height="16"><path fill="currentColor" d="M9 20C13.95 20 18 16 18 11.1111C18 6.22222 13.95 2.22222 9 2.22222V0L3.375 3.33333L9 6.66667V4.44444C12.7125 4.44444 15.75 7.44444 15.75 11.1111C15.75 14.7778 12.7125 17.7778 9 17.7778C5.2875 17.7778 2.25 14.7778 2.25 11.1111H0C0 16 4.05 20 9 20ZM5.89659 7.77778H7.20825V14.3545H5.87143V9.47977H5.81166C5.67326 9.69814 5.21088 9.96789 4.5 9.96789V8.8632C5.32726 8.8632 5.88086 8.17919 5.89659 7.77778ZM13.5 12.1612C13.5031 13.4907 12.528 14.4444 11.0937 14.4444C9.76002 14.4444 8.78807 13.632 8.76291 12.4952H10.084C10.1155 13.0058 10.5527 13.3526 11.0937 13.3526C11.7322 13.3526 12.1883 12.8805 12.1883 12.1965C12.1883 11.5061 11.7228 11.0276 11.0748 11.0244C10.6942 11.0244 10.3105 11.1946 10.1123 11.4676L8.90131 11.246L9.20642 7.77778H13.1446V8.91458H10.3294L10.1626 10.562H10.2004C10.4269 10.2376 10.9144 9.99679 11.4806 9.99679C12.6413 9.99679 13.5031 10.9024 13.5 12.1612Z"/></svg>
+          </button>
+          <button class="btn btn-play" part="play-btn"
+                  title="Play" aria-label="Play" aria-pressed="false">
+            <svg viewBox="0 0 512 512" width="22" height="22"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z"/></svg>
+          </button>
+          <button class="btn btn-skip-fwd" part="skip-fwd-btn"
+                  title="Forward 15s" aria-label="Forward 15 seconds">
+            <svg viewBox="0 0 20 20" width="16" height="16"><path fill="currentColor" d="M9 20C4.05 20 0 16 0 11.1111C0 6.22222 4.05 2.22222 9 2.22222V0L14.625 3.33333L9 6.66667V4.44444C5.2875 4.44444 2.25 7.44444 2.25 11.1111C2.25 14.7778 5.2875 17.7778 9 17.7778C12.7125 17.7778 15.75 14.7778 15.75 11.1111H18C18 16 13.95 20 9 20ZM5.89659 7.77778H7.20825V14.3545H5.87143V9.47977H5.81166C5.67326 9.69814 5.21088 9.96789 4.5 9.96789V8.8632C5.32726 8.8632 5.88086 8.17919 5.89659 7.77778ZM13.5 12.1612C13.5031 13.4907 12.528 14.4444 11.0937 14.4444C9.76002 14.4444 8.78807 13.632 8.76291 12.4952H10.084C10.1155 13.0058 10.5527 13.3526 11.0937 13.3526C11.7322 13.3526 12.1883 12.8805 12.1883 12.1965C12.1883 11.5061 11.7228 11.0276 11.0748 11.0244C10.6942 11.0244 10.3105 11.1946 10.1123 11.4676L8.90131 11.246L9.20642 7.77778H13.1446V8.91458H10.3294L10.1626 10.562H10.2004C10.4269 10.2376 10.9144 9.99679 11.4806 9.99679C12.6413 9.99679 13.5031 10.9024 13.5 12.1612Z"/></svg>
+          </button>
         </div>
-        <button class="close" part="close-btn" title="Close player" aria-label="Close player">✕</button>
+        <div class="progress-wrap">
+          <input type="range" class="progress" part="progress" min="0" max="100" value="0"
+                 aria-label="Seek position" aria-valuetext="0:00 of 0:00">
+        </div>
+        <span class="time" part="time-current">--:--</span>
+        <span class="time-sep" part="time-sep">/</span>
+        <span class="time" part="time-duration">--:--</span>
+        <div class="vol-wrap" part="vol-wrap">
+          <button class="btn mute-btn" part="mute-btn" title="Mute" aria-label="Toggle mute">
+            <svg viewBox="0 0 576 512" width="18" height="18"><path fill="currentColor" d="M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zm233.32-51.08c-11.17-7.33-26.18-4.24-33.51 6.95-7.34 11.17-4.22 26.18 6.95 33.51 66.27 43.49 105.82 116.6 105.82 195.58 0 78.98-39.55 152.09-105.82 195.58-11.17 7.32-14.29 22.34-6.95 33.5 7.04 10.71 21.93 14.56 33.51 6.95C528.27 439.58 576 351.33 576 256S528.27 72.43 448.35 19.97zM480 256c0-63.53-32.06-121.94-85.77-156.24-11.19-7.14-26.03-3.82-33.12 7.46s-3.78 26.21 7.41 33.36C408.27 165.97 432 209.11 432 256s-23.73 90.03-63.48 115.42c-11.19 7.14-14.5 22.07-7.41 33.36 6.51 10.36 21.12 15.14 33.12 7.46C447.94 377.94 480 319.54 480 256z"/></svg>
+          </button>
+          <input type="range" class="volume" part="volume" min="0" max="1" step="0.05" value="1"
+                 aria-label="Volume">
+        </div>
+        <button class="rate-btn" part="rate-btn"
+                title="Playback speed" aria-label="Playback speed">1×</button>
+        <button class="close" part="close-btn" title="Close player" aria-label="Close player">
+          <svg viewBox="0 0 12 12" width="14" height="14"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M3 9l6-6m0 6L3 3"/></svg>
+        </button>
       </div>
     `;
 
@@ -1361,11 +1418,14 @@ class PodcastFooter extends HTMLElement {
       title:      this._shadow.querySelector(".title"),
       source:     this._shadow.querySelector(".source"),
       playBtn:    this._shadow.querySelector(".btn-play"),
+      skipBack:   this._shadow.querySelector(".btn-skip-back"),
+      skipFwd:    this._shadow.querySelector(".btn-skip-fwd"),
       progress:   this._shadow.querySelector(".progress"),
       timeCur:    this._shadow.querySelector('[part="time-current"]'),
       timeDur:    this._shadow.querySelector('[part="time-duration"]'),
       volume:     this._shadow.querySelector(".volume"),
       muteBtn:    this._shadow.querySelector(".mute-btn"),
+      rateBtn:    this._shadow.querySelector(".rate-btn"),
       closeBtn:   this._shadow.querySelector(".close"),
     };
   }
@@ -1390,10 +1450,13 @@ class PodcastFooter extends HTMLElement {
 
   _bindUIEvents() {
     this._els.playBtn.addEventListener("click", () => this._togglePlay());
+    this._els.skipBack.addEventListener("click", () => this._skip(-15));
+    this._els.skipFwd.addEventListener("click", () => this._skip(15));
     this._els.progress.addEventListener("input", () => this._seeking());
     this._els.progress.addEventListener("change", () => this._seek());
     this._els.volume.addEventListener("input", () => this._setVolume());
     this._els.muteBtn.addEventListener("click", () => this._toggleMute());
+    this._els.rateBtn.addEventListener("click", () => this._cycleRate());
     this._els.closeBtn.addEventListener("click", () => this._close());
   }
 
@@ -1492,17 +1555,41 @@ class PodcastFooter extends HTMLElement {
     this._audio.currentTime = Math.min(time, this._audio.duration);
   }
 
+  _skip(sec) {
+    if (!this._audio.src) return;
+    this._audio.currentTime = Math.max(0, Math.min(
+      (this._audio.currentTime || 0) + sec,
+      this._audio.duration || Infinity,
+    ));
+    this.dispatchEvent(new CustomEvent("podcast-seek", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        currentTime: this._audio.currentTime,
+        src: this._audio.src || "",
+      },
+    }));
+  }
+
+  _cycleRate() {
+    const rates = [0.5, 0.75, 1, 1.25, 1.5, 2];
+    const cur = this._audio.playbackRate;
+    const idx = rates.indexOf(cur);
+    this._audio.playbackRate = rates[(idx + 1) % rates.length];
+    this._els.rateBtn.textContent = this._audio.playbackRate + "×";
+  }
+
   _setVolume() {
     const v = parseFloat(this._els.volume.value);
     this._audio.volume = v;
     this._audio.muted = false;
-    this._els.muteBtn.textContent = v === 0 ? "🔇" : v < 0.5 ? "🔉" : "🔊";
+    this._setMuteIcon();
   }
 
   _toggleMute() {
     this._audio.muted = !this._audio.muted;
-    this._els.muteBtn.textContent = this._audio.muted ? "🔇" : "🔊";
     this._els.volume.value = this._audio.muted ? 0 : this._audio.volume;
+    this._setMuteIcon();
   }
 
   /** Hide the footer and stop playback. */
@@ -1521,7 +1608,7 @@ class PodcastFooter extends HTMLElement {
   }
 
   _onPlay() {
-    this._els.playBtn.textContent = "⏸";
+    this._els.playBtn.innerHTML = `<svg viewBox="0 0 512 512" width="22" height="22"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm-16 328c0 8.8-7.2 16-16 16h-48c-8.8 0-16-7.2-16-16V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v160zm112 0c0 8.8-7.2 16-16 16h-48c-8.8 0-16-7.2-16-16V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v160z"/></svg>`;
     this._els.playBtn.setAttribute("aria-label", "Pause");
     this._els.playBtn.title = "Pause";
 
@@ -1539,7 +1626,7 @@ class PodcastFooter extends HTMLElement {
   }
 
   _onPause() {
-    this._els.playBtn.textContent = "▶";
+    this._els.playBtn.innerHTML = `<svg viewBox="0 0 512 512" width="22" height="22"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z"/></svg>`;
     this._els.playBtn.setAttribute("aria-label", "Play");
     this._els.playBtn.title = "Play";
 
@@ -1611,7 +1698,8 @@ class PodcastFooter extends HTMLElement {
       if (state.playbackRate != null)  this._audio.playbackRate = state.playbackRate;
 
       this._els.volume.value = this._audio.muted ? 0 : this._audio.volume;
-      this._els.muteBtn.textContent = this._audio.muted ? "🔇" : this._audio.volume === 0 ? "🔇" : "🔊";
+      this._setMuteIcon();
+      this._els.rateBtn.textContent = (state.playbackRate || 1) + "×";
       this._els.title.textContent = state.title || "Unknown Episode";
       this._els.source.textContent = state.src.replace(/^https?:\/\//, "").split("/")[0] || state.src;
 

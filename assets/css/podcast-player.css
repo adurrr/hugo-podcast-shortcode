@@ -219,3 +219,25 @@ podcast-footer[active]::part(footer) {
   --podcast-player-accent: #a78bfa;
   --podcast-player-border: rgba(255, 255, 255, 0.06);
 }
+
+/* Footer parts focus styles */
+podcast-footer[active]::part(skip-back-btn):focus-visible,
+podcast-footer[active]::part(skip-fwd-btn):focus-visible,
+podcast-footer[active]::part(play-btn):focus-visible,
+podcast-footer[active]::part(mute-btn):focus-visible,
+podcast-footer[active]::part(rate-btn):focus-visible,
+podcast-footer[active]::part(progress):focus-visible,
+podcast-footer[active]::part(volume):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.35);
+}
+
+[data-theme="dark"] podcast-footer[active]::part(skip-back-btn):focus-visible,
+[data-theme="dark"] podcast-footer[active]::part(skip-fwd-btn):focus-visible,
+[data-theme="dark"] podcast-footer[active]::part(play-btn):focus-visible,
+[data-theme="dark"] podcast-footer[active]::part(mute-btn):focus-visible,
+[data-theme="dark"] podcast-footer[active]::part(rate-btn):focus-visible,
+[data-theme="dark"] podcast-footer[active]::part(progress):focus-visible,
+[data-theme="dark"] podcast-footer[active]::part(volume):focus-visible {
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.35);
+}
