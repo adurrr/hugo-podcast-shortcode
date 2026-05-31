@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wavecast Social Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1280px; height: 640px;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 50%, #1a1a2e 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  /* Decorative circles */
+  .circle {
+    position: absolute; border-radius: 50%;
+    opacity: 0.08;
+  }
+  .c1 { width: 500px; height: 500px; background: #818cf8; top: -100px; right: -100px; }
+  .c2 { width: 300px; height: 300px; background: #6366f1; bottom: -80px; left: 100px; }
+  .c3 { width: 200px; height: 200px; background: #a78bfa; top: 50%; right: 15%; }
+  .content {
+    text-align: center; z-index: 1;
+    padding: 60px;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.2);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    color: #a78bfa;
+    padding: 8px 20px;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-size: 80px;
+    font-weight: 800;
+    color: #e4e4ed;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+  }
+  h1 span { color: #818cf8; }
+  .subtitle {
+    font-size: 24px;
+    color: #9ca3af;
+    font-weight: 400;
+    margin-bottom: 32px;
+  }
+  .features {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    font-size: 15px;
+    color: #6b7280;
+  }
+  .features span {
+    background: rgba(255,255,255,0.04);
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .install {
+    margin-top: 32px;
+    font-size: 14px;
+    color: #6b7280;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    background: rgba(0,0,0,0.3);
+    padding: 12px 24px;
+    border-radius: 8px;
+    display: inline-block;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .install span { color: #a78bfa; }
+  .footer-text {
+    position: absolute;
+    bottom: 24px;
+    font-size: 13px;
+    color: #4a4a5e;
+  }
+</style>
+</head>
+<body>
+  <div class="circle c1"></div>
+  <div class="circle c2"></div>
+  <div class="circle c3"></div>
+  <div class="content">
+    <div class="badge">Hugo Module + Theme</div>
+    <h1><span>Wave</span>cast</h1>
+    <p class="subtitle">Persistent podcast/radio player for Hugo</p>
+    <div class="features">
+      <span>Web Component</span>
+      <span>AzuraCast</span>
+      <span>iVoox</span>
+      <span>Turbolinks</span>
+      <span>AGPLv3</span>
+    </div>
+    <div class="install"><span>hugo mod get</span> github.com/adurrr/wavecast &nbsp;·&nbsp; <span>theme</span> = "wavecast"</div>
+  </div>
+  <div class="footer-text">github.com/adurrr/wavecast</div>
+</body>
+</html>

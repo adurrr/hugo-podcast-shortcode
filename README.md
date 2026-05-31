@@ -1,6 +1,6 @@
 # Wavecast
 
-A persistent podcast/radio audio player for Hugo — drop `<podcast-player>` into any page with a single shortcode. Supports **local files**, **AzuraCast** radio streams, and **iVoox** episodes. Works as a **Hugo module** _and_ as a **Hugo theme**.
+A persistent podcast/radio audio player for Hugo - drop `<podcast-player>` into any page with a single shortcode. Supports **local files**, **AzuraCast** radio streams, and **iVoox** episodes. Works as a **Hugo module** _and_ as a **Hugo theme**.
 
 ## How It Works
 
@@ -11,11 +11,11 @@ Wavecast provides two custom Web Components that work together:
 | `<podcast-player>` | Inline (in your content) | Play/pause, skip, seek, volume, chapters, poster |
 | `<podcast-footer>` | Sticky footer | Persistent player bar at the bottom of every page |
 
-Both components are **bidirectionally synced** — pausing the footer pauses all inline players, and vice versa. Only one audio source plays at a time. Position, volume, mute, and speed are saved to `sessionStorage` and restored across page navigations.
+Both components are **bidirectionally synced** - pausing the footer pauses all inline players, and vice versa. Only one audio source plays at a time. Position, volume, mute, and speed are saved to `sessionStorage` and restored across page navigations.
 
 ## Features
 
-- **Web Component** (`<podcast-player>`) with Shadow DOM — framework-agnostic, works anywhere
+- **Web Component** (`<podcast-player>`) with Shadow DOM - framework-agnostic, works anywhere
 - **Inline player**: play/pause, skip ±15s, seekable progress bar, volume slider, mute, playback rate (0.5×–2×)
 - **Sticky footer player**: radio-t style bottom bar with cover art, track name, skip, play/pause, wide progress bar, volume, mute, speed, close
 - **Bidirectional sync**: pausing any player pauses all audio; all play buttons stay in sync
@@ -89,7 +89,7 @@ Hugo will resolve the module and make the shortcode, JS, and CSS available.
 | Simple setup, one theme | **Theme** (`theme = "wavecast"`) |
 | To use Wavecast alongside other modules | **Module** (`[module.imports]`) |
 | To override Wavecast's templates in your own project theme | **Theme** (Hugo's theme cascade handles overrides) |
-| Pinned, reproducible builds | Either — both support version pinning |
+| Pinned, reproducible builds | Either - both support version pinning |
 | No git submodule or clone in your repo | **Module** (`hugo mod get`) |
 
 ### Local development / demo
@@ -132,7 +132,7 @@ Place your audio file in your Hugo project's `assets/` directory, then reference
 >}}
 ```
 
-The shortcode resolves local files via `resources.GetMatch` — it checks page-scoped resources first, then the global `assets/` directory. Remote URLs are passed through as-is to the `<audio>` element.
+The shortcode resolves local files via `resources.GetMatch` - it checks page-scoped resources first, then the global `assets/` directory. Remote URLs are passed through as-is to the `<audio>` element.
 
 ---
 
@@ -146,7 +146,7 @@ Add this element just before the closing `</body>` tag in `layouts/_default/base
 <podcast-footer id="podcast-footer" data-turbolinks-permanent data-turbo-permanent hx-preserve></podcast-footer>
 ```
 
-The `data-turbolinks-permanent`, `data-turbo-permanent`, and `hx-preserve` attributes ensure the footer survives page navigation when using Turbolinks, Turbo, or htmx respectively. If you don't use any of those, omit the framework-specific attributes — the footer will still persist via `sessionStorage`.
+The `data-turbolinks-permanent`, `data-turbo-permanent`, and `hx-preserve` attributes ensure the footer survives page navigation when using Turbolinks, Turbo, or htmx respectively. If you don't use any of those, omit the framework-specific attributes - the footer will still persist via `sessionStorage`.
 
 > **Important:** The footer player is **opt-in**. If you don't add `<podcast-footer>` to your template, only the inline `<podcast-player>` components will render, and no footer bar will appear. The project works perfectly without a footer.
 
@@ -175,7 +175,7 @@ Supported site config keys match the shortcode parameter names (except `src`, `t
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
-| `src` | **yes** | — | Audio URL or local file path. Local resources resolved via `.Resources.GetMatch` / `resources.GetMatch`. |
+| `src` | **yes** | - | Audio URL or local file path. Local resources resolved via `.Resources.GetMatch` / `resources.GetMatch`. |
 | `title` | no | `""` | Episode title displayed in the player header (and footer). |
 | `poster` | no | `""` | Cover image URL displayed next to the controls. Responsive size via `clamp(64px, 10vw, 110px)`. |
 | `description` | no | `""` | Markdown description rendered into a `slot="description"` element below the player controls. |
@@ -284,7 +284,7 @@ Multiple players on the same page use separate `sessionStorage` keys (`podcastPl
 ### Cross-page behaviour
 
 - Navigating away from a page pauses inline audio (saves position)
-- Returning to a page does **not** autoplay — the player restores in paused state
+- Returning to a page does **not** autoplay - the player restores in paused state
 - The footer player persists across all pages without interruption
 
 ---
@@ -446,12 +446,12 @@ npm test && go test ./tests/hugo/... && npm run test:e2e
 ## Troubleshooting
 
 **Player doesn't appear (empty area where it should be)**
-- Check the browser console for JavaScript errors. The `<podcast-player>` custom element must be registered — if the JS asset fails to load, the player won't render.
+- Check the browser console for JavaScript errors. The `<podcast-player>` custom element must be registered - if the JS asset fails to load, the player won't render.
 - Verify the JS asset is accessible. In your browser's Network tab, look for `podcast-player.js`. With `hugo server` it's typically at `/wavecast/js/podcast-player.js`.
 - Some ad-blockers or script blockers may prevent module scripts from loading.
 
 **Audio doesn't play**
-- Click the play button — the player doesn't autoplay by default (browsers block autoplay).
+- Click the play button - the player doesn't autoplay by default (browsers block autoplay).
 - Check the browser console for CORS errors. The audio source must either be same-origin or have permissive CORS headers. For development, use the demo audio file at `assets/demo/demo-audio.wav`.
 - Ensure the `src` URL is valid and points to a playable audio file.
 - Check that the `type` attribute matches the audio format (e.g. `audio/mpeg` for MP3, `audio/wav` for WAV). When omitted, the browser auto-detects.
@@ -471,7 +471,7 @@ npm test && go test ./tests/hugo/... && npm run test:e2e
 
 **Persistence doesn't work**
 - `persistent` must be present as an attribute on the element. By default it's enabled, but setting `persistent="false"` in a shortcode param or globally in `[params.podcastPlayer]` disables it.
-- State is stored in `sessionStorage` — it persists only within the same browser tab.
+- State is stored in `sessionStorage` - it persists only within the same browser tab.
 - The footer player persists automatically; no `persistent` attribute needed on `<podcast-footer>`.
 
 ---
