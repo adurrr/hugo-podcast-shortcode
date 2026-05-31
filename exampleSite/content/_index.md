@@ -1,168 +1,99 @@
 ---
-title: "Wavecast Demo"
+title: "Wavecast Radio"
 ---
 
 <section class="hero">
-  <h1>Wavecast</h1>
-  <p>A persistent <strong>&lt;podcast-player&gt;</strong> Web Component for Hugo - drop it into any post with a single shortcode. Supports local audio, AzuraCast radio streams, and iVoox episodes. Works as a <strong>Hugo module</strong> or as a <strong>Hugo theme</strong>.</p>
-  <div class="nav-buttons" style="margin-top:1rem">
-    <a href="{{< relref "posts/test-episode.md" >}}" class="nav-button nav-button-primary">Test Episode</a>
-    <a href="{{< relref "posts/second-episode.md" >}}" class="nav-button">Second Episode</a>
-    <a href="https://github.com/adurrr/wavecast" class="nav-button" target="_blank" rel="noopener">GitHub</a>
+  <h1>Wavecast Radio</h1>
+  <p class="tagline">Tune in to Tech</p>
+  <p>Your destination for the best conversations about software engineering, cybersecurity, AI, cloud infrastructure, and open source. Every show is powered by <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener" style="color:var(--accent)">Wavecast</a> — the persistent podcast-player Web Component for Hugo.</p>
+  <div class="nav-buttons">
+    <a href="{{< relref "programs/" >}}" class="nav-button nav-button-primary">Browse Programs</a>
+    <a href="{{< relref "schedule/" >}}" class="nav-button">Schedule</a>
   </div>
 </section>
 
-<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:2rem;font-size:0.9rem">
-  <p style="margin-bottom:0.4rem"><strong>Notice the persistent audio footer at the bottom of the page?</strong> That's the Wavecast sticky footer player - it follows you across all pages, stays in sync with every inline player, and remembers your position, volume, and speed. Try navigating between pages while audio is playing.</p>
-  <p style="margin:0;color:var(--text-muted)">Wavecast works as both a <a href="https://github.com/adurrr/wavecast#option-a-install-as-a-hugo-theme-recommended-for-most-sites">Hugo theme</a> (<code>theme = "wavecast"</code>) and a <a href="https://github.com/adurrr/wavecast#option-b-install-as-a-hugo-module-for-multi-module-sites">Hugo module</a> (<code>hugo mod get</code>). See the <a href="https://github.com/adurrr/wavecast#installation">README</a> for both installation paths.</p>
+{{< podcast-player
+  src="https://aphid.fireside.fm/d/1437767933/b44de5fa-47c1-4e94-bf9e-c72f8d1c8f5d/8e63b44a-1634-4422-907c-4b96173a0fbd.mp3"
+  title="Cloudflare's Sunil Pai — Code & Circuit"
+  poster="https://picsum.photos/seed/featured-program/400/400"
+  persistent="true"
+  chapters="00:00:00-Intro,00:03:00-Cloudflare AI,00:10:00-Vibe Coding,00:18:00-Rust & Ruby,00:25:00-Platform Engineering,00:33:00-Wrap Up"
+>}}
+
+<div class="info-card">
+  <p><strong>Notice the player at the bottom of the page?</strong> That's Wavecast's sticky footer player. It follows you across all pages, stays in sync with every episode, and remembers your position, volume, and speed. Try navigating between shows while audio is playing.</p>
 </div>
 
 <section class="demo-section">
-  <h2>Basic Player</h2>
-  <p class="desc">Minimal usage - just a <code>src</code> and <code>title</code>. This uses a local <code>.wav</code> asset from <code>assets/demo/</code>.</p>
-  <div class="demo-player">
-    <div class="player-wrapper">
-      {{< podcast-player
-        src="demo/demo-audio.wav"
-        title="Demo: 440Hz Sine Tone"
-      >}}
-    </div>
-  </div>
-  <div class="demo-code">
-    <code>&#123;&#123;&lt; podcast-player
-  src="demo/demo-audio.wav"
-  title="Demo: 440Hz Sine Tone"
-&gt;&#125;&#125;</code>
+  <h2>Our Programs</h2>
+  <p class="desc">Four shows covering the technology topics that matter.</p>
+
+  <div class="program-grid">
+    <a href="{{< relref "programs/code-and-circuit" >}}" class="program-card">
+      <div class="program-card-icon">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      </div>
+      <h3>Code &amp; Circuit</h3>
+      <p>AI, cloud infrastructure, and the craft of software development.</p>
+      <span class="program-card-episodes">2 episodes</span>
+    </a>
+
+    <a href="{{< relref "programs/security-brief" >}}" class="program-card">
+      <div class="program-card-icon">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3>The Security Brief</h3>
+      <p>Cybersecurity stories, threat analysis, and defense strategies.</p>
+      <span class="program-card-episodes">2 episodes</span>
+    </a>
+
+    <a href="{{< relref "programs/open-source-spotlight" >}}" class="program-card">
+      <div class="program-card-icon">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      </div>
+      <h3>Open Source Spotlight</h3>
+      <p>Projects, communities, and the people building open source.</p>
+      <span class="program-card-episodes">2 episodes</span>
+    </a>
+
+    <a href="{{< relref "programs/deploy-friday" >}}" class="program-card">
+      <div class="program-card-icon">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <h3>Deploy Friday</h3>
+      <p>DevOps, SRE, platform engineering, and production stories.</p>
+      <span class="program-card-episodes">2 episodes</span>
+    </a>
   </div>
 </section>
 
 <section class="demo-section">
-  <h2>Player with Poster</h2>
-  <p class="desc">Show an album-art poster alongside the controls.</p>
-  <div class="demo-player">
-    <div class="player-wrapper">
-      {{< podcast-player
-        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-        title="SoundHelix: Chilled Beats"
-        poster="https://picsum.photos/seed/player1/400/400"
-      >}}
+  <h2>Latest Episodes</h2>
+  <p class="desc">Recently aired episodes across all programs.</p>
+
+  <div class="episode-list">
+    <div class="episode-list-item">
+      <span class="badge">Code &amp; Circuit</span>
+      <a href="{{< relref "episodes/cr-620-cloudflare-sunil-pai" >}}">Cloudflare's Sunil Pai</a>
     </div>
-  </div>
-  <div class="demo-code">
-    <code>&#123;&#123;&lt; podcast-player
-  src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-  title="SoundHelix: Chilled Beats"
-  poster="https://picsum.photos/seed/player1/400/400"
-&gt;&#125;&#125;</code>
-  </div>
-</section>
-
-<section class="demo-section">
-  <h2>Player with Chapters</h2>
-  <p class="desc">Add timestamp-labelled chapters for easy navigation.</p>
-  <div class="demo-player">
-    <div class="player-wrapper">
-      {{< podcast-player
-        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-        title="SoundHelix: Long Mix"
-        poster="https://picsum.photos/seed/player2/400/400"
-        chapters="00:00:00-Intro,00:00:45-Buildup,00:02:15-Main Theme,00:04:00-Bridge,00:05:30-Climax,00:06:45-Outro"
-        persistent="true"
-      >}}
+    <div class="episode-list-item">
+      <span class="badge">Deploy Friday</span>
+      <a href="{{< relref "episodes/devsecops-99-ai-sre" >}}">AI SRE and the End of 3 AM On-Call</a>
     </div>
-  </div>
-  <div class="demo-code">
-    <code>&#123;&#123;&lt; podcast-player
-  src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-  title="SoundHelix: Long Mix"
-  poster="https://picsum.photos/seed/player2/400/400"
-  chapters="00:00:00-Intro,00:00:45-Buildup,00:02:15-Main Theme,00:04:00-Bridge,00:05:30-Climax,00:06:45-Outro"
-  persistent="true"
-&gt;&#125;&#125;</code>
-  </div>
-</section>
-
-<section class="demo-section">
-  <h2>Persistence Demo</h2>
-  <p class="desc">Toggle <code>persistent="true"</code> - the player saves your position, volume, mute, and playback speed to <code>sessionStorage</code>. Navigate between pages and resume where you left off. Try it on these two instances of the same audio:</p>
-
-  <div class="demo-player">
-    <h3 style="font-size:1rem;margin-bottom:0.5rem">Player A (with persistence)</h3>
-    <div class="player-wrapper">
-      {{< podcast-player
-        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
-        title="SoundHelix: Persistent Player"
-        persistent="true"
-      >}}
+    <div class="episode-list-item">
+      <span class="badge">The Security Brief</span>
+      <a href="{{< relref "episodes/r2-19-democratizing-security" >}}">Democratizing Cybersecurity</a>
     </div>
-  </div>
-  <div class="demo-code" style="margin-bottom:1rem">
-    <code>&#123;&#123;&lt; podcast-player src="…" title="SoundHelix: Persistent Player" persistent="true" &gt;&#125;&#125;</code>
-  </div>
-
-  <div class="demo-player">
-    <h3 style="font-size:1rem;margin-bottom:0.5rem">Player B (no persistence)</h3>
-    <div class="player-wrapper">
-      {{< podcast-player
-        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
-        title="SoundHelix: Non-Persistent"
-        persistent="false"
-      >}}
-    </div>
-  </div>
-  <div class="demo-code">
-    <code>&#123;&#123;&lt; podcast-player src="…" title="SoundHelix: Non-Persistent" &gt;&#125;&#125;</code>
-  </div>
-  <p class="desc" style="margin-top:0.75rem;font-size:0.85rem">Play some of Player A, then <a href="{{< relref "posts/second-episode.md" >}}">navigate to the second page</a> and come back - your position, volume, mute, and speed are remembered. Player B always starts fresh. You can also try navigating between <a href="{{< relref "posts/test-episode.md" >}}">Test Episode</a> and <a href="{{< relref "posts/second-episode.md" >}}">Second Episode</a>.</p>
-</section>
-
-<section class="demo-section">
-  <h2>Theming</h2>
-  <p class="desc">Click the <strong>Dark / Light</strong> toggle in the header to switch between built-in themes. The player responds to <code>data-theme</code> on <code>&lt;html&gt;</code>. You can also customise every visual aspect with <a href="https://github.com/adurrr/wavecast#css-custom-properties" target="_blank" rel="noopener">CSS custom properties</a> - primary colour, background, radius, progress height, and more.</p>
-  <div class="demo-player">
-    <div class="player-wrapper">
-      {{< podcast-player
-        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"
-        title="SoundHelix: Theme Demo"
-      >}}
+    <div class="episode-list-item">
+      <span class="badge">Open Source Spotlight</span>
+      <a href="{{< relref "episodes/ossp-13-firefox" >}}">Firefox Site Isolation &amp; Open Source Roundup</a>
     </div>
   </div>
 </section>
 
 <section class="demo-section">
-  <h2>Shortcode Reference</h2>
-  <p class="desc">All parameters can be passed per-invocation or set globally in <code>hugo.toml</code> under <code>[params.podcastPlayer]</code>:</p>
-
-  <table style="width:100%;border-collapse:collapse;font-size:0.9rem">
-    <thead>
-      <tr style="border-bottom:2px solid var(--border);text-align:left">
-        <th style="padding:0.5rem 0.75rem">Param</th>
-        <th style="padding:0.5rem 0.75rem">Default</th>
-        <th style="padding:0.5rem 0.75rem">Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr style="border-bottom:1px solid var(--border)"><td style="padding:0.5rem 0.75rem"><code>src</code></td><td style="padding:0.5rem 0.75rem">-</td><td style="padding:0.5rem 0.75rem">Audio URL or local resource path</td></tr>
-      <tr style="border-bottom:1px solid var(--border)"><td style="padding:0.5rem 0.75rem"><code>title</code></td><td style="padding:0.5rem 0.75rem">-</td><td style="padding:0.5rem 0.75rem">Episode title (required for a11y)</td></tr>
-      <tr style="border-bottom:1px solid var(--border)"><td style="padding:0.5rem 0.75rem"><code>type</code></td><td style="padding:0.5rem 0.75rem"><code>local</code></td><td style="padding:0.5rem 0.75rem">Source type: <code>local</code>, <code>azuracast</code>, <code>ivoox</code></td></tr>
-      <tr style="border-bottom:1px solid var(--border)"><td style="padding:0.5rem 0.75rem"><code>persistent</code></td><td style="padding:0.5rem 0.75rem"><code>false</code></td><td style="padding:0.5rem 0.75rem">Save/resume playback in sessionStorage</td></tr>
-      <tr style="border-bottom:1px solid var(--border)"><td style="padding:0.5rem 0.75rem"><code>preload</code></td><td style="padding:0.5rem 0.75rem"><code>metadata</code></td><td style="padding:0.5rem 0.75rem">HTML5 <code>&lt;audio&gt;</code> preload hint</td></tr>
-      <tr style="border-bottom:1px solid var(--border)"><td style="padding:0.5rem 0.75rem"><code>autoplay</code></td><td style="padding:0.5rem 0.75rem"><code>false</code></td><td style="padding:0.5rem 0.75rem">Start playing on page load</td></tr>
-      <tr style="border-bottom:1px solid var(--border)"><td style="padding:0.5rem 0.75rem"><code>rate</code></td><td style="padding:0.5rem 0.75rem"><code>1</code></td><td style="padding:0.5rem 0.75rem">Playback speed multiplier</td></tr>
-      <tr style="border-bottom:1px solid var(--border)"><td style="padding:0.5rem 0.75rem"><code>poster</code></td><td style="padding:0.5rem 0.75rem">-</td><td style="padding:0.5rem 0.75rem">Cover image URL</td></tr>
-      <tr style="border-bottom:1px solid var(--border)"><td style="padding:0.5rem 0.75rem"><code>chapters</code></td><td style="padding:0.5rem 0.75rem">-</td><td style="padding:0.5rem 0.75rem">Comma-separated <code>time-label</code> list</td></tr>
-      <tr><td style="padding:0.5rem 0.75rem"><code>description</code></td><td style="padding:0.5rem 0.75rem">-</td><td style="padding:0.5rem 0.75rem">Rich text description (supports Markdown)</td></tr>
-    </tbody>
-  </table>
-</section>
-
-<section class="demo-section">
-  <h2>Links &amp; Resources</h2>
-  <ul class="link-list">
-    <li><a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">GitHub Repository</a> - source code, issues, contributing</li>
-    <li><a href="https://github.com/adurrr/wavecast#readme" target="_blank" rel="noopener">README</a> - full documentation, installation (module + theme), CSS custom properties, <code>::part()</code> selectors</li>
-    <li><a href="https://github.com/adurrr/wavecast?tab=readme-ov-file#keyboard-shortcuts" target="_blank" rel="noopener">Keyboard Shortcuts</a> - Space, arrows, M, and more</li>
-    <li><a href="{{< relref "posts/test-episode.md" >}}">Test Episode</a> - basic player + player with chapters and poster</li>
-    <li><a href="{{< relref "posts/second-episode.md" >}}">Second Episode</a> - player with persistence enabled for cross-page testing</li>
-  </ul>
+  <h2>About Wavecast</h2>
+  <p class="desc">The technology behind the station.</p>
+  <p>Wavecast Radio is a live demo of the <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">Wavecast</a> Hugo module/theme — a persistent <code>&lt;podcast-player&gt;</code> Web Component that survives page navigation without restarting audio. Every episode on this site is a real podcast embedded via a single Hugo shortcode. The persistent footer player follows you across pages, remembers your position, volume, and speed, and stays in sync with every inline player.</p>
+  <p style="margin-top:1rem">This demo uses real episodes from <a href="https://coder.show" target="_blank" rel="noopener">Coder Radio</a>, <a href="https://www.reality2cast.com/" target="_blank" rel="noopener">Reality 2.0</a>, <a href="https://devsecops.fm/" target="_blank" rel="noopener">DevSecOps Talks</a>, and the <a href="https://opensourcesystempodcast.vf.io/" target="_blank" rel="noopener">Open Source System Podcast</a> — all excellent tech podcasts well worth subscribing to.</p>
 </section>

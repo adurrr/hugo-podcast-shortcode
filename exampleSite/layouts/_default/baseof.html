@@ -24,45 +24,60 @@
     .container{max-width:var(--max-w);margin:0 auto;padding:0 1.5rem;width:100%}
     header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
     header .container{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-    header .site-title{font-size:1.1rem;font-weight:700;color:var(--accent);text-decoration:none;margin-right:auto}
-    header nav{display:flex;gap:1rem;align-items:center}
-    header nav a{color:var(--text-muted);text-decoration:none;font-size:0.9rem;transition:color .15s}
-    header nav a:hover{color:var(--accent)}
+    header .site-title{font-size:1.1rem;font-weight:700;color:var(--accent);text-decoration:none;margin-right:auto;display:flex;align-items:center;gap:6px}
+    header .site-title svg{flex-shrink:0}
+    header nav{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+    header nav a{color:var(--text-muted);text-decoration:none;font-size:0.87rem;font-weight:500;transition:color .15s;padding:0.25rem 0}
+    header nav a:hover,header nav a.active{color:var(--accent)}
     main{flex:1;padding:2rem 0}
-    footer{background:var(--surface);border-top:1px solid var(--border);padding:1.5rem 0;text-align:center;color:var(--text-muted);font-size:0.85rem}
+    footer{background:var(--surface);border-top:1px solid var(--border);padding:1.5rem 0;text-align:center;color:var(--text-muted);font-size:0.85rem;padding-bottom:calc(1.5rem + 60px)}
     footer a{color:var(--accent)}
 
-    /* ── Theme toggle button ── */
+    /* ── Theme toggle ── */
     #theme-toggle{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);cursor:pointer;font-size:0.85rem;padding:0.35rem 0.75rem;transition:background .15s,border-color .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
     #theme-toggle:hover{background:var(--border)}
 
     /* ── Hero ── */
     .hero{padding:2rem 0 1rem}
-    .hero h1{font-size:2rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.5rem}
-    .hero p{color:var(--text-muted);font-size:1.05rem;max-width:640px}
+    .hero h1{font-size:1.8rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.25rem}
+    .hero p{color:var(--text-muted);font-size:1rem;max-width:640px}
+    .hero .tagline{font-size:1.1rem;font-weight:600;color:var(--accent);margin-bottom:0.75rem}
+
+    /* ── Info card ── */
+    .info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:2rem;font-size:0.9rem}
 
     /* ── Demo sections ── */
-    .demo-section{margin-bottom:3rem}
-    .demo-section h2{font-size:1.4rem;font-weight:700;margin-bottom:0.25rem}
-    .demo-section .desc{color:var(--text-muted);font-size:0.92rem;margin-bottom:1rem}
+    .demo-section{margin-bottom:2.5rem}
+    .demo-section h2{font-size:1.35rem;font-weight:700;margin-bottom:0.25rem}
+    .demo-section .desc{color:var(--text-muted);font-size:0.92rem;margin-bottom:0.75rem}
     .demo-player{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
-    .demo-player .player-wrapper{max-width:700px}
-    .demo-code{background:#1a1a2e;color:#e4e4ed;border-radius:var(--radius);font-size:0.82rem;overflow-x:auto;padding:1rem;margin-top:0.75rem}
-    .demo-code code{white-space:pre-wrap;word-break:break-all}
+
+    /* ── Badge / tags ── */
     .badge{display:inline-block;background:var(--accent);color:#fff;border-radius:999px;font-size:0.7rem;font-weight:600;padding:0.15rem 0.6rem;text-transform:uppercase;letter-spacing:0.03em;margin-right:0.4rem;vertical-align:middle}
 
-    /* ── Responsive ── */
-    @media(max-width:640px){
-      .hero h1{font-size:1.5rem}
-      header .container{gap:0.5rem}
-      header nav{order:3;width:100%;justify-content:flex-start;padding-top:0.35rem;border-top:1px solid var(--border)}
-    }
+    /* ── Program grid ── */
+    .program-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin:1.25rem 0}
+    .program-card{display:flex;flex-direction:column;gap:0.4rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;text-decoration:none;color:var(--text);transition:border-color .15s,box-shadow .15s}
+    .program-card:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(79,70,229,.1)}
+    .program-card-icon{width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--accent);margin-bottom:0.25rem}
+    .program-card h3{font-size:1rem;font-weight:700}
+    .program-card p{font-size:0.85rem;color:var(--text-muted);line-height:1.4}
+    .program-card-episodes,.program-card-meta{font-size:0.75rem;color:var(--text-muted);font-weight:500;margin-top:auto}
 
-    /* ── Link list ── */
-    .link-list{list-style:none;padding:0;margin:1rem 0}
-    .link-list li{margin-bottom:0.5rem}
-    .link-list a{color:var(--accent);text-decoration:none;font-weight:500}
-    .link-list a:hover{text-decoration:underline}
+    /* ── Episode entries ── */
+    .episode-entry{padding:1.25rem 0;border-bottom:1px solid var(--border)}
+    .episode-entry:last-child{border-bottom:none}
+    .episode-entry h3{font-size:1.1rem;font-weight:700;margin-bottom:0.2rem}
+    .episode-entry h3 a{color:var(--text);text-decoration:none}
+    .episode-entry h3 a:hover{color:var(--accent)}
+    .episode-meta{font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem}
+
+    /* ── Episode list (home page) ── */
+    .episode-list{display:flex;flex-direction:column;gap:0.5rem}
+    .episode-list-item{padding:0.6rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap}
+    .episode-list-item:last-child{border-bottom:none}
+    .episode-list-item a{color:var(--accent);text-decoration:none;font-weight:500}
+    .episode-list-item a:hover{text-decoration:underline}
 
     /* ── Nav buttons ── */
     .nav-buttons{display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1.5rem;align-items:center}
@@ -70,29 +85,50 @@
     .nav-button:hover{background:var(--accent);border-color:var(--accent);color:#fff}
     .nav-button-primary{background:var(--accent);border-color:var(--accent);color:#fff}
     .nav-button-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
-  </style>
 
-  {{- /* Favicon & browser assets */ -}}
-  <link rel="icon" href="/favicon.ico" sizes="48x48">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
-  <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16">
-  <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
-  <meta name="theme-color" content="#6366f1" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#6366f1" media="(prefers-color-scheme: dark)">
+    /* ── Schedule table ── */
+    table{width:100%;border-collapse:collapse;font-size:0.9rem}
+    th,td{padding:0.5rem 0.75rem;text-align:left;border-bottom:1px solid var(--border)}
+    th{border-bottom:2px solid var(--border);font-weight:700}
+    td a{color:var(--accent);text-decoration:none;font-weight:500}
+    td a:hover{text-decoration:underline}
+
+    /* ── Link list ── */
+    .link-list{list-style:none;padding:0;margin:1rem 0}
+    .link-list li{margin-bottom:0.5rem}
+    .link-list a{color:var(--accent);text-decoration:none;font-weight:500}
+    .link-list a:hover{text-decoration:underline}
+
+    /* ── Footer nav ── */
+    .footer-nav{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:0.75rem}
+    .footer-nav a{color:var(--text-muted);text-decoration:none;font-size:0.85rem;transition:color .15s}
+    .footer-nav a:hover{color:var(--accent)}
+
+    /* ── Responsive ── */
+    @media(max-width:640px){
+      .hero h1{font-size:1.5rem}
+      header .container{gap:0.5rem}
+      header nav{order:3;width:100%;justify-content:flex-start;padding-top:0.35rem;border-top:1px solid var(--border)}
+      .program-grid{grid-template-columns:1fr}
+    }
+  </style>
 </head>
 <body>
   <header>
     <div class="container">
-      <a href="{{ .Site.Home.RelPermalink }}" class="site-title">{{ .Site.Title }}</a>
+      <a href="{{ .Site.Home.RelPermalink }}" class="site-title">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01M4 18h16M8 8l4-4 4 4M12 4v12"/></svg>
+        Wavecast Radio
+      </a>
       <nav>
-        <a href="{{ .Site.Home.RelPermalink }}">Home</a>
-        <a href="{{ "posts/test-episode.md" | relref . }}">Test Episode</a>
-        <a href="{{ "posts/second-episode.md" | relref . }}">Second Episode</a>
-        <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">GitHub</a>
+        <a href="{{ .Site.Home.RelPermalink }}" class="nav-link">Home</a>
+        <a href="{{ "programs/_index.md" | relref . }}" class="nav-link">Programs</a>
+        <a href="{{ "schedule.md" | relref . }}" class="nav-link">Schedule</a>
+        <a href="{{ "about.md" | relref . }}" class="nav-link">About</a>
+        <a href="{{ "contact.md" | relref . }}" class="nav-link">Contact</a>
+        <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener" style="font-size:0.8rem">GitHub</a>
       </nav>
-      <button id="theme-toggle" aria-label="Toggle color theme"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Dark</button>
+      <button id="theme-toggle" aria-label="Toggle color theme"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Dark</button>
     </div>
   </header>
 
@@ -104,7 +140,15 @@
 
   <footer>
     <div class="container">
-      <p>Powered by <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">Wavecast</a> (Hugo module + theme) - built with Hugo</p>
+      <div class="footer-nav">
+        <a href="{{ .Site.Home.RelPermalink }}">Home</a>
+        <a href="{{ "programs/_index.md" | relref . }}">Programs</a>
+        <a href="{{ "schedule.md" | relref . }}">Schedule</a>
+        <a href="{{ "about.md" | relref . }}">About</a>
+        <a href="{{ "contact.md" | relref . }}">Contact</a>
+        <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <p>Wavecast Radio — Tune in to Tech. Powered by <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">Wavecast</a>, built with Hugo.</p>
     </div>
   </footer>
 
@@ -135,8 +179,6 @@
         }
       }
 
-      // Apply stored theme and bind on every page view
-      // turbolinks:load fires on initial load AND after every Turbolinks navigation
       apply(getPreferred());
       bindToggle();
       document.addEventListener('turbolinks:load', function() {
