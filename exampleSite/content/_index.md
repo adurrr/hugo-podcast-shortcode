@@ -6,19 +6,19 @@ title: "Wavecast Demo"
   <h1>Wavecast</h1>
   <p>A persistent <strong>&lt;podcast-player&gt;</strong> Web Component for Hugo - drop it into any post with a single shortcode. Supports local audio, AzuraCast radio streams, and iVoox episodes. Works as a <strong>Hugo module</strong> or as a <strong>Hugo theme</strong>.</p>
   <div class="nav-buttons" style="margin-top:1rem">
-    <a href="{{< relref "posts/test-episode.md" >}}" class="nav-button nav-button-primary">📻 Test Episode</a>
-    <a href="{{< relref "posts/second-episode.md" >}}" class="nav-button">▶️ Second Episode</a>
-    <a href="https://github.com/adurrr/wavecast" class="nav-button" target="_blank" rel="noopener">📖 GitHub</a>
+    <a href="{{< relref "posts/test-episode.md" >}}" class="nav-button nav-button-primary">Test Episode</a>
+    <a href="{{< relref "posts/second-episode.md" >}}" class="nav-button">Second Episode</a>
+    <a href="https://github.com/adurrr/wavecast" class="nav-button" target="_blank" rel="noopener">GitHub</a>
   </div>
 </section>
 
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:2rem;font-size:0.9rem">
-  <p style="margin-bottom:0.4rem"><strong>🔊 Notice the persistent audio footer at the bottom of the page?</strong> That's the Wavecast sticky footer player - it follows you across all pages, stays in sync with every inline player, and remembers your position, volume, and speed. Try navigating between pages while audio is playing.</p>
+  <p style="margin-bottom:0.4rem"><strong>Notice the persistent audio footer at the bottom of the page?</strong> That's the Wavecast sticky footer player - it follows you across all pages, stays in sync with every inline player, and remembers your position, volume, and speed. Try navigating between pages while audio is playing.</p>
   <p style="margin:0;color:var(--text-muted)">Wavecast works as both a <a href="https://github.com/adurrr/wavecast#option-a-install-as-a-hugo-theme-recommended-for-most-sites">Hugo theme</a> (<code>theme = "wavecast"</code>) and a <a href="https://github.com/adurrr/wavecast#option-b-install-as-a-hugo-module-for-multi-module-sites">Hugo module</a> (<code>hugo mod get</code>). See the <a href="https://github.com/adurrr/wavecast#installation">README</a> for both installation paths.</p>
 </div>
 
 <section class="demo-section">
-  <h2>📻 Basic Player</h2>
+  <h2>Basic Player</h2>
   <p class="desc">Minimal usage - just a <code>src</code> and <code>title</code>. This uses a local <code>.wav</code> asset from <code>assets/demo/</code>.</p>
   <div class="demo-player">
     <div class="player-wrapper">
@@ -37,7 +37,7 @@ title: "Wavecast Demo"
 </section>
 
 <section class="demo-section">
-  <h2>🎵 Player with Poster</h2>
+  <h2>Player with Poster</h2>
   <p class="desc">Show an album-art poster alongside the controls.</p>
   <div class="demo-player">
     <div class="player-wrapper">
@@ -58,7 +58,7 @@ title: "Wavecast Demo"
 </section>
 
 <section class="demo-section">
-  <h2>📖 Player with Chapters</h2>
+  <h2>Player with Chapters</h2>
   <p class="desc">Add timestamp-labelled chapters for easy navigation.</p>
   <div class="demo-player">
     <div class="player-wrapper">
@@ -83,11 +83,11 @@ title: "Wavecast Demo"
 </section>
 
 <section class="demo-section">
-  <h2>💾 Persistence Demo</h2>
+  <h2>Persistence Demo</h2>
   <p class="desc">Toggle <code>persistent="true"</code> - the player saves your position, volume, mute, and playback speed to <code>sessionStorage</code>. Navigate between pages and resume where you left off. Try it on these two instances of the same audio:</p>
 
   <div class="demo-player">
-    <h3 style="font-size:1rem;margin-bottom:0.5rem">🔁 Player A (with persistence)</h3>
+    <h3 style="font-size:1rem;margin-bottom:0.5rem">Player A (with persistence)</h3>
     <div class="player-wrapper">
       {{< podcast-player
         src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
@@ -101,7 +101,7 @@ title: "Wavecast Demo"
   </div>
 
   <div class="demo-player">
-    <h3 style="font-size:1rem;margin-bottom:0.5rem">🔁 Player B (no persistence)</h3>
+    <h3 style="font-size:1rem;margin-bottom:0.5rem">Player B (no persistence)</h3>
     <div class="player-wrapper">
       {{< podcast-player
         src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
@@ -113,12 +113,12 @@ title: "Wavecast Demo"
   <div class="demo-code">
     <code>&#123;&#123;&lt; podcast-player src="…" title="SoundHelix: Non-Persistent" &gt;&#125;&#125;</code>
   </div>
-  <p class="desc" style="margin-top:0.75rem;font-size:0.85rem">💡 Play some of Player A, then <a href="{{< relref "posts/second-episode.md" >}}">navigate to the second page</a> and come back - your position, volume, mute, and speed are remembered. Player B always starts fresh. You can also try navigating between <a href="{{< relref "posts/test-episode.md" >}}">Test Episode</a> and <a href="{{< relref "posts/second-episode.md" >}}">Second Episode</a>.</p>
+  <p class="desc" style="margin-top:0.75rem;font-size:0.85rem">Play some of Player A, then <a href="{{< relref "posts/second-episode.md" >}}">navigate to the second page</a> and come back - your position, volume, mute, and speed are remembered. Player B always starts fresh. You can also try navigating between <a href="{{< relref "posts/test-episode.md" >}}">Test Episode</a> and <a href="{{< relref "posts/second-episode.md" >}}">Second Episode</a>.</p>
 </section>
 
 <section class="demo-section">
-  <h2>🎨 Theming</h2>
-  <p class="desc">Click the <strong>🌙 Dark / ☀️ Light</strong> toggle in the header to switch between built-in themes. The player responds to <code>data-theme</code> on <code>&lt;html&gt;</code>. You can also customise every visual aspect with <a href="https://github.com/adurrr/wavecast#css-custom-properties" target="_blank" rel="noopener">CSS custom properties</a> - primary colour, background, radius, progress height, and more.</p>
+  <h2>Theming</h2>
+  <p class="desc">Click the <strong>Dark / Light</strong> toggle in the header to switch between built-in themes. The player responds to <code>data-theme</code> on <code>&lt;html&gt;</code>. You can also customise every visual aspect with <a href="https://github.com/adurrr/wavecast#css-custom-properties" target="_blank" rel="noopener">CSS custom properties</a> - primary colour, background, radius, progress height, and more.</p>
   <div class="demo-player">
     <div class="player-wrapper">
       {{< podcast-player
@@ -130,7 +130,7 @@ title: "Wavecast Demo"
 </section>
 
 <section class="demo-section">
-  <h2>📋 Shortcode Reference</h2>
+  <h2>Shortcode Reference</h2>
   <p class="desc">All parameters can be passed per-invocation or set globally in <code>hugo.toml</code> under <code>[params.podcastPlayer]</code>:</p>
 
   <table style="width:100%;border-collapse:collapse;font-size:0.9rem">
@@ -157,12 +157,12 @@ title: "Wavecast Demo"
 </section>
 
 <section class="demo-section">
-  <h2>🔗 Links &amp; Resources</h2>
+  <h2>Links &amp; Resources</h2>
   <ul class="link-list">
-    <li><a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">📦 GitHub Repository</a> - source code, issues, contributing</li>
-    <li><a href="https://github.com/adurrr/wavecast#readme" target="_blank" rel="noopener">📖 README</a> - full documentation, installation (module + theme), CSS custom properties, <code>::part()</code> selectors</li>
-    <li><a href="https://github.com/adurrr/wavecast?tab=readme-ov-file#keyboard-shortcuts" target="_blank" rel="noopener">⌨️ Keyboard Shortcuts</a> - Space, arrows, M, and more</li>
-    <li><a href="{{< relref "posts/test-episode.md" >}}">📻 Test Episode</a> - basic player + player with chapters and poster</li>
-    <li><a href="{{< relref "posts/second-episode.md" >}}">▶️ Second Episode</a> - player with persistence enabled for cross-page testing</li>
+    <li><a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">GitHub Repository</a> - source code, issues, contributing</li>
+    <li><a href="https://github.com/adurrr/wavecast#readme" target="_blank" rel="noopener">README</a> - full documentation, installation (module + theme), CSS custom properties, <code>::part()</code> selectors</li>
+    <li><a href="https://github.com/adurrr/wavecast?tab=readme-ov-file#keyboard-shortcuts" target="_blank" rel="noopener">Keyboard Shortcuts</a> - Space, arrows, M, and more</li>
+    <li><a href="{{< relref "posts/test-episode.md" >}}">Test Episode</a> - basic player + player with chapters and poster</li>
+    <li><a href="{{< relref "posts/second-episode.md" >}}">Second Episode</a> - player with persistence enabled for cross-page testing</li>
   </ul>
 </section>

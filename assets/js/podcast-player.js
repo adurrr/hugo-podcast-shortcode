@@ -198,7 +198,7 @@ class PodcastPlayer extends HTMLElement {
     // Phase 5: Apply restored position if the player was reconnected
     // (e.g. Turbolinks). The persistence layer saved the position but
     // marked paused=true (set in disconnectedCallback), so this only
-    // restores time/progress without autoplaying — the user sees "▶" and
+    // restores time/progress without autoplaying — the user sees "play" icon and
     // can click to resume from where they left off. If metadata is already
     // loaded (audio element survived reconnection), apply eagerly.
     if (this._pendingRestoreState && this._audio.readyState >= HTMLMediaElement.HAVE_METADATA) {
