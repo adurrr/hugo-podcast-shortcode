@@ -371,7 +371,7 @@ class PodcastPlayer extends HTMLElement {
           <button class="btn btn-skip-back"  part="skip-back-btn"
                   title="Rewind 15s" aria-label="Rewind 15 seconds">⏪</button>
           <button class="btn btn-play" part="play-btn"
-                  title="Play" aria-label="Play" aria-pressed="false">▶</button>
+                  title="Play" aria-label="Play" aria-pressed="false"><svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg></button>
           <button class="btn btn-skip-fwd"  part="skip-fwd-btn"
                   title="Forward 15s" aria-label="Forward 15 seconds">⏩</button>
           <div class="progress-wrap" part="progress-wrap">
@@ -726,7 +726,7 @@ class PodcastPlayer extends HTMLElement {
   }
 
   _onPlay() {
-    this._els.playBtn.textContent = "⏸";
+    this._els.playBtn.innerHTML = '<svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M144 96h96v320h-96zM272 96h96v320h-96z"/></svg>';
     this._els.playBtn.setAttribute("aria-label", "Pause");
     this._els.playBtn.setAttribute("aria-pressed", "true");
     this._els.playBtn.title = "Pause";
@@ -754,7 +754,7 @@ class PodcastPlayer extends HTMLElement {
   }
 
   _onPause() {
-    this._els.playBtn.textContent = "▶";
+    this._els.playBtn.innerHTML = '<svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg>';
     this._els.playBtn.setAttribute("aria-label", "Play");
     this._els.playBtn.setAttribute("aria-pressed", "false");
     this._els.playBtn.title = "Play";
@@ -853,7 +853,7 @@ class PodcastPlayer extends HTMLElement {
       // _onPause will update our UI
     } else {
       // Ensure button shows play icon
-      this._els.playBtn.textContent = "▶";
+      this._els.playBtn.innerHTML = '<svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg>';
       this._els.playBtn.setAttribute("aria-label", "Play");
       this._els.playBtn.setAttribute("aria-pressed", "false");
       this._els.playBtn.title = "Play";
@@ -866,7 +866,7 @@ class PodcastPlayer extends HTMLElement {
       this._audio.pause();
     }
     // Always show play icon on close
-    this._els.playBtn.textContent = "▶";
+    this._els.playBtn.innerHTML = '<svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg>';
     this._els.playBtn.setAttribute("aria-label", "Play");
     this._els.playBtn.setAttribute("aria-pressed", "false");
     this._els.playBtn.title = "Play";
@@ -882,8 +882,8 @@ class PodcastPlayer extends HTMLElement {
     if (!mySrc || !src) return;
 
     if (mySrc === src || src.endsWith(mySrc) || mySrc.endsWith(src)) {
-      // Same source: someone else started our track — sync button to show ⏸
-      this._els.playBtn.textContent = "⏸";
+      // Same source: someone else started our track — sync button to show pause
+      this._els.playBtn.innerHTML = '<svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M144 96h96v320h-96zM272 96h96v320h-96z"/></svg>';
       this._els.playBtn.setAttribute("aria-label", "Pause");
       this._els.playBtn.setAttribute("aria-pressed", "true");
       this._els.playBtn.title = "Pause";

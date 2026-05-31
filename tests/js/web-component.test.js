@@ -114,15 +114,15 @@ describe("PodcastPlayer Web Component", () => {
 
   it("should toggle play button icon on play/pause events", () => {
     const playBtn = el.shadowRoot.querySelector(".btn-play");
-    expect(playBtn.textContent).toBe("▶");
+    expect(playBtn.getAttribute("aria-label")).toBe("Play");
 
     // Simulate play event on the internal audio
     el._audio.dispatchEvent(new Event("play"));
-    expect(playBtn.textContent).toBe("⏸");
+    expect(playBtn.getAttribute("aria-label")).toBe("Pause");
 
-    // Simulate pause
+    // Simulate pause event
     el._audio.dispatchEvent(new Event("pause"));
-    expect(playBtn.textContent).toBe("▶");
+    expect(playBtn.getAttribute("aria-label")).toBe("Play");
   });
 
   it("should call _togglePlay when play button is clicked", () => {

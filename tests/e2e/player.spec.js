@@ -90,8 +90,8 @@ test.describe("Podcast Player E2E", () => {
       // Footer should still be active and playing
       const footer = page.locator("podcast-footer");
       await expect(footer).toHaveAttribute("active", "");
-      // The play button should show "⏸" (pause icon) indicating audio is playing
-      await expect(footer.locator("[part='play-btn']")).toHaveText("⏸");
+      // The play button should show the pause icon indicating audio is playing
+      await expect(footer.locator("[part='play-btn']")).toHaveAttribute("aria-label", "Pause");
     });
 
     test.describe("Bidirectional play/pause sync", () => {
@@ -104,13 +104,13 @@ test.describe("Podcast Player E2E", () => {
         // Play on inline
         await playBtn.click();
         await expect(footer).toHaveAttribute("active", "");
-        await expect(footer.locator("[part='play-btn']")).toHaveText("⏸");
-        await expect(playBtn).toHaveText("⏸");
+        await expect(footer.locator("[part='play-btn']")).toHaveAttribute("aria-label", "Pause");
+        await expect(playBtn).toHaveAttribute("aria-label", "Pause");
 
         // Pause on inline
         await playBtn.click();
-        await expect(footer.locator("[part='play-btn']")).toHaveText("▶");
-        await expect(playBtn).toHaveText("▶");
+        await expect(footer.locator("[part='play-btn']")).toHaveAttribute("aria-label", "Play");
+        await expect(playBtn).toHaveAttribute("aria-label", "Play");
       });
 
       test("pause on footer pauses both", async ({ page }) => {
@@ -122,13 +122,13 @@ test.describe("Podcast Player E2E", () => {
 
         // Play on inline
         await playBtn.click();
-        await expect(playBtn).toHaveText("⏸");
-        await expect(footerPlayBtn).toHaveText("⏸");
+        await expect(playBtn).toHaveAttribute("aria-label", "Pause");
+        await expect(footerPlayBtn).toHaveAttribute("aria-label", "Pause");
 
         // Pause on footer
         await footerPlayBtn.click();
-        await expect(footerPlayBtn).toHaveText("▶");
-        await expect(playBtn).toHaveText("▶");
+        await expect(footerPlayBtn).toHaveAttribute("aria-label", "Play");
+        await expect(playBtn).toHaveAttribute("aria-label", "Play");
       });
 
       test("play on footer after pause resumes both", async ({ page }) => {
@@ -141,20 +141,20 @@ test.describe("Podcast Player E2E", () => {
         // Play on inline
         await playBtn.click();
         await page.waitForTimeout(500);
-        await expect(footerPlayBtn).toHaveText("⏸");
-        await expect(playBtn).toHaveText("⏸");
+        await expect(footerPlayBtn).toHaveAttribute("aria-label", "Pause");
+        await expect(playBtn).toHaveAttribute("aria-label", "Pause");
 
         // Pause on footer
         await footerPlayBtn.click();
         await page.waitForTimeout(500);
-        await expect(footerPlayBtn).toHaveText("▶");
-        await expect(playBtn).toHaveText("▶");
+        await expect(footerPlayBtn).toHaveAttribute("aria-label", "Play");
+        await expect(playBtn).toHaveAttribute("aria-label", "Play");
 
         // Play on footer — both resume
         await footerPlayBtn.click();
         await page.waitForTimeout(1500);
-        await expect(footerPlayBtn).toHaveText("⏸");
-        await expect(playBtn).toHaveText("⏸");
+        await expect(footerPlayBtn).toHaveAttribute("aria-label", "Pause");
+        await expect(playBtn).toHaveAttribute("aria-label", "Pause");
       });
 
       test("close footer pauses inline player", async ({ page }) => {
@@ -165,7 +165,7 @@ test.describe("Podcast Player E2E", () => {
 
         // Play on inline
         await playBtn.click();
-        await expect(playBtn).toHaveText("⏸");
+        await expect(playBtn).toHaveAttribute("aria-label", "Pause");
         await expect(footer).toHaveAttribute("active", "");
 
         // Verify inline player audio is actually playing
@@ -180,7 +180,7 @@ test.describe("Podcast Player E2E", () => {
         const paused = await firstInline.evaluate(el => el._audio.paused);
         expect(paused).toBe(true);
         // Button should show play icon
-        await expect(playBtn).toHaveText("▶");
+        await expect(playBtn).toHaveAttribute("aria-label", "Play");
       });
 
       test.describe("Single-stream (only one song at a time)", () => {
@@ -194,19 +194,19 @@ test.describe("Podcast Player E2E", () => {
 
           // Play first inline player
           await firstPlayBtn.click();
-          await expect(firstPlayBtn).toHaveText("⏸");
+          await expect(firstPlayBtn).toHaveAttribute("aria-label", "Pause");
           await expect(footer).toHaveAttribute("active", "");
           expect(await firstInline.evaluate(el => el._audio.paused)).toBe(false);
 
           // Play second inline player
           await secondPlayBtn.click();
-          await expect(secondPlayBtn).toHaveText("⏸");
+          await expect(secondPlayBtn).toHaveAttribute("aria-label", "Pause");
           await expect(footer).toHaveAttribute("active", "");
 
           // First should now be stopped, second should be playing
           expect(await firstInline.evaluate(el => el._audio.paused)).toBe(true);
           expect(await secondInline.evaluate(el => el._audio.paused)).toBe(false);
-          await expect(firstPlayBtn).toHaveText("▶");
+          await expect(firstPlayBtn).toHaveAttribute("aria-label", "Play");
         });
 
         test("can switch back to first player", async ({ page }) => {
@@ -219,15 +219,15 @@ test.describe("Podcast Player E2E", () => {
 
           // Play first, then second
           await firstPlayBtn.click();
-          await expect(firstPlayBtn).toHaveText("⏸");
+          await expect(firstPlayBtn).toHaveAttribute("aria-label", "Pause");
           await secondPlayBtn.click();
-          await expect(secondPlayBtn).toHaveText("⏸");
-          await expect(firstPlayBtn).toHaveText("▶");
+          await expect(secondPlayBtn).toHaveAttribute("aria-label", "Pause");
+          await expect(firstPlayBtn).toHaveAttribute("aria-label", "Play");
 
           // Switch back to first
           await firstPlayBtn.click();
-          await expect(firstPlayBtn).toHaveText("⏸");
-          await expect(secondPlayBtn).toHaveText("▶");
+          await expect(firstPlayBtn).toHaveAttribute("aria-label", "Pause");
+          await expect(secondPlayBtn).toHaveAttribute("aria-label", "Play");
 
           // Only first should be playing
           expect(await firstInline.evaluate(el => el._audio.paused)).toBe(false);
