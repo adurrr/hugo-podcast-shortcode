@@ -112,6 +112,18 @@ export class IvooxAdapter {
   async enrich() { return null; }
 }
 
+/* ---- Open-source SVG icons (Feather/Lucide, MIT licensed) ---- */
+const ICON_SKIP_BACK =
+  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>';
+const ICON_SKIP_FWD =
+  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>';
+const ICON_VOL_FULL =
+  '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+const ICON_VOL_LOW =
+  '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+const ICON_VOL_MUTED =
+  '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+
 class PodcastPlayer extends HTMLElement {
   /** Attributes the component should react to. */
   static get observedAttributes() {
@@ -369,11 +381,11 @@ class PodcastPlayer extends HTMLElement {
         </div>
         <div class="controls" part="controls">
           <button class="btn btn-skip-back"  part="skip-back-btn"
-                  title="Rewind 15s" aria-label="Rewind 15 seconds">⏪</button>
+                  title="Rewind 15s" aria-label="Rewind 15 seconds">${ICON_SKIP_BACK}</button>
           <button class="btn btn-play" part="play-btn"
                   title="Play" aria-label="Play" aria-pressed="false"><svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg></button>
           <button class="btn btn-skip-fwd"  part="skip-fwd-btn"
-                  title="Forward 15s" aria-label="Forward 15 seconds">⏩</button>
+                  title="Forward 15s" aria-label="Forward 15 seconds">${ICON_SKIP_FWD}</button>
           <div class="progress-wrap" part="progress-wrap">
             <input type="range" class="progress" part="progress"
                    min="0" max="100" value="0"
@@ -386,7 +398,7 @@ class PodcastPlayer extends HTMLElement {
         <div class="extras" part="extras">
           <div class="vol-wrap" part="vol-wrap">
             <button class="btn btn-mute" part="mute-btn"
-                    title="Mute" aria-label="Toggle mute" aria-pressed="false">🔊</button>
+                    title="Mute" aria-label="Toggle mute" aria-pressed="false">${ICON_VOL_FULL}</button>
             <input type="range" class="volume" part="volume"
                    min="0" max="1" step="0.05" value="1"
                    aria-label="Volume">
@@ -648,12 +660,12 @@ class PodcastPlayer extends HTMLElement {
 
   _updateMuteIcon(vol) {
     if (this._audio.muted || vol === 0) {
-      this._els.muteBtn.textContent = "🔇";
+      this._els.muteBtn.innerHTML = ICON_VOL_MUTED;
       this._els.volume.value = 0;
     } else if (vol < 0.5) {
-      this._els.muteBtn.textContent = "🔉";
+      this._els.muteBtn.innerHTML = ICON_VOL_LOW;
     } else {
-      this._els.muteBtn.textContent = "🔊";
+      this._els.muteBtn.innerHTML = ICON_VOL_FULL;
     }
   }
 
