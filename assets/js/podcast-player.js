@@ -763,6 +763,19 @@ class PodcastPlayer extends HTMLElement {
         currentTime: this._audio.currentTime,
       },
     }));
+
+    // Mute the inline's own audio when a <podcast-footer> is present to prevent
+    // double audio — the footer's <audio> will produce the actual sound while
+    // this element's <audio> keeps playing for progress/chapter tracking.
+    // When no footer exists (standalone usage), restore volume to full so the
+    // inline produces audible output (handles the edge case where persistence
+    // restored volume=0 from a prior muted state).
+    const hasFooter = document.querySelector("podcast-footer");
+    if (hasFooter) {
+      this._audio.volume = 0;
+    } else if (this._audio.volume === 0) {
+      this._audio.volume = 1;
+    }
   }
 
   _onPause() {
@@ -772,6 +785,9 @@ class PodcastPlayer extends HTMLElement {
     this._els.playBtn.title = "Play";
     this._dispatchState();
     this._updateMediaSessionPlayback();
+
+    // Restore volume so standalone playback (no footer) works at normal level
+    this._audio.volume = 1;
 
     // Persistence: save pause state immediately
     if (this.hasAttribute("persistent")) {
