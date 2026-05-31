@@ -1,5 +1,5 @@
 {
-  "name": "hugo-podcast-shortcode",
+  "name": "wavecast",
   "version": "0.1.0",
   "description": "A Hugo shortcode module for persistent podcast/radio player with multi-source support",
   "private": true,

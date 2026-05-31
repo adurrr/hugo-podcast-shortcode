@@ -1,4 +1,4 @@
-module github.com/adurrr/hugo-podcast-shortcode
+module github.com/adurrr/wavecast
 
 go 1.23.0
 

@@ -3,12 +3,12 @@ title: "Podcast Player Demo"
 ---
 
 <section class="hero">
-  <h1>Hugo Podcast Shortcode</h1>
+  <h1>Wavecast</h1>
   <p>A reusable <strong>&lt;podcast-player&gt;</strong> Web Component for Hugo — persistent audio playback with chapter navigation, poster support, and full accessibility. Drop it into any post with a single shortcode.</p>
   <div class="nav-buttons" style="margin-top:1rem">
     <a href="{{< relref "posts/test-episode.md" >}}" class="nav-button">📻 Test Episode</a>
     <a href="{{< relref "posts/second-episode.md" >}}" class="nav-button">▶️ Second Episode</a>
-    <a href="https://github.com/adurrr/hugo-podcast-shortcode" class="nav-button" target="_blank" rel="noopener">📖 GitHub</a>
+    <a href="https://github.com/adurrr/wavecast" class="nav-button" target="_blank" rel="noopener">📖 GitHub</a>
   </div>
 </section>
 
@@ -113,7 +113,7 @@ title: "Podcast Player Demo"
 
 <section class="demo-section">
   <h2>🎨 Theming</h2>
-  <p class="desc">Click the <strong>🌙 Dark / ☀️ Light</strong> toggle in the header to switch between built-in themes. The player responds to <code>data-theme</code> on <code>&lt;html&gt;</code>. You can also customise every visual aspect with <a href="https://github.com/adurrr/hugo-podcast-shortcode#css-custom-properties" target="_blank" rel="noopener">CSS custom properties</a> — primary colour, background, radius, progress height, and more.</p>
+  <p class="desc">Click the <strong>🌙 Dark / ☀️ Light</strong> toggle in the header to switch between built-in themes. The player responds to <code>data-theme</code> on <code>&lt;html&gt;</code>. You can also customise every visual aspect with <a href="https://github.com/adurrr/wavecast#css-custom-properties" target="_blank" rel="noopener">CSS custom properties</a> — primary colour, background, radius, progress height, and more.</p>
   <div class="demo-player">
     <div class="player-wrapper">
       {{< podcast-player
@@ -157,8 +157,8 @@ title: "Podcast Player Demo"
     <li><a href="{{< relref "/" >}}">Home</a> — this page (all demo variations)</li>
     <li><a href="{{< relref "posts/test-episode.md" >}}">Test Episode</a> — basic player + player with chapters and poster</li>
     <li><a href="{{< relref "posts/second-episode.md" >}}">Second Episode</a> — player with persistence enabled for cross-page testing</li>
-    <li><a href="https://github.com/adurrr/hugo-podcast-shortcode" target="_blank" rel="noopener">GitHub Repository</a> — source code, issues, contributing</li>
-    <li><a href="https://github.com/adurrr/hugo-podcast-shortcode#readme" target="_blank" rel="noopener">README</a> — full documentation, install guide, all CSS custom properties and <code>::part()</code> selectors</li>
-    <li><a href="https://github.com/adurrr/hugo-podcast-shortcode?tab=readme-ov-file#keyboard-shortcuts" target="_blank" rel="noopener">Keyboard Shortcuts</a> — Space, arrows, M, and more</li>
+    <li><a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">GitHub Repository</a> — source code, issues, contributing</li>
+    <li><a href="https://github.com/adurrr/wavecast#readme" target="_blank" rel="noopener">README</a> — full documentation, install guide, all CSS custom properties and <code>::part()</code> selectors</li>
+    <li><a href="https://github.com/adurrr/wavecast?tab=readme-ov-file#keyboard-shortcuts" target="_blank" rel="noopener">Keyboard Shortcuts</a> — Space, arrows, M, and more</li>
   </ul>
 </section>

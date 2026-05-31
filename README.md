@@ -1,6 +1,6 @@
-# Hugo Podcast Shortcode
+# Wavecast
 
-A Hugo module shortcode for a persistent podcast/radio audio player with Web Component, multi-source support, and navigation survival.
+A Hugo module for a persistent podcast/radio audio player with Web Component, multi-source support, and navigation survival.
 
 ## Features
 
@@ -27,7 +27,7 @@ A Hugo module shortcode for a persistent podcast/radio audio player with Web Com
 
 ```bash
 hugo mod init github.com/yourusername/your-site
-hugo mod get github.com/adurrr/hugo-podcast-shortcode
+hugo mod get github.com/adurrr/wavecast
 ```
 
 Then in your `hugo.toml`:
@@ -35,7 +35,7 @@ Then in your `hugo.toml`:
 ```toml
 [module]
   [[module.imports]]
-    path = "github.com/adurrr/hugo-podcast-shortcode"
+    path = "github.com/adurrr/wavecast"
 ```
 
 ### Local development
@@ -43,12 +43,12 @@ Then in your `hugo.toml`:
 Clone the repo and use the included example site:
 
 ```bash
-git clone git@github.com:adurrr/hugo-podcast-shortcode.git
-cd hugo-podcast-shortcode/exampleSite
+git clone git@github.com:adurrr/wavecast.git
+cd wavecast/exampleSite
 hugo server --port 1313
 ```
 
-Open your browser to the URL shown in the server output (e.g. `http://localhost:1313/hugo-podcast-shortcode/`). The first demo player uses a local audio file (`assets/demo/demo-audio.wav`) so it should work immediately with no external dependencies.
+Open your browser to the URL shown in the server output (e.g. `http://localhost:1313/wavecast/`). The first demo player uses a local audio file (`assets/demo/demo-audio.wav`) so it should work immediately with no external dependencies.
 
 ## Quick start
 
@@ -329,7 +329,7 @@ exampleSite/                # Runnable demo site
 
 **Player doesn't appear (empty area where it should be)**
 - Check the browser console for JavaScript errors. The `<podcast-player>` custom element must be registered — if the module script fails to load, the player won't render.
-- Verify the JS asset is accessible. In your browser's Network tab, look for `podcast-player.js`. With `hugo server` it's typically at `/hugo-podcast-shortcode/js/podcast-player.js`.
+- Verify the JS asset is accessible. In your browser's Network tab, look for `podcast-player.js`. With `hugo server` it's typically at `/wavecast/js/podcast-player.js`.
 - Some ad-blockers or script blockers may prevent module scripts from loading.
 
 **Audio doesn't play**

@@ -7,10 +7,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const exampleSite = path.resolve(__dirname, "../../exampleSite");
 
 // Derive the subpath from Hugo's baseURL for local testing.
-// Hugo's server respects the baseURL subpath (e.g. /hugo-podcast-shortcode/)
+// Hugo's server respects the baseURL subpath (e.g. /wavecast/)
 // when one is present, so we must match it in Playwright's URL config.
 const HUGO_PORT = 1313;
-const BASE_PATH = "/hugo-podcast-shortcode";
+const BASE_PATH = "/wavecast";
 
 export default defineConfig({
   testDir: ".",

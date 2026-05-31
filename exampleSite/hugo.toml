@@ -1,5 +1,5 @@
-baseURL = "https://adurrr.github.io/hugo-podcast-shortcode/"
-title = "Hugo Podcast Shortcode Demo"
+baseURL = "https://adurrr.github.io/wavecast/"
+title = "Wavecast Demo"
 languageCode = "en-us"
 ignoreLogs = ["warning-goldmark-raw-html"]
 
@@ -12,12 +12,12 @@ ignoreLogs = ["warning-goldmark-raw-html"]
 # Import the local module for development
 [module]
   [[module.imports]]
-    path = "github.com/adurrr/hugo-podcast-shortcode"
+    path = "github.com/adurrr/wavecast"
 
 # Site-wide defaults for podcast-player shortcode params.
 # Per-shortcode params override these; these override the built-in defaults.
 [params]
-  description = "Live demo for the hugo-podcast-shortcode module — a persistent <podcast-player> Web Component for Hugo"
+  description = "Live demo for the Wavecast module — a persistent <podcast-player> Web Component for Hugo"
 
   [params.podcastPlayer]
     source = "local"

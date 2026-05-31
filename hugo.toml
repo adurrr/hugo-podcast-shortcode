@@ -1,10 +1,10 @@
-# Hugo Podcast Shortcode Module
-# This is a Hugo module that provides a podcast player shortcode.
+# Wavecast Module
+# A Hugo module providing a persistent podcast/radio player Web Component.
 # See: https://gohugo.io/hugo-modules/
 
 [module]
   # Module path for Go module resolution
-  # Users import via: github.com/adurrr/hugo-podcast-shortcode
+  # Users import via: github.com/adurrr/wavecast
   [module.hugoVersion]
     min = "0.146.0"
 
