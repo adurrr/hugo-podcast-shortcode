@@ -602,11 +602,14 @@ class PodcastPlayer extends HTMLElement {
     if (!this._audio.duration) return;
     const pct = parseFloat(this._els.progress.value) / 100;
     this._audio.currentTime = pct * this._audio.duration;
-    // Notify footer and other inline players to keep timeline in sync
+    // Notify footer and other inline players playing the same source
     this.dispatchEvent(new CustomEvent("podcast-seek", {
       bubbles: true,
       composed: true,
-      detail: { currentTime: this._audio.currentTime },
+      detail: {
+        currentTime: this._audio.currentTime,
+        src: this._audio.src || this.getAttribute("src") || "",
+      },
     }));
   }
 
@@ -893,9 +896,13 @@ class PodcastPlayer extends HTMLElement {
 
   /** Respond to a seek event from the footer or another inline player. */
   _onExternalSeek(e) {
-    const time = e.detail && e.detail.currentTime;
+    const { currentTime: time, src } = (e.detail || {});
     if (time == null || !isFinite(time)) return;
-    if (!this._audio.src || !this._audio.duration) return;
+    // Only seek if the event's source matches ours — prevents a paused
+    // player's progress bar interaction from affecting the active player.
+    const mySrc = this._audio.src || this.getAttribute("src") || "";
+    if (src && mySrc && src !== mySrc && !src.endsWith(mySrc) && !mySrc.endsWith(src)) return;
+    if (!this._audio.duration) return;
     // Silently seek without dispatching our own seek event
     this._audio.currentTime = Math.min(time, this._audio.duration);
   }
@@ -1463,19 +1470,25 @@ class PodcastFooter extends HTMLElement {
     if (!this._audio.duration) return;
     const pct = parseFloat(this._els.progress.value) / 100;
     this._audio.currentTime = pct * this._audio.duration;
-    // Notify inline players to keep their timeline in sync
+    // Notify inline players playing the same source
     this.dispatchEvent(new CustomEvent("podcast-seek", {
       bubbles: true,
       composed: true,
-      detail: { currentTime: this._audio.currentTime },
+      detail: {
+        currentTime: this._audio.currentTime,
+        src: this._audio.src || "",
+      },
     }));
   }
 
   /** Respond to seek events from inline players — keep footer in sync. */
   _onExternalSeek(e) {
-    const time = e.detail && e.detail.currentTime;
+    const { currentTime: time, src } = (e.detail || {});
     if (time == null || !isFinite(time)) return;
-    if (!this._audio.src || !this._audio.duration) return;
+    // Only seek if the source matches what the footer is playing
+    const mySrc = this._audio.src || "";
+    if (src && mySrc && src !== mySrc && !src.endsWith(mySrc) && !mySrc.endsWith(src)) return;
+    if (!this._audio.duration) return;
     this._audio.currentTime = Math.min(time, this._audio.duration);
   }
 
