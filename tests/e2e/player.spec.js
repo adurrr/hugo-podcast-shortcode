@@ -84,7 +84,7 @@ test.describe("Podcast Player E2E", () => {
       await page.waitForTimeout(1000);
 
       // Navigate via Turbolinks (click an internal link)
-      await page.locator('header nav a', { hasText: 'Second Episode' }).click();
+      await page.locator('header nav a', { hasText: 'Programs' }).click();
       await page.waitForTimeout(1000);
 
       // Footer should still be active and playing
