@@ -1,5 +1,10 @@
 # Wavecast
 
+[![Release](https://img.shields.io/github/v/release/adurrr/wavecast?style=flat&label=release&color=6366f1)](https://github.com/adurrr/wavecast/releases)
+[![License](https://img.shields.io/github/license/adurrr/wavecast?style=flat&color=a78bfa)](https://github.com/adurrr/wavecast/blob/main/LICENSE)
+[![Tests](https://img.shields.io/github/actions/workflow/status/adurrr/wavecast/ci.yml?style=flat&label=tests&color=4f46e5)](https://github.com/adurrr/wavecast/actions)
+[![GitHub stars](https://img.shields.io/github/stars/adurrr/wavecast?style=flat&color=6366f1)](https://github.com/adurrr/wavecast/stargazers)
+
 A persistent podcast/radio audio player for Hugo - drop `<podcast-player>` into any page with a single shortcode. Supports **local files**, **AzuraCast** radio streams, and **iVoox** episodes. Works as a **Hugo module** _and_ as a **Hugo theme**.
 
 ## How It Works
