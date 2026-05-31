@@ -5,6 +5,10 @@
 [![Tests](https://img.shields.io/github/actions/workflow/status/adurrr/wavecast/ci.yml?style=flat&label=tests&color=4f46e5)](https://github.com/adurrr/wavecast/actions)
 [![GitHub stars](https://img.shields.io/github/stars/adurrr/wavecast?style=flat&color=6366f1)](https://github.com/adurrr/wavecast/stargazers)
 
+<p align="center">
+  <img src="images/demo.gif" alt="Wavecast demo showing persistent audio player across page navigation" width="800">
+</p>
+
 A persistent podcast/radio audio player for Hugo - drop `<podcast-player>` into any page with a single shortcode. Supports **local files**, **AzuraCast** radio streams, and **iVoox** episodes. Works as a **Hugo module** _and_ as a **Hugo theme**.
 
 ## How It Works
