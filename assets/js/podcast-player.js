@@ -377,7 +377,7 @@ class PodcastPlayer extends HTMLElement {
         [hidden]       { display: none !important; }
 
         @media (max-width: 640px) {
-          .player        { gap: 14px; }
+          .player        { flex-direction: column; gap: 14px; }
           .title         { white-space: normal; overflow: visible; text-overflow: clip; }
           .media-row     { display: flex; flex-direction: column; gap: 12px; }
           .poster-wrap   { display: block; position: relative; width: 100%; }
@@ -389,11 +389,13 @@ class PodcastPlayer extends HTMLElement {
           .play-overlay .btn { background: transparent; color: #fff; width: 40px; height: 40px; }
           .play-overlay .btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
           .play-overlay .btn-play { width: 46px; height: 46px; }
-          .body-area     { display: flex; flex-direction: column; gap: 12px; }
-          .controls-row  { grid-area: auto; width: 100%; overflow: hidden;
-                            display: flex; flex-wrap: nowrap; align-items: center; gap: 4px; }
-          .controls-row .progress-wrap { flex: 1 1 40px; min-width: 0; width: auto; }
-          .controls-row .time { font-size: .65rem; flex-shrink: 0; }
+          .body-area     { flex-direction: column; gap: 12px; }
+          .controls-row  { grid-area: auto; width: 100%;
+                            display: grid; grid-template-columns: 1fr auto auto auto;
+                            align-items: center; gap: 4px; }
+          .controls-row .progress-wrap { min-width: 30px; overflow: hidden; }
+          .controls-row .time { font-size: .7rem; white-space: nowrap; }
+          .controls-row .time-duration { padding-right: 8px; }
           .extras-row    { grid-area: auto; }
           .chapters      { margin-top: 0; width: 100%; overflow: hidden; }
         }

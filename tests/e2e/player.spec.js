@@ -236,4 +236,40 @@ test.describe("Podcast Player E2E", () => {
       });
     });
   });
+
+  test.describe("Mobile Responsive", () => {
+    test("time-duration stays inside player bounds on narrow viewports", async ({ page }) => {
+      // Test with a narrow mobile viewport (iPhone SE width)
+      await page.setViewportSize({ width: 375, height: 812 });
+
+      // Use the democratizing-security episode which has ~61 min duration
+      await page.goto("episodes/r2-19-democratizing-security/");
+      const player = page.locator("podcast-player").first();
+      await expect(player).toBeAttached();
+
+      // Click play to trigger metadata load (time-duration changes from --:--)
+      const playBtn = player.locator("[part='play-btn']");
+      await playBtn.click();
+
+      // Wait for time-duration to show actual duration (not "--:--")
+      const timeDuration = player.locator("[part='time-duration']");
+      await expect(timeDuration).not.toHaveText("--:--", { timeout: 15000 });
+
+      // Get bounding boxes and verify time-duration is inside the player
+      const playerBox = await player.boundingBox();
+      const timeBox = await timeDuration.boundingBox();
+
+      expect(playerBox).not.toBeNull();
+      expect(timeBox).not.toBeNull();
+
+      if (playerBox && timeBox) {
+        // Right edge of time-duration must be <= right edge of the host element
+        expect(timeBox.x + timeBox.width).toBeLessThanOrEqual(
+          playerBox.x + playerBox.width,
+        );
+        // Left edge must be >= player's left edge
+        expect(timeBox.x).toBeGreaterThanOrEqual(playerBox.x);
+      }
+    });
+  });
 });
