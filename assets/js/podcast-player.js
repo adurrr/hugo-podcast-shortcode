@@ -361,7 +361,7 @@ class PodcastPlayer extends HTMLElement {
         .time          { font-size: .8rem; font-variant-numeric: tabular-nums;
                          color: var(--pp-text-muted); white-space: nowrap; }
         .vol-wrap      { display: flex; align-items: center; gap: 4px; width: 90px; }
-        .vol-wrap .btn { width: 28px; height: 28px; font-size: .85rem; }
+        .vol-wrap .btn { width: 28px; height: 28px; border-radius: 50%; font-size: .85rem; }
         .rate-btn      { font-size: .75rem; font-weight: 600; width: auto;
                          height: 28px; border-radius: 14px; padding: 0 10px; }
         .chapters      { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -382,16 +382,17 @@ class PodcastPlayer extends HTMLElement {
           .media-row     { display: flex; flex-direction: column; gap: 12px; }
           .poster-wrap   { display: block; position: relative; width: 100%; }
           .poster        { width: 100%; aspect-ratio: 16/9; grid-area: auto; display: block; }
-          .play-overlay  { grid-area: auto; position: absolute; bottom: 12px; left: 50%;
-                           transform: translateX(-50%); z-index: 2;
+          .play-overlay  { grid-area: auto; position: absolute; top: 50%; left: 50%;
+                           transform: translate(-50%, -50%); z-index: 2;
                            background: rgba(0,0,0,0.6); border-radius: 999px;
                            padding: 8px 16px; gap: 12px; }
-          .play-overlay .btn { background: transparent; color: #fff; }
+          .play-overlay .btn { background: transparent; color: #fff; width: 40px; height: 40px; }
           .play-overlay .btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+          .play-overlay .btn-play { width: 46px; height: 46px; }
           .body-area     { display: flex; flex-direction: column; gap: 12px; }
-          .controls-row  { grid-area: auto; }
+          .controls-row  { grid-area: auto; flex-wrap: nowrap; }
           .extras-row    { grid-area: auto; }
-          .chapters      { margin-top: 0; }
+          .chapters      { margin-top: 0; width: 100%; overflow: hidden; }
         }
       </style>
       <div class="player" part="player" role="region" aria-label="Podcast Player">
@@ -1391,7 +1392,7 @@ class PodcastFooter extends HTMLElement {
                     flex-shrink: 0; }
         .vol-wrap { display: flex; align-items: center; gap: 2px; width: 70px; flex-shrink: 0; }
         .vol-wrap[hidden] { display: none; }
-        .mute-btn { width: 28px; height: 28px; }
+        .mute-btn { width: 28px; height: 28px; border-radius: 50%; }
         .mute-btn svg { display: block; }
         .rate-btn {
           font-size: .7rem; font-weight: 600; width: auto; height: 24px;
