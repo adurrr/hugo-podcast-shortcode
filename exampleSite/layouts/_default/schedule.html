@@ -1,0 +1,72 @@
+{{- /* Schedule page template */ -}}
+{{ define "main" }}
+  {{ partial "hero.html" (dict
+    "title"       "Schedule"
+    "description" "Our weekly programming lineup. All times are Eastern."
+  ) }}
+
+  {{- $blocks := .Params.schedule_blocks }}
+  {{- $days := slice
+    (dict "name" "Monday"    "label" "Mon")
+    (dict "name" "Tuesday"   "label" "Tue")
+    (dict "name" "Wednesday" "label" "Wed")
+    (dict "name" "Thursday"  "label" "Thu")
+    (dict "name" "Friday"    "label" "Fri")
+  }}
+
+  {{- /* Weekly Schedule - card-based day columns */ -}}
+  <section class="demo-section">
+    <h2>Weekly Schedule</h2>
+    <p class="desc">One show each day. Click any program to learn more.</p>
+    <div class="program-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+      {{- range $days }}
+      <div class="program-card" style="cursor:default;align-items:center;text-align:center">
+        <div class="program-card-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <h3 style="font-size:1rem">{{ .name }}</h3>
+        {{- $dayName := .name }}
+        {{- $found := false }}
+        {{- range $blocks }}
+          {{- if eq .day $dayName }}
+          {{- $found = true }}
+          <span class="badge" style="background:var(--pp-surface);color:var(--pp-text-muted);text-transform:none;font-size:0.7rem;margin-bottom:0.25rem">{{ .time }}</span>
+          {{- $u := .url }}
+          {{- if not (hasPrefix $u "http") }}
+            {{- $u = printf "%s%s" (strings.TrimSuffix "/" $.Site.BaseURL) $u }}
+          {{- end }}
+          <a href="{{ $u }}" class="nav-button nav-button-primary" style="font-size:0.8rem;padding:0.35rem 1rem;margin-top:auto">{{ .program }}</a>
+          {{- end }}
+        {{- end }}
+        {{- if not $found }}
+        <p style="font-size:0.85rem;color:var(--text-muted)">No programs today</p>
+        {{- end }}
+      </div>
+      {{- end }}
+    </div>
+  </section>
+
+  {{- /* Upcoming Episodes */ -}}
+  {{- with .Params.upcoming }}
+  <section class="demo-section">
+    <h2>Upcoming Episodes</h2>
+    {{- range . }}
+    <div class="episode-entry">
+      <h3>{{ .title }} <span style="font-weight:400;color:var(--text-muted);font-size:0.9rem"> -  {{ .program }}</span></h3>
+      <p class="episode-meta">{{ .day }} &middot; {{ .time }}</p>
+      <p>{{ .description }}</p>
+      {{- $eu := .url }}
+      {{- if not (hasPrefix $eu "http") }}
+        {{- $eu = printf "%s%s" (strings.TrimSuffix "/" $.Site.BaseURL) $eu }}
+      {{- end }}
+      <a href="{{ $eu }}" class="nav-button" style="margin-top:0.5rem">Listen Now</a>
+    </div>
+    {{- end }}
+  </section>
+  {{- end }}
+
+  <div class="nav-buttons">
+    <a href="{{ ref . "programs/_index.md" }}" class="nav-button nav-button-primary">Browse Programs</a>
+    <a href="{{ .Site.Home.RelPermalink }}" class="nav-button">Back to Home</a>
+  </div>
+{{ end }}

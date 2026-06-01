@@ -1,0 +1,71 @@
+{{- /* episodes/single.html - Single episode page */ -}}
+{{ define "main" }}
+  {{- /* Load assets on first episode render per page */ -}}
+  {{- if not (.Page.Store.Get "podcastPlayerAssetsLoaded") -}}
+    {{- .Page.Store.Set "podcastPlayerAssetsLoaded" true }}
+    {{- $js := resources.Get "js/podcast-player.js" -}}
+    {{- if $js }}
+    <script src="{{ $js.RelPermalink }}" type="module" defer></script>
+    {{- end }}
+    {{- $css := resources.Get "css/podcast-player.css" -}}
+    {{- if $css }}
+    <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+    {{- end }}
+  {{- end }}
+
+  {{- $program := .Params.program -}}
+  {{- $programPage := .Site.GetPage (printf "programs/%s" ($program | urlize)) -}}
+  {{- $programUrl := cond (ne $programPage nil) $programPage.RelPermalink .Site.Home.RelPermalink -}}
+
+  <section class="hero">
+    <h1>{{ .Title }}</h1>
+    <p class="episode-meta">{{ $program }} &middot; {{ .Params.episode }} &middot; {{ .Params.duration }}</p>
+    {{- with .Params.summary }}
+    <p>{{ . }}</p>
+    {{- end }}
+  </section>
+
+  {{- /* Render podcast-player from frontmatter params */ -}}
+  {{- with .Params.podcast }}
+  <podcast-player
+    src="{{ .src }}"
+    title="{{ $.Title }}{{ with $.Params.program }} - {{ . }}{{ end }}"
+    {{- with .poster }} poster="{{ . }}"{{ end }}
+    {{- with .chapters }} chapters="{{ . }}"{{ end }}
+    persistent type="audio/mpeg"
+    data-source="local"
+    data-preload="metadata"
+    data-rate-control></podcast-player>
+  {{- end }}
+
+  {{- /* Content body (optional markdown show notes) */ -}}
+  {{- with .Content }}
+  <div class="demo-section">
+    {{ . }}
+  </div>
+  {{- end }}
+
+  {{- with .Params.show_notes }}
+  <div class="demo-section">
+    <h2>Show Notes</h2>
+    <ul class="link-list">
+      {{- range . }}
+      <li>{{ . | markdownify }}</li>
+      {{- end }}
+    </ul>
+  </div>
+  {{- end }}
+
+  {{- with .Params.attribution }}
+  <p style="margin-top:2rem;font-size:0.85rem;color:var(--text-muted)">
+    Episode from <a href="{{ .url }}" target="_blank" rel="noopener">{{ .text }}</a>. Used with attribution.
+  </p>
+  {{- end }}
+
+  {{- partial "episode-nav.html" (dict
+    "program"    $program
+    "programUrl" $programUrl
+    "prevEp"     .PrevInSection
+    "nextEp"     .NextInSection
+  ) }}
+{{ end }}

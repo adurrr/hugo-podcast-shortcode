@@ -1,0 +1,36 @@
+{{- /* programs/single.html - Single program page showing its episodes */ -}}
+{{ define "main" }}
+  {{ partial "hero.html" (dict
+    "title"       .Title
+    "tagline"     .Params.tagline
+    "description" .Params.description
+  ) }}
+
+  {{- $episodes := where (where .Site.Pages "Section" "episodes") "Kind" "page" }}
+  {{- $progEpisodes := where $episodes "Params.program" .Title }}
+  {{- $sorted := sort $progEpisodes "Params.episode" "desc" }}
+
+  <section class="demo-section">
+    <h2>Episodes</h2>
+    {{- range $sorted }}
+    <div class="episode-entry">
+      <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+      <p class="episode-meta">{{ .Params.episode }} &middot; {{ .Params.duration }}</p>
+      <p>{{ .Params.description }}</p>
+      {{- with .Params.tags }}
+      <div style="margin-top:0.75rem">
+        {{- range . }}
+        <span class="badge">{{ . }}</span>
+        {{- end }}
+      </div>
+      {{- end }}
+      <a href="{{ .RelPermalink }}" class="nav-button" style="margin-top:1rem">Listen →</a>
+    </div>
+    {{- end }}
+  </section>
+
+  <div class="nav-buttons">
+    <a href="{{ relref . "programs/_index.md" }}" class="nav-button">← All Programs</a>
+    <a href="{{ relref . "schedule.md" }}" class="nav-button nav-button-primary">Schedule</a>
+  </div>
+{{ end }}

@@ -1,5 +1,127 @@
-{{ define "title" }}{{ .Site.Title }}{{ end }}
-
+{{- /* index.html - Home page template */ -}}
 {{ define "main" }}
-  {{ .Content }}
+  {{- /* Load podcast-player assets manually since the home page uses no shortcode */ -}}
+  {{- if not (.Page.Store.Get "podcastPlayerAssetsLoaded") -}}
+    {{- .Page.Store.Set "podcastPlayerAssetsLoaded" true }}
+    {{- $js := resources.Get "js/podcast-player.js" -}}
+    {{- if $js }}
+    <script src="{{ $js.RelPermalink }}" type="module" defer></script>
+    {{- end }}
+    {{- $css := resources.Get "css/podcast-player.css" -}}
+    {{- if $css }}
+    <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+    {{- end }}
+  {{- end }}
+
+  {{- /* Hero section */ -}}
+  {{ partial "hero.html" (dict
+    "title"       .Params.title
+    "tagline"     .Params.tagline
+    "description" .Params.description
+    "buttons"     .Params.buttons
+  ) }}
+
+  {{- /* Featured episode player */ -}}
+  {{- $featured := .Site.GetPage .Params.featured_episode }}
+  {{- with $featured }}
+  {{- with .Params.podcast }}
+  <podcast-player
+    src="{{ .src }}"
+    title="{{ $featured.Title }}{{ with $featured.Params.program }} - {{ . }}{{ end }}"
+    {{- with .poster }} poster="{{ . }}"{{ end }}
+    {{- with .chapters }} chapters="{{ . }}"{{ end }}
+    persistent type="audio/mpeg"
+    data-source="local"
+    data-preload="metadata"
+    data-rate-control></podcast-player>
+  {{- end }}
+  {{- end }}
+
+  {{- /* Info card */ -}}
+  <div class="info-card">
+    <p><strong>Notice the player at the bottom of the page?</strong> That's Wavecast's sticky footer player. It follows you across all pages, stays in sync with every episode, and remembers your position, volume, and speed. Try navigating between shows while audio is playing.</p>
+  </div>
+
+  {{- /* Our Programs - program grid */ -}}
+  <section class="demo-section">
+    <h2>Our Programs</h2>
+    <p class="desc">Four shows covering the technology topics that matter.</p>
+    {{- $programs := where (where .Site.Pages "Section" "programs") "Kind" "page" }}
+    {{- $episodes := where (where .Site.Pages "Section" "episodes") "Kind" "page" }}
+    <div class="program-grid">
+      {{- range $programs }}
+      {{- $count := len (where $episodes "Params.program" .Title) }}
+      {{ partial "program-card.html" (dict
+        "icon"        .Params.icon
+        "url"         .RelPermalink
+        "title"       .Title
+        "description" .Params.description
+        "episodes"    $count
+      ) }}
+      {{- end }}
+    </div>
+  </section>
+
+  {{- /* Latest Episodes */ -}}
+  <section class="demo-section">
+    <h2>Latest Episodes</h2>
+    <p class="desc">Recently aired episodes across all programs.</p>
+    {{- $latest := first 4 (sort $episodes "Date" "desc") }}
+    <div class="program-grid">
+      {{- range $latest }}
+      <a href="{{ .RelPermalink }}" class="program-card" style="gap:0.35rem">
+        <span class="badge" style="width:fit-content">{{ .Params.program }}</span>
+        <h3 style="font-size:0.95rem;line-height:1.3">{{ .Title }}</h3>
+        <p style="font-size:0.8rem">{{ .Params.episode }} &middot; {{ .Params.duration }}</p>
+        {{- with .Params.tags }}
+        <div style="margin-top:auto;display:flex;gap:4px;flex-wrap:wrap">
+          {{- range first 3 . }}
+          <span class="badge" style="background:var(--pp-surface);color:var(--pp-text-muted);text-transform:none;font-size:0.65rem">{{ . }}</span>
+          {{- end }}
+        </div>
+        {{- end }}
+      </a>
+      {{- end }}
+    </div>
+  </section>
+
+  {{- /* About Wavecast */ -}}
+  <section class="demo-section">
+    <h2>About Wavecast</h2>
+    <p class="desc">The technology behind the station.</p>
+    <div class="program-grid">
+      <div class="program-card" style="cursor:default">
+        <div class="program-card-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Persistent Audio</h3>
+        <p>Navigate pages without restarting. Footer player follows you everywhere.</p>
+      </div>
+      <div class="program-card" style="cursor:default">
+        <div class="program-card-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+        </div>
+        <h3>Bidirectional Sync</h3>
+        <p>Play or pause any inline player, and the footer stays perfectly in sync.</p>
+      </div>
+      <div class="program-card" style="cursor:default">
+        <div class="program-card-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/></svg>
+        </div>
+        <h3>Hugo Theme &amp; Module</h3>
+        <p>Drop into any Hugo site. Works as a theme or as a Hugo module.</p>
+      </div>
+      <div class="program-card" style="cursor:default">
+        <div class="program-card-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h3>Real Podcasts</h3>
+        <p>Episodes from Coder Radio, Reality 2.0, DevSecOps Talks, and more.</p>
+      </div>
+    </div>
+    <div class="nav-buttons" style="margin-top:1rem">
+      <a href="{{ relref . "about.md" }}" class="nav-button nav-button-primary">Learn More About Wavecast</a>
+      <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener" class="nav-button">GitHub</a>
+    </div>
+  </section>
 {{ end }}

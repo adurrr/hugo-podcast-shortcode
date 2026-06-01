@@ -1,0 +1,14 @@
+{{- /* episode-nav.html - renders prev/next navigation between episodes and back to program */ -}}
+{{- $program    := .program    -}}
+{{- $prevEp     := .prevEp     -}}
+{{- $nextEp     := .nextEp     -}}
+{{- $programUrl := .programUrl -}}
+<div class="nav-buttons">
+  <a href="{{ $programUrl }}" class="nav-button">{{ printf "← %s" $program }}</a>
+  {{- with $prevEp }}
+  <a href="{{ .RelPermalink }}" class="nav-button">← Previous Episode</a>
+  {{- end }}
+  {{- with $nextEp }}
+  <a href="{{ .RelPermalink }}" class="nav-button nav-button-primary">Next Episode →</a>
+  {{- end }}
+</div>
