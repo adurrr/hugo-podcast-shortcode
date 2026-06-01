@@ -390,7 +390,9 @@ class PodcastPlayer extends HTMLElement {
           .play-overlay .btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
           .play-overlay .btn-play { width: 46px; height: 46px; }
           .body-area     { display: flex; flex-direction: column; gap: 12px; }
-          .controls-row  { grid-area: auto; flex-wrap: nowrap; }
+          .controls-row  { grid-area: auto; flex-wrap: nowrap; gap: 4px; }
+          .controls-row .progress-wrap { min-width: 50px; }
+          .controls-row .time { font-size: .7rem; }
           .extras-row    { grid-area: auto; }
           .chapters      { margin-top: 0; width: 100%; overflow: hidden; }
         }
