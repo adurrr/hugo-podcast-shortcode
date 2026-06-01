@@ -310,31 +310,38 @@ class PodcastPlayer extends HTMLElement {
           box-shadow: 0 4px 24px rgba(0,0,0,.25);
           transition: background .2s;
         }
-        .player      { display: flex; gap: 14px; align-items: flex-start; }
-        .poster      { width: clamp(64px, 10vw, 110px); aspect-ratio: 1;
-                         border-radius: 8px; object-fit: cover; flex-shrink: 0;
-                         background: var(--pp-surface); }
-        .body        { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
-        .header      { display: flex; gap: 14px; align-items: flex-start; }
-        .info        { flex: 1; min-width: 0; }
-        .title       { font-weight: 600; font-size: 1rem; margin: 0 0 4px;
-                        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .player        { display: flex; flex-direction: column; gap: 12px; }
+        .title-row     { min-width: 0; }
+        .title         { font-weight: 600; font-size: 1rem; margin: 0 0 4px;
+                         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         ::slotted([slot="description"]) { font-size: .85rem; color: var(--pp-text-muted);
                                           margin: 0; line-height: 1.4;
                                           display: -webkit-box;
                                           -webkit-line-clamp: 2;
                                           -webkit-box-orient: vertical;
                                           overflow: hidden; }
-        .controls    { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .btn         { background: var(--pp-surface); border: none; color: var(--pp-text);
-                        width: 36px; height: 36px; border-radius: 50%;
-                        cursor: pointer; display: inline-flex; align-items: center;
-                        justify-content: center; font-size: 1.1rem;
-                        transition: background .15s, transform .1s, box-shadow .15s; }
-        .btn:hover   { background: var(--pp-primary); color: #fff; }
-        .btn:active  { transform: scale(.92); }
-        .btn-play    { width: 44px; height: 44px; font-size: 1.3rem;
-                        background: var(--pp-primary); color: #fff; }
+        .media-row     { display: grid; grid-template-columns: auto 1fr;
+                         grid-template-areas:
+                           "poster buttons"
+                           "poster controls"
+                           "poster extras";
+                         gap: 12px 14px; align-items: start; }
+        .poster-wrap   { display: contents; }
+        .poster        { grid-area: poster; width: clamp(64px, 10vw, 110px); aspect-ratio: 1;
+                         border-radius: 8px; object-fit: cover; background: var(--pp-surface); }
+        .play-overlay  { grid-area: buttons; display: flex; align-items: center; gap: 8px; }
+        .body-area     { display: contents; }
+        .controls-row  { grid-area: controls; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .extras-row    { grid-area: extras; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .btn           { background: var(--pp-surface); border: none; color: var(--pp-text);
+                         width: 36px; height: 36px; border-radius: 50%;
+                         cursor: pointer; display: inline-flex; align-items: center;
+                         justify-content: center; font-size: 1.1rem;
+                         transition: background .15s, transform .1s, box-shadow .15s; }
+        .btn:hover     { background: var(--pp-primary); color: #fff; }
+        .btn:active    { transform: scale(.92); }
+        .btn-play      { width: 44px; height: 44px; font-size: 1.3rem;
+                         background: var(--pp-primary); color: #fff; }
         .btn-play:hover { background: var(--pp-accent); }
         .progress-wrap { flex: 1; min-width: 100px; position: relative; }
         input[type="range"] { -webkit-appearance: none; appearance: none;
@@ -351,64 +358,86 @@ class PodcastPlayer extends HTMLElement {
           border-radius: 50%; background: var(--pp-primary); border: 2px solid var(--pp-bg);
           cursor: pointer; transition: transform .15s ease; }
         input[type="range"]::-moz-range-thumb:hover { transform: scale(1.25); }
-        .time        { font-size: .8rem; font-variant-numeric: tabular-nums;
-                        color: var(--pp-text-muted); white-space: nowrap; }
-        .extras      { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .vol-wrap    { display: flex; align-items: center; gap: 4px; width: 90px; }
-        .vol-wrap .btn { width: 28px; height: 28px; font-size: .85rem; }
-        .rate-btn    { font-size: .75rem; font-weight: 600; width: auto;
-                        height: 28px; border-radius: 14px; padding: 0 10px; }
-        .chapters    { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-        .chapter-chip { font-size: .75rem; padding: 2px 8px; border-radius: 10px;
+        .time          { font-size: .8rem; font-variant-numeric: tabular-nums;
+                         color: var(--pp-text-muted); white-space: nowrap; }
+        .vol-wrap      { display: flex; align-items: center; gap: 4px; width: 90px; }
+        .vol-wrap .btn { width: 28px; height: 28px; border-radius: 50%; font-size: .85rem; }
+        .rate-btn      { font-size: .75rem; font-weight: 600; width: auto;
+                         height: 28px; border-radius: 14px; padding: 0 10px; }
+        .chapters      { display: flex; flex-wrap: wrap; gap: 4px; }
+        .chapter-chip  { font-size: .75rem; padding: 2px 8px; border-radius: 10px;
                          background: var(--pp-surface); color: var(--pp-text-muted);
                          cursor: pointer; border: none; transition: background .15s; }
         .chapter-chip:hover { background: var(--pp-primary); color: #fff; }
         .chapter-chip.active { background: var(--pp-primary); color: #fff; }
-        .error-msg   { color: #f87171; font-size: .8rem; padding: 4px 0; }
+        .error-msg     { color: #f87171; font-size: .8rem; padding: 4px 0; }
         .error-msg:not([hidden]) { animation: error-in .25s ease; }
         @keyframes error-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
         .btn:focus-visible, .chapter-chip:focus-visible, input[type="range"]:focus-visible { outline: none; box-shadow: var(--pp-focus-ring); }
-        [hidden]     { display: none !important; }
+        [hidden]       { display: none !important; }
+
+        @media (max-width: 640px) {
+          .player        { gap: 14px; }
+          .title         { white-space: normal; overflow: visible; text-overflow: clip; }
+          .media-row     { display: flex; flex-direction: column; gap: 12px; }
+          .poster-wrap   { display: block; position: relative; width: 100%; }
+          .poster        { width: 100%; aspect-ratio: 16/9; grid-area: auto; display: block; }
+          .play-overlay  { grid-area: auto; position: absolute; top: 50%; left: 50%;
+                           transform: translate(-50%, -50%); z-index: 2;
+                           background: rgba(0,0,0,0.6); border-radius: 999px;
+                           padding: 8px 16px; gap: 12px; }
+          .play-overlay .btn { background: transparent; color: #fff; width: 40px; height: 40px; }
+          .play-overlay .btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+          .play-overlay .btn-play { width: 46px; height: 46px; }
+          .body-area     { display: flex; flex-direction: column; gap: 12px; }
+          .controls-row  { grid-area: auto; flex-wrap: nowrap; }
+          .extras-row    { grid-area: auto; }
+          .chapters      { margin-top: 0; width: 100%; overflow: hidden; }
+        }
       </style>
       <div class="player" part="player" role="region" aria-label="Podcast Player">
-        <img class="poster" part="poster" src="" alt="Cover" hidden>
-        <div class="body" part="body">
-        <div class="header" part="header">
-          <div class="info">
-            <p class="title" part="title"></p>
-            <slot name="description"></slot>
+        <div class="title-row" part="header">
+          <p class="title" part="title"></p>
+          <slot name="description"></slot>
+        </div>
+        <div class="media-row" part="media-row">
+          <div class="poster-wrap" part="poster-wrap">
+            <img class="poster" part="poster" src="" alt="Cover" hidden>
+            <div class="play-overlay" part="play-overlay">
+              <button class="btn btn-skip-back" part="skip-back-btn"
+                      title="Rewind 15s" aria-label="Rewind 15 seconds">${ICON_SKIP_BACK}</button>
+              <button class="btn btn-play" part="play-btn"
+                      title="Play" aria-label="Play" aria-pressed="false"><svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg></button>
+              <button class="btn btn-skip-fwd" part="skip-fwd-btn"
+                      title="Forward 15s" aria-label="Forward 15 seconds">${ICON_SKIP_FWD}</button>
+            </div>
+          </div>
+          <div class="body-area" part="body">
+            <div class="controls-row" part="controls">
+              <div class="progress-wrap" part="progress-wrap">
+                <input type="range" class="progress" part="progress"
+                       min="0" max="100" value="0"
+                       aria-label="Seek position" aria-valuetext="0:00 of 0:00">
+              </div>
+              <span class="time time-current" part="time-current">--:--</span>
+              <span class="time time-sep" part="time-sep">/</span>
+              <span class="time time-duration" part="time-duration">--:--</span>
+            </div>
+            <div class="extras-row" part="extras">
+              <div class="vol-wrap" part="vol-wrap">
+                <button class="btn btn-mute" part="mute-btn"
+                        title="Mute" aria-label="Toggle mute" aria-pressed="false">${ICON_VOL_FULL}</button>
+                <input type="range" class="volume" part="volume"
+                       min="0" max="1" step="0.05" value="1"
+                       aria-label="Volume">
+              </div>
+              <button class="btn rate-btn" part="rate-btn"
+                      title="Playback speed" aria-label="Playback speed">1×</button>
+            </div>
           </div>
         </div>
-        <div class="controls" part="controls">
-          <button class="btn btn-skip-back"  part="skip-back-btn"
-                  title="Rewind 15s" aria-label="Rewind 15 seconds">${ICON_SKIP_BACK}</button>
-          <button class="btn btn-play" part="play-btn"
-                  title="Play" aria-label="Play" aria-pressed="false"><svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg></button>
-          <button class="btn btn-skip-fwd"  part="skip-fwd-btn"
-                  title="Forward 15s" aria-label="Forward 15 seconds">${ICON_SKIP_FWD}</button>
-          <div class="progress-wrap" part="progress-wrap">
-            <input type="range" class="progress" part="progress"
-                   min="0" max="100" value="0"
-                   aria-label="Seek position" aria-valuetext="0:00 of 0:00">
-          </div>
-          <span class="time time-current" part="time-current">--:--</span>
-          <span class="time time-sep" part="time-sep">/</span>
-          <span class="time time-duration" part="time-duration">--:--</span>
-        </div>
-        <div class="extras" part="extras">
-          <div class="vol-wrap" part="vol-wrap">
-            <button class="btn btn-mute" part="mute-btn"
-                    title="Mute" aria-label="Toggle mute" aria-pressed="false">${ICON_VOL_FULL}</button>
-            <input type="range" class="volume" part="volume"
-                   min="0" max="1" step="0.05" value="1"
-                   aria-label="Volume">
-          </div>
-          <button class="btn rate-btn" part="rate-btn"
-                  title="Playback speed" aria-label="Playback speed">1×</button>
-          <div class="chapters" part="chapters" hidden></div>
-        </div>
+        <div class="chapters" part="chapters" hidden></div>
         <div class="error-msg" part="error" role="alert" hidden></div>
-      </div>
       </div>
     `;
 
@@ -1363,7 +1392,7 @@ class PodcastFooter extends HTMLElement {
                     flex-shrink: 0; }
         .vol-wrap { display: flex; align-items: center; gap: 2px; width: 70px; flex-shrink: 0; }
         .vol-wrap[hidden] { display: none; }
-        .mute-btn { width: 28px; height: 28px; }
+        .mute-btn { width: 28px; height: 28px; border-radius: 50%; }
         .mute-btn svg { display: block; }
         .rate-btn {
           font-size: .7rem; font-weight: 600; width: auto; height: 24px;
