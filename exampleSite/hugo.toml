@@ -16,7 +16,7 @@ ignoreLogs = ["warning-goldmark-raw-html"]
 
 # Site-wide description
 [params]
-  description = "Wavecast Radio — Tune in to Tech. A demo radio station showcasing the Wavecast persistent podcast-player Web Component for Hugo."
+  description = "Wavecast Radio: Tune in to Tech. A demo radio station showcasing the Wavecast persistent podcast-player Web Component for Hugo."
 
   [params.podcastPlayer]
     source = "local"

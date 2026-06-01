@@ -1,0 +1,17 @@
+{{- /* hero.html - renders a hero section with optional tagline, description, and buttons */ -}}
+<section class="hero">
+  <h1>{{ .title }}</h1>
+  {{- with .tagline }}
+  <p class="tagline">{{ . }}</p>
+  {{- end }}
+  {{- with .description }}
+  <p>{{ . }}</p>
+  {{- end }}
+  {{- with .buttons }}
+  <div class="nav-buttons">
+    {{- range . }}
+    <a href="{{ .url }}" class="nav-button {{ .class }}">{{ .text | safeHTML }}</a>
+    {{- end }}
+  </div>
+  {{- end }}
+</section>

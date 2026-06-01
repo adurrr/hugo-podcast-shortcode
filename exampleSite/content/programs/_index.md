@@ -4,7 +4,7 @@ title: "Programs"
 
 <section class="hero">
   <h1>Our Programs</h1>
-  <p>Four shows exploring the technologies that define our industry. Each program releases episodes weekly — pick one and dive in.</p>
+  <p>Four shows exploring the technologies that define our industry. Each program releases episodes weekly :  pick one and dive in.</p>
 </section>
 
 <div class="program-grid">

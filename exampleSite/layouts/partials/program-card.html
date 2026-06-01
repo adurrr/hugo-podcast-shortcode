@@ -1,0 +1,14 @@
+{{- /* program-card.html - renders a single program card with icon, title, description, episodes */ -}}
+{{- $icon := .icon -}}
+{{- $url  := .url -}}
+{{- $title := .title -}}
+{{- $desc := .description -}}
+{{- $eps  := .episodes | default 0 -}}
+<a href="{{ $url }}" class="program-card">
+  <div class="program-card-icon">
+    {{ $icon | safeHTML }}
+  </div>
+  <h3>{{ $title }}</h3>
+  <p>{{ $desc }}</p>
+  <span class="program-card-episodes">{{ $eps }} episodes</span>
+</a>

@@ -10,6 +10,11 @@
   {{ end -}}
   {{ $turbolinks := resources.Get "js/vendor/turbolinks.js" | fingerprint }}
   <script src="{{ $turbolinks.RelPermalink }}" integrity="{{ $turbolinks.Data.Integrity }}"></script>
+  {{- /* Always load podcast-player CSS so the persistent footer has theme support on every page */ -}}
+  {{- $playerCSS := resources.Get "css/podcast-player.css" -}}
+  {{- if $playerCSS }}
+  <link rel="stylesheet" href="{{ $playerCSS.RelPermalink }}">
+  {{- end }}
   <style>
     /* ── Reset & base ── */
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -79,6 +84,10 @@
     .episode-list-item a{color:var(--accent);text-decoration:none;font-weight:500}
     .episode-list-item a:hover{text-decoration:underline}
 
+    /* ── Link list ── */
+    .link-list{list-style:none;padding:0;margin:1rem 0}
+    .link-list li{margin-bottom:0.5rem}
+
     /* ── Nav buttons ── */
     .nav-buttons{display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1.5rem;align-items:center}
     .nav-button{display:inline-flex;align-items:center;gap:0.4rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:0.9rem;font-weight:500;padding:0.5rem 1.1rem;text-decoration:none;transition:all .15s;cursor:pointer}
@@ -93,11 +102,13 @@
     td a{color:var(--accent);text-decoration:none;font-weight:500}
     td a:hover{text-decoration:underline}
 
-    /* ── Link list ── */
-    .link-list{list-style:none;padding:0;margin:1rem 0}
-    .link-list li{margin-bottom:0.5rem}
-    .link-list a{color:var(--accent);text-decoration:none;font-weight:500}
-    .link-list a:hover{text-decoration:underline}
+    /* ── Links (content areas) ── */
+    main a{color:var(--accent);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--accent) 25%,transparent);text-underline-offset:2px;transition:text-decoration-color .15s}
+    main a:hover{text-decoration-color:var(--accent)}
+    /* Reset decoration for nav-like elements inside content */
+    .nav-button,.nav-button-primary,.program-card,.program-card:hover{text-decoration:none}
+    .episode-entry h3 a,.episode-entry h3 a:hover{text-decoration:none}
+    .badge{text-decoration:none !important}
 
     /* ── Footer nav ── */
     .footer-nav{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:0.75rem}
@@ -148,7 +159,7 @@
         <a href="{{ "contact.md" | relref . }}">Contact</a>
         <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">GitHub</a>
       </div>
-      <p>Wavecast Radio — Tune in to Tech. Powered by <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">Wavecast</a>, built with Hugo.</p>
+      <p>Wavecast Radio: Tune in to Tech. Powered by <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">Wavecast</a>, built with Hugo.</p>
     </div>
   </footer>
 
