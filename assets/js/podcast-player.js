@@ -390,9 +390,10 @@ class PodcastPlayer extends HTMLElement {
           .play-overlay .btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
           .play-overlay .btn-play { width: 46px; height: 46px; }
           .body-area     { display: flex; flex-direction: column; gap: 12px; }
-          .controls-row  { grid-area: auto; flex-wrap: nowrap; gap: 4px; }
-          .controls-row .progress-wrap { min-width: 50px; }
-          .controls-row .time { font-size: .7rem; }
+          .controls-row  { grid-area: auto; width: 100%; overflow: hidden;
+                            display: flex; flex-wrap: nowrap; align-items: center; gap: 4px; }
+          .controls-row .progress-wrap { flex: 1 1 40px; min-width: 0; width: auto; }
+          .controls-row .time { font-size: .65rem; flex-shrink: 0; }
           .extras-row    { grid-area: auto; }
           .chapters      { margin-top: 0; width: 100%; overflow: hidden; }
         }
@@ -1426,6 +1427,8 @@ class PodcastFooter extends HTMLElement {
           .vol-wrap { display: none; }
           .time-sep { display: none; }
           .time + .time { margin-left: 4px; }
+          .progress-wrap { min-width: 40px; }
+          .time { font-size: .65rem; }
         }
       </style>
       <div class="footer" part="footer">
