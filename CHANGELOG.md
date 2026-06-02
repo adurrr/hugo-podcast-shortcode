@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-02
+
+### Added
+
+- Bidirectional real-time sync of mute, volume, playback rate, and chapter seek between inline player and footer via new `podcast-state-change` event (#25, #28)
+- `podcast-seek` event dispatched from skip (rewind/forward) and chapter-click buttons so footer tracks all position changes
+- Updated demo GIF showing new sync features (8 frames, SVG icons, volume/speed sync)
+
+### Changed
+
+- Updated demo capture script (`scripts/capture-demo.mjs`) for new site structure, port 1311, and `/wavecast/` subpath
+- Updated GIF generation script (`scripts/make-gif.py`) with new captions matching updated demo flow
+
+### Fixed
+
+- Speed change on inline player no longer accidentally mutes footer audio (volume/mute defaults now read from UI rather than silenced `<audio>` when footer is active)
+- Double-audio prevention: inline `_setVolume`, `_toggleMute`, `_cycleRate`, and keyboard volume handlers now skip modifying the inline `<audio>` when a footer is producing audible output
+- Event echo loop prevented with `_suppressSync` guard flag on both inline player and footer
+
+## [1.1.0] - 2026-05-31
+
 ### Added
 
 - Demo GIF to README showing persistent player across page navigation
@@ -13,22 +34,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Favicon and browser assets (SVG, ICO, PNG sizes, Apple touch icon, Android Chrome icons, webmanifest)
 - Theme-color meta tags for light and dark color schemes
 - `CHANGELOG.md` with Keep a Changelog format
+- Hugo theme gallery screenshots (`images/screenshot.png`, `images/tn.png`)
+- README badges (release, license, tests, GitHub stars)
+- `demosite` field in theme.toml
 
 ### Changed
 
 - Replaced emoji with Feather/Lucide SVG icons in inline player skip and mute buttons
-
-## [1.1.0] - 2026-05-31
-
-### Changed
-
 - Updated theme.toml tags for Hugo theme gallery: `podcast`, `radio`, `music`, `responsive`, `dark`, `dark mode`
-
-### Added
-
-- Hugo theme gallery screenshots (`images/screenshot.png`, `images/tn.png`)
-- README badges (release, license, tests, GitHub stars)
-- `demosite` field in theme.toml
 
 ### Fixed
 
@@ -80,6 +93,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-[Unreleased]: https://github.com/adurrr/wavecast/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/adurrr/wavecast/releases/tag/v1.1.0
+[Unreleased]: https://github.com/adurrr/wavecast/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/adurrr/wavecast/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/adurrr/wavecast/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/adurrr/wavecast/releases/tag/v1.0.0
