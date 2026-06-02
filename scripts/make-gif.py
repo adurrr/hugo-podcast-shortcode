@@ -7,12 +7,14 @@ OUTPUT = os.path.join(os.path.dirname(__file__), '..', 'images', 'demo.gif')
 WIDTH = 800
 
 captions = [
-    "Page loads with inline podcast player",
-    "Click play -> sticky footer player appears at bottom",
-    "Navigate to another page -> footer persists",
-    "Navigate back -> footer still there, still playing",
+    "Page loads with SVG-icon podcast player and chapters",
+    "Click play -> sticky footer player appears with poster",
+    "Change volume on inline -> footer slider syncs in real time",
+    "Change playback speed on inline -> footer syncs speed",
+    "Navigate to another page -> footer persists, never stops",
+    "Interact with footer (skip forward) while navigating",
     "Close the footer player",
-    "Navigate again -> footer stays closed",
+    "Navigate again -> footer stays closed, playback stops",
 ]
 
 frame_files = sorted(
