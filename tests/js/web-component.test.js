@@ -4,7 +4,7 @@
  * Runs in jsdom — audio features are partially mocked (play/pause events
  * must be dispatched manually since jsdom doesn't implement them).
  */
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 // Import registers the custom element as a side-effect
 // and gives us the class for static property access.
@@ -554,6 +554,218 @@ describe("PodcastPlayer Web Component", () => {
       expect(el1.id).not.toBe(el2.id);
       el1.remove();
       el2.remove();
+    });
+  });
+
+  /* ------------------------------------------------------------------ */
+  /*  Bidirectional state sync (issue #25)                                */
+  /* ------------------------------------------------------------------ */
+
+  describe("podcast-state-change sync", () => {
+    /** @type {HTMLElement} */
+    let player;
+    /** @type {HTMLElement} */
+    let footer;
+
+    beforeEach(() => {
+      document.querySelectorAll("podcast-player, podcast-footer").forEach((e) => e.remove());
+      player = document.createElement("podcast-player");
+      footer = document.createElement("podcast-footer");
+      document.body.appendChild(player);
+      document.body.appendChild(footer);
+    });
+
+    afterEach(() => {
+      document.body.innerHTML = "";
+    });
+
+    it("should dispatch podcast-state-change from inline when volume changes", () => {
+      const handler = vi.fn();
+      document.addEventListener("podcast-state-change", handler);
+
+      const volSlider = player.shadowRoot.querySelector(".volume");
+      volSlider.value = "0.3";
+      volSlider.dispatchEvent(new Event("input"));
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      const detail = handler.mock.calls[0][0].detail;
+      expect(detail.volume).toBe(0.3);
+      expect(detail.muted).toBe(false);
+
+      document.removeEventListener("podcast-state-change", handler);
+    });
+
+    it("should dispatch podcast-state-change from inline when mute toggled", () => {
+      const handler = vi.fn();
+      document.addEventListener("podcast-state-change", handler);
+
+      player.shadowRoot.querySelector(".btn-mute").click();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler.mock.calls[0][0].detail.muted).toBe(true);
+
+      document.removeEventListener("podcast-state-change", handler);
+    });
+
+    it("should dispatch podcast-state-change from inline when rate changed", () => {
+      player._audio.playbackRate = 1;
+      const handler = vi.fn();
+      document.addEventListener("podcast-state-change", handler);
+
+      player.shadowRoot.querySelector(".rate-btn").click();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler.mock.calls[0][0].detail.playbackRate).toBe(1.25);
+
+      document.removeEventListener("podcast-state-change", handler);
+    });
+
+    it("should dispatch podcast-seek from inline when chapter clicked", () => {
+      const handler = vi.fn();
+      document.addEventListener("podcast-seek", handler);
+      player.setAttribute("chapters", "00:05:00-Intro,00:30:00-Main");
+
+      const chips = player.shadowRoot.querySelectorAll(".chapter-chip");
+      expect(chips.length).toBe(2);
+      chips[1].click(); // "Main" at 00:30:00
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      const detail = handler.mock.calls[0][0].detail;
+      expect(detail.currentTime).toBe(1800); // 30 min in seconds
+
+      document.removeEventListener("podcast-seek", handler);
+    });
+
+    it("should dispatch podcast-seek from inline when skip (rewind/forward) used", () => {
+      const handler = vi.fn();
+      document.addEventListener("podcast-seek", handler);
+      Object.defineProperty(player._audio, "duration", { value: 300, configurable: true });
+      player._audio.currentTime = 50;
+
+      // Click skip-forward button (15s forward)
+      player.shadowRoot.querySelector(".btn-skip-fwd").click();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      const detail = handler.mock.calls[0][0].detail;
+      expect(detail.currentTime).toBe(65);
+
+      document.removeEventListener("podcast-seek", handler);
+    });
+
+    it("should NOT send silenced inline volume when changing rate with footer active", () => {
+      // Simulate footer active — inline audio was silenced by _onPlay
+      footer.setAttribute("active", "");
+      // The inline audio is at volume=0 (silenced), but the UI shows volume=0.7
+      player._audio.volume = 0;
+      player._audio.muted = false;
+      player._audio.playbackRate = 1;
+      player.shadowRoot.querySelector(".volume").value = "0.7";
+
+      const handler = vi.fn();
+      document.addEventListener("podcast-state-change", handler);
+
+      player.shadowRoot.querySelector(".rate-btn").click();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      const d = handler.mock.calls[0][0].detail;
+      expect(d.playbackRate).toBe(1.25);
+      // Volume MUST reflect the UI (0.7), NOT the silenced audio (0)
+      expect(d.volume).toBe(0.7);
+      expect(d.muted).toBe(false);
+
+      document.removeEventListener("podcast-state-change", handler);
+    });
+
+    it("should NOT send silenced inline volume when changing rate (no footer)", () => {
+      // No footer — audio should be the source of truth
+      player._audio.volume = 0.9;
+      player._audio.muted = false;
+      player._audio.playbackRate = 1;
+
+      const handler = vi.fn();
+      document.addEventListener("podcast-state-change", handler);
+
+      player.shadowRoot.querySelector(".rate-btn").click();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      const d = handler.mock.calls[0][0].detail;
+      expect(d.volume).toBe(0.9); // reads from audio since no footer
+      expect(d.muted).toBe(false);
+      expect(d.playbackRate).toBe(1.25);
+
+      document.removeEventListener("podcast-state-change", handler);
+    });
+
+    it("should apply inline mute/volume to footer audio", () => {
+      // Set up footer with an active source
+      footer._audio.src = "https://example.com/test.mp3";
+      footer._els.volume.value = "1";
+      footer.setAttribute("active", "");
+
+      // Inline dispatches state change (mute with current volume)
+      player.setAttribute("src", "https://example.com/test.mp3");
+      player.dispatchEvent(new CustomEvent("podcast-state-change", {
+        bubbles: true,
+        composed: true,
+        detail: { src: "https://example.com/test.mp3", volume: 0.8, muted: true, playbackRate: 1 }
+      }));
+
+      // Footer should have applied the changes
+      expect(footer._audio.muted).toBe(true);
+      expect(footer._audio.volume).toBe(0.8);
+    });
+
+    it("should apply footer mute/volume/speed to footer audio from inline event", () => {
+      footer._audio.src = "https://example.com/test.mp3";
+      footer._els.volume.value = "1";
+      footer.setAttribute("active", "");
+
+      player.setAttribute("src", "https://example.com/test.mp3");
+      player.dispatchEvent(new CustomEvent("podcast-state-change", {
+        bubbles: true,
+        composed: true,
+        detail: { src: "https://example.com/test.mp3", volume: 0.5, muted: false, playbackRate: 1.5 }
+      }));
+
+      expect(footer._audio.volume).toBe(0.5);
+      expect(footer._audio.muted).toBe(false);
+      expect(footer._audio.playbackRate).toBe(1.5);
+    });
+
+    it("should update inline UI when footer dispatches state change", () => {
+      player.setAttribute("src", "https://example.com/test.mp3");
+      player._audio.muted = false;
+      player._audio.volume = 1;
+
+      footer._audio.src = "https://example.com/test.mp3";
+      footer.dispatchEvent(new CustomEvent("podcast-state-change", {
+        bubbles: true,
+        composed: true,
+        detail: { src: "https://example.com/test.mp3", volume: 0.2, muted: false, playbackRate: 2 }
+      }));
+
+      // Inline UI should reflect footer state
+      expect(player.shadowRoot.querySelector(".volume").value).toBe("0.2");
+      expect(player.shadowRoot.querySelector(".rate-btn").textContent).toContain("2");
+    });
+
+    it("should NOT apply footer state to inline when src differs", () => {
+      footer._audio.src = "https://example.com/other-track.mp3";
+
+      player.setAttribute("src", "https://example.com/track-a.mp3");
+      player._audio.volume = 1;
+      player._audio.muted = false;
+      player._audio.playbackRate = 1;
+
+      footer.dispatchEvent(new CustomEvent("podcast-state-change", {
+        bubbles: true,
+        composed: true,
+        detail: { src: "https://example.com/track-b.mp3", volume: 0.1, muted: true, playbackRate: 2 }
+      }));
+
+      // Inline state should NOT change
+      expect(player._audio.volume).toBe(1);
+      expect(player._audio.muted).toBe(false);
     });
   });
 });
