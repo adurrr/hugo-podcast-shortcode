@@ -159,6 +159,8 @@ class PodcastPlayer extends HTMLElement {
     this._persistenceActive = false;
     /** @type {object|null} deferred restore state, applied on loadedmetadata */
     this._pendingRestoreState = null;
+    /** @type {boolean} guard to suppress sync echo during cross-player state events */
+    this._suppressSync = false;
 
     // Bind handlers so we can add/remove them
     this._onTimeUpdate = this._onTimeUpdate.bind(this);
@@ -173,6 +175,7 @@ class PodcastPlayer extends HTMLElement {
     this._onExternalSeek = this._onExternalSeek.bind(this);
     this._onPodcastClose = this._onPodcastClose.bind(this);
     this._onBeforeUnload = this._onBeforeUnload.bind(this);
+    this._onStateChange = this._onStateChange.bind(this);
   }
 
   /* ------------------------------------------------------------------ */
@@ -188,6 +191,7 @@ class PodcastPlayer extends HTMLElement {
     document.addEventListener("podcast-play", this._onExternalPlay);
     document.addEventListener("podcast-seek", this._onExternalSeek);
     document.addEventListener("podcast-close", this._onPodcastClose);
+    document.addEventListener("podcast-state-change", this._onStateChange);
     this._applyAttributes();
 
     // Phase 4: persistence — only when the persistent attribute is present
@@ -240,6 +244,7 @@ class PodcastPlayer extends HTMLElement {
     document.removeEventListener("podcast-play", this._onExternalPlay);
     document.removeEventListener("podcast-seek", this._onExternalSeek);
     document.removeEventListener("podcast-close", this._onPodcastClose);
+    document.removeEventListener("podcast-state-change", this._onStateChange);
   }
 
   attributeChangedCallback(name, oldVal, newVal) {
@@ -641,6 +646,15 @@ class PodcastPlayer extends HTMLElement {
       this._audio.currentTime + sec,
       this._audio.duration || 0,
     ));
+    // Notify footer and other inline players of position change
+    this.dispatchEvent(new CustomEvent("podcast-seek", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        currentTime: this._audio.currentTime,
+        src: this._audio.src || this.getAttribute("src") || "",
+      },
+    }));
   }
 
   /** Seek to the position set on the progress slider. */
@@ -669,6 +683,15 @@ class PodcastPlayer extends HTMLElement {
       chip.classList.toggle("active", i === index);
     });
     this._currentChapterIndex = index;
+    // Notify footer and other inline players of position change
+    this.dispatchEvent(new CustomEvent("podcast-seek", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        currentTime: ch.time,
+        src: this._audio.src || this.getAttribute("src") || "",
+      },
+    }));
     // Auto-play if paused
     if (this._audio.paused) {
       this._audio.play()?.catch(() => {});
@@ -681,15 +704,30 @@ class PodcastPlayer extends HTMLElement {
 
   _setVolume() {
     const v = parseFloat(this._els.volume.value);
-    this._audio.volume = v;
-    this._audio.muted = false;
+    // When a podcast-footer is producing audible output, keep the inline
+    // <audio> silenced (volume=0) to avoid double audio.  Only the footer's
+    // <audio> should produce sound.
+    const hasFooter = document.querySelector("podcast-footer[active]");
+    if (!hasFooter) {
+      this._audio.volume = v;
+      this._audio.muted = false;
+    }
     this._updateMuteIcon(v);
+    // Dispatch the user-chosen values regardless of footer presence
+    this._dispatchStateChange({ volume: v, muted: false });
   }
 
   _toggleMute() {
-    this._audio.muted = !this._audio.muted;
-    this._updateMuteIcon(this._audio.muted ? 0 : this._audio.volume);
-    this._els.muteBtn.setAttribute("aria-pressed", this._audio.muted ? "true" : "false");
+    const hasFooter = document.querySelector("podcast-footer[active]");
+    const wasMuted = this._els.muteBtn.getAttribute("aria-pressed") === "true";
+    const newMuted = !wasMuted;
+    if (!hasFooter) {
+      this._audio.muted = newMuted;
+    }
+    const currentVol = parseFloat(this._els.volume.value);
+    this._updateMuteIcon(newMuted ? 0 : currentVol);
+    this._els.muteBtn.setAttribute("aria-pressed", String(newMuted));
+    this._dispatchStateChange({ muted: newMuted, volume: newMuted ? 0 : currentVol });
   }
 
   _updateMuteIcon(vol) {
@@ -709,12 +747,16 @@ class PodcastPlayer extends HTMLElement {
 
   _cycleRate() {
     const rates = [0.5, 0.75, 1, 1.25, 1.5, 2];
-    const current = this._audio.playbackRate;
+    const current = parseFloat(this._els.rateBtn.textContent) || 1;
     const idx = rates.indexOf(current);
     const next = rates[(idx + 1) % rates.length];
-    this._audio.playbackRate = next;
-    this._els.rateBtn.textContent = next + "×";
-    this._els.rateBtn.setAttribute("aria-label", `Playback speed ${next}×`);
+    const hasFooter = document.querySelector("podcast-footer[active]");
+    if (!hasFooter) {
+      this._audio.playbackRate = next;
+    }
+    this._els.rateBtn.textContent = next + "\u00d7";
+    this._els.rateBtn.setAttribute("aria-label", `Playback speed ${next}\u00d7`);
+    this._dispatchStateChange({ playbackRate: next });
   }
 
   /* ------------------------------------------------------------------ */
@@ -884,17 +926,32 @@ class PodcastPlayer extends HTMLElement {
         break;
       case "ArrowUp":
         e.preventDefault();
-        this._audio.volume = Math.min(1, this._audio.volume + 0.1);
-        this._updateMuteIcon(this._audio.volume);
+        {
+          const hasFooter = document.querySelector("podcast-footer[active]");
+          const base = hasFooter ? parseFloat(this._els.volume.value) : this._audio.volume;
+          const newVol = Math.min(1, base + 0.1);
+          if (!hasFooter) this._audio.volume = newVol;
+          this._els.volume.value = String(newVol);
+          this._updateMuteIcon(newVol);
+          this._dispatchStateChange({ volume: newVol, muted: false });
+        }
         break;
       case "ArrowDown":
         e.preventDefault();
-        this._audio.volume = Math.max(0, this._audio.volume - 0.1);
-        this._updateMuteIcon(this._audio.volume);
+        {
+          const hasFooter = document.querySelector("podcast-footer[active]");
+          const base = hasFooter ? parseFloat(this._els.volume.value) : this._audio.volume;
+          const newVol = Math.max(0, base - 0.1);
+          if (!hasFooter) this._audio.volume = newVol;
+          this._els.volume.value = String(newVol);
+          this._updateMuteIcon(newVol);
+          this._dispatchStateChange({ volume: newVol, muted: false });
+        }
         break;
       case "KeyM":
         e.preventDefault();
         this._toggleMute();
+        // _toggleMute already dispatches state change
         break;
     }
   }
@@ -1217,6 +1274,74 @@ class PodcastPlayer extends HTMLElement {
     }));
   }
 
+  /**
+   * Dispatch a podcast-state-change event so the footer (and other inline
+   * players) can sync mute, volume, and playback rate in real time.
+   *
+   * When a &lt;podcast-footer&gt; is active, the inline &lt;audio&gt; is
+   * silenced (volume=0) so the footer can produce audible output without
+   * double audio.  In that scenario we read volume / mute / rate from the
+   * inline UI elements rather than from `this._audio`, because the UI
+   * reflects the user's intent whereas the silenced audio does not.
+   *
+   * Callers can pass overrides to pin specific values regardless of the
+   * footer-active heuristic.
+   *
+   * @param {{ volume?: number, muted?: boolean, playbackRate?: number }} [overrides]
+   */
+  _dispatchStateChange(overrides = {}) {
+    if (this._suppressSync) return;
+    const footerActive = document.querySelector("podcast-footer[active]");
+    this.dispatchEvent(new CustomEvent("podcast-state-change", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        src:          this._audio.src || this.getAttribute("src") || "",
+        volume:       "volume" in overrides ? overrides.volume
+                      : footerActive ? parseFloat(this._els.volume.value)
+                      : this._audio.volume,
+        muted:        "muted" in overrides ? overrides.muted
+                      : footerActive ? (this._els.muteBtn.getAttribute("aria-pressed") === "true")
+                      : this._audio.muted,
+        playbackRate: "playbackRate" in overrides ? overrides.playbackRate
+                      : footerActive ? (parseFloat(this._els.rateBtn.textContent) || 1)
+                      : this._audio.playbackRate,
+        currentTime:  this._audio.currentTime,
+      },
+    }));
+  }
+
+  /**
+   * Respond to podcast-state-change from the footer (or another inline player).
+   * Updates our UI sliders/buttons without changing our own <audio> — the footer
+   * is the source of truth for audible output.
+   */
+  _onStateChange(e) {
+    if (this._suppressSync) return;
+    const d = e.detail || {};
+    // Only react if src matches
+    const mySrc = this._audio.src || this.getAttribute("src") || "";
+    if (d.src && mySrc && d.src !== mySrc && !d.src.endsWith(mySrc) && !mySrc.endsWith(d.src)) return;
+
+    // Guard against echo — suppress our own dispatch while updating UI
+    this._suppressSync = true;
+    try {
+      if (d.volume != null && !this._audio.muted) {
+        this._els.volume.value = d.volume;
+      }
+      if (d.muted != null) {
+        this._updateMuteIcon(d.muted ? 0 : (d.volume != null ? d.volume : this._audio.volume));
+        this._els.volume.value = d.muted ? 0 : (this._els.volume.value);
+        this._els.muteBtn.setAttribute("aria-pressed", d.muted ? "true" : "false");
+      }
+      if (d.playbackRate != null) {
+        this._els.rateBtn.textContent = d.playbackRate + "\u00d7";
+      }
+    } finally {
+      this._suppressSync = false;
+    }
+  }
+
   /** Update Media Session action handlers. */
   _updateMediaSessionPlayback() {
     if (!("mediaSession" in navigator)) return;
@@ -1243,6 +1368,8 @@ class PodcastFooter extends HTMLElement {
     this._shadow = this.attachShadow({ mode: "open" });
     this._audio = new Audio();
     this._audio.preload = "metadata";
+    /** @type {boolean} guard to suppress sync echo during cross-player state events */
+    this._suppressSync = false;
 
     // Bound handlers
     this._onPlay = this._onPlay.bind(this);
@@ -1253,6 +1380,7 @@ class PodcastFooter extends HTMLElement {
     this._onPodcastPlay = this._onPodcastPlay.bind(this);
     this._onExternalPause = this._onExternalPause.bind(this);
     this._onExternalSeek = this._onExternalSeek.bind(this);
+    this._onStateChange = this._onStateChange.bind(this);
   }
 
   connectedCallback() {
@@ -1264,6 +1392,7 @@ class PodcastFooter extends HTMLElement {
     document.addEventListener("podcast-play", this._onPodcastPlay);
     document.addEventListener("podcast-pause", this._onExternalPause);
     document.addEventListener("podcast-seek", this._onExternalSeek);
+    document.addEventListener("podcast-state-change", this._onStateChange);
 
     // Persist on page unload
     window.addEventListener("beforeunload", this._onBeforeUnload);
@@ -1314,6 +1443,7 @@ class PodcastFooter extends HTMLElement {
     document.removeEventListener("podcast-play", this._onPodcastPlay);
     document.removeEventListener("podcast-pause", this._onExternalPause);
     document.removeEventListener("podcast-seek", this._onExternalSeek);
+    document.removeEventListener("podcast-state-change", this._onStateChange);
     window.removeEventListener("beforeunload", this._onBeforeUnload);
     this._unbindAudioEvents();
     this._unbindUIEvents();
@@ -1640,7 +1770,8 @@ class PodcastFooter extends HTMLElement {
     const cur = this._audio.playbackRate;
     const idx = rates.indexOf(cur);
     this._audio.playbackRate = rates[(idx + 1) % rates.length];
-    this._els.rateBtn.textContent = this._audio.playbackRate + "×";
+    this._els.rateBtn.textContent = this._audio.playbackRate + "\u00d7";
+    this._dispatchStateChange();
   }
 
   _setVolume() {
@@ -1648,12 +1779,14 @@ class PodcastFooter extends HTMLElement {
     this._audio.volume = v;
     this._audio.muted = false;
     this._setMuteIcon();
+    this._dispatchStateChange();
   }
 
   _toggleMute() {
     this._audio.muted = !this._audio.muted;
     this._els.volume.value = this._audio.muted ? 0 : this._audio.volume;
     this._setMuteIcon();
+    this._dispatchStateChange();
   }
 
   /** Hide the footer and stop playback. */
@@ -1669,6 +1802,59 @@ class PodcastFooter extends HTMLElement {
     this._audio.load();
     this.removeAttribute("active");
     this._savePlaybackState();
+  }
+
+  /**
+   * Dispatch podcast-state-change so inline players stay in sync when the user
+   * adjusts mute, volume, or playback rate from the footer.
+   */
+  _dispatchStateChange() {
+    if (this._suppressSync) return;
+    this.dispatchEvent(new CustomEvent("podcast-state-change", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        src:          this._audio.src || "",
+        volume:       this._audio.volume,
+        muted:        this._audio.muted,
+        playbackRate: this._audio.playbackRate,
+        currentTime:  this._audio.currentTime,
+      },
+    }));
+  }
+
+  /**
+   * Respond to podcast-state-change from an inline player.  Applies the
+   * incoming mute / volume / playback rate to the footer's <audio> (which is
+   * the actual audible output).
+   */
+  _onStateChange(e) {
+    if (this._suppressSync) return;
+    const d = e.detail || {};
+    // Only react if src matches
+    const mySrc = this._audio.src || "";
+    if (d.src && mySrc && d.src !== mySrc && !d.src.endsWith(mySrc) && !mySrc.endsWith(d.src)) return;
+
+    this._suppressSync = true;
+    try {
+      if (d.volume != null) {
+        this._audio.volume = d.volume;
+        this._els.volume.value = d.volume;
+      }
+      if (d.muted != null) {
+        this._audio.muted = d.muted;
+        this._els.volume.value = d.muted ? 0 : parseFloat(this._els.volume.value);
+      }
+      if (d.volume != null || d.muted != null) {
+        this._setMuteIcon();
+      }
+      if (d.playbackRate != null) {
+        this._audio.playbackRate = d.playbackRate;
+        this._els.rateBtn.textContent = d.playbackRate + "\u00d7";
+      }
+    } finally {
+      this._suppressSync = false;
+    }
   }
 
   _onPlay() {
