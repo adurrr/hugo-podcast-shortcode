@@ -42,8 +42,11 @@ jobs:
         run: npm test
 
   e2e-tests:
-    name: E2E Tests
+    name: E2E Tests (shard ${{ matrix.shard }}/2)
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v4
 
@@ -70,4 +73,4 @@ jobs:
         run: hugo --source "${{ github.workspace }}/exampleSite" --quiet 2>/dev/null || true
 
       - name: Run E2E tests
-        run: npx playwright test --config tests/e2e/playwright.config.js
+        run: npx playwright test --config tests/e2e/playwright.config.js --shard=${{ matrix.shard }}/2
