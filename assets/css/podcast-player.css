@@ -10,6 +10,7 @@ podcast-player {
   display: block;
   box-sizing: border-box;
   max-width: 100%;
+  overflow: hidden;
   margin: 1.5rem 0;
 
   /* Light theme (default) — clean, modern palette for typical Hugo pages */
@@ -165,8 +166,6 @@ podcast-player::part(rate-btn) {
 
   /* Chapters: horizontal scroll, no wrapping */
   podcast-player::part(chapters) {
-    flex-wrap: nowrap;
-    gap: 6px;
     padding-bottom: 4px;
   }
 

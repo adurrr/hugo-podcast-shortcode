@@ -369,8 +369,8 @@ class PodcastPlayer extends HTMLElement {
         .vol-wrap .btn { width: 28px; height: 28px; border-radius: 50%; font-size: .85rem; }
         .rate-btn      { font-size: .75rem; font-weight: 600; width: auto;
                          height: 28px; border-radius: 14px; padding: 0 10px; }
-        .chapters      { display: flex; flex-wrap: wrap; gap: 4px; }
-        .chapter-chip  { font-size: .75rem; padding: 2px 8px; border-radius: 10px;
+        .chapters      { overflow-x: auto; }
+        .chapter-chip  { display: inline-block; font-size: .75rem; padding: 2px 8px; border-radius: 10px; margin-right: 4px;
                          background: var(--pp-surface); color: var(--pp-text-muted);
                          cursor: pointer; border: none; transition: background .15s; }
         .chapter-chip:hover { background: var(--pp-primary); color: #fff; }
@@ -402,7 +402,7 @@ class PodcastPlayer extends HTMLElement {
           .controls-row .time { font-size: .7rem; white-space: nowrap; }
           .controls-row .time-duration { padding-right: 8px; }
           .extras-row    { grid-area: auto; }
-          .chapters      { margin-top: 0; width: 100%; overflow: hidden; }
+          .chapters      { margin-top: 0; width: 100%; }
         }
       </style>
       <div class="player" part="player" role="region" aria-label="Podcast Player">
