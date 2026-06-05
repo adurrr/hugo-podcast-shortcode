@@ -47,7 +47,7 @@
     <title>{{ .Site.Title }}</title>
     <link>{{ .Site.BaseURL }}</link>
     {{- with $podcast.description }}<description>{{ . }}</description>{{ else }}<description>{{ .Site.Params.description | default .Site.Title }}</description>{{ end }}
-    <language>{{ $podcast.language | default .Site.Language.Locale }}</language>
+    <language>{{ $podcast.language | default .Site.LanguageCode }}</language>
     {{- with $podcast.copyright }}<copyright>{{ . }}</copyright>{{ end }}
     {{- with $podcast.author }}<itunes:author>{{ . }}</itunes:author>{{ end }}
     {{- with $podcast.summary }}<itunes:summary>{{ . | transform.XMLEscape | safeHTML }}</itunes:summary>{{ end }}
@@ -123,7 +123,7 @@
     <link>{{ .Permalink }}</link>
     <description>Recent content {{ if ne .Title .Site.Title }}{{ with .Title }}in {{ . }} {{ end }}{{ end }}on {{ .Site.Title }}</description>
     <generator>Hugo</generator>
-    <language>{{ site.Language.Locale }}</language>
+    <language>{{ site.LanguageCode }}</language>
     {{ with $authorEmail }}<managingEditor>{{ . }}{{ with $authorName }} ({{ . }}){{ end }}</managingEditor>{{ end }}
     {{ with $authorEmail }}<webMaster>{{ . }}{{ with $authorName }} ({{ . }}){{ end }}</webMaster>{{ end }}
     {{ with .Site.Copyright }}<copyright>{{ . }}</copyright>{{ end }}
