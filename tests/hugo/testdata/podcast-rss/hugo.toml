@@ -1,0 +1,24 @@
+baseURL = "https://example.org/"
+title = "Test Podcast RSS"
+
+[module]
+  [[module.imports]]
+    path = "github.com/adurrr/wavecast"
+
+[params.podcast]
+  description = "A podcast about testing RSS feeds."
+  author      = "Test Author"
+  summary     = "This is a test podcast summary for RSS feed validation."
+  image       = "/cover.jpg"
+  explicit    = false
+  type        = "episodic"
+  owner_name  = "Test Owner"
+  owner_email = "owner@test.example"
+  language    = "en-us"
+  copyright   = "© 2025 Test Podcast"
+
+  [[params.podcast.categories]]
+    category = "Technology"
+  [[params.podcast.categories]]
+    category = "Education"
+    subcategory = "Courses"

@@ -15,7 +15,8 @@
 
   {{- $program := .Params.program -}}
   {{- $programPage := .Site.GetPage (printf "programs/%s" ($program | urlize)) -}}
-  {{- $programUrl := cond (ne $programPage nil) $programPage.RelPermalink .Site.Home.RelPermalink -}}
+  {{- $programUrl := .Site.Home.RelPermalink -}}
+  {{- if and $programPage $programPage.RelPermalink }}{{ $programUrl = $programPage.RelPermalink }}{{ end -}}
 
   <section class="hero">
     <h1>{{ .Title }}</h1>

@@ -20,3 +20,17 @@
     defaultSource = "local"
     # Enable playback rate control by default
     showRateControl = true
+
+  # ── RSS / Podcast feed ──
+  # To enable an iTunes-compatible podcast RSS feed, add a
+  # [params.podcast] section to your SITE's hugo.toml (not here).
+  #
+  # Fields available (all optional):
+  #   description, author, summary, image, copyright, language,
+  #   explicit, type ("episodic" or "serial"), owner_name, owner_email
+  #
+  #   [[params.podcast.categories]]
+  #     category = "Technology"
+  #     subcategory = "Tech News"  # optional
+  #
+  # See README for full documentation.

@@ -14,6 +14,10 @@
   <link rel="manifest" href="{{ "site.webmanifest" | relURL }}">
   {{ $turbolinks := resources.Get "js/vendor/turbolinks.js" | fingerprint }}
   <script src="{{ $turbolinks.RelPermalink }}" integrity="{{ $turbolinks.Data.Integrity }}"></script>
+  {{- $codeCopy := resources.Get "js/code-copy.js" -}}
+  {{- if $codeCopy }}
+  <script src="{{ $codeCopy.RelPermalink }}" defer></script>
+  {{- end }}
   {{- /* Always load podcast-player CSS so the persistent footer has theme support on every page */ -}}
   {{- $playerCSS := resources.Get "css/podcast-player.css" -}}
   {{- if $playerCSS }}
@@ -110,6 +114,26 @@
     td a{color:var(--accent);text-decoration:none;font-weight:500}
     td a:hover{text-decoration:underline}
 
+    /* ── Content typography ── */
+    main h2{font-size:1.35rem;font-weight:700;margin:1.5rem 0 0.5rem}
+    main h3{font-size:1.1rem;font-weight:600;margin:1rem 0 0.25rem}
+    main p{margin-bottom:0.75rem}
+    main pre{margin:1rem 0;overflow-x:auto;padding-left:0.75rem}
+    main ul,main ol{margin:0.5rem 0 0.75rem;padding-left:1.25rem}
+    main li{margin-bottom:0.25rem}
+    main table{width:100%;border-collapse:collapse;font-size:0.85rem;margin:1rem 0}
+    main th{font-weight:700;text-align:left;padding:0.4rem 0.6rem;border-bottom:2px solid var(--border)}
+    main td{padding:0.35rem 0.6rem;border-bottom:1px solid var(--border)}
+
+    /* ── Code copy button ── */
+    .highlight{position:relative}
+    .highlight .code-copy-btn{visibility:hidden;position:absolute;top:0;right:0;z-index:10;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:0 var(--radius) 0 var(--radius);color:var(--text-muted);opacity:0;transition:opacity .15s,visibility .15s}
+    .highlight:hover .code-copy-btn,.highlight .code-copy-btn:focus-visible{visibility:visible;opacity:1}
+    .highlight .code-copy-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+    .highlight .code-copy-btn.copied{background:var(--accent);border-color:var(--accent);color:#fff}
+    .highlight .code-copy-btn.copied svg{display:none}
+    .highlight .code-copy-btn.copied::after{content:"Copied!";font-size:0.65rem;font-weight:600;white-space:nowrap}
+
     /* ── Links (content areas) ── */
     main a{color:var(--accent);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--accent) 25%,transparent);text-underline-offset:2px;transition:text-decoration-color .15s}
     main a:hover{text-decoration-color:var(--accent)}
@@ -122,6 +146,12 @@
     .footer-nav{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:0.75rem}
     .footer-nav a{color:var(--text-muted);text-decoration:none;font-size:0.85rem;transition:color .15s}
     .footer-nav a:hover{color:var(--accent)}
+
+    /* ── Episode nav ── */
+    .episode-nav{gap:0.6rem}
+    .episode-nav .nav-button{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .episode-nav-back{font-size:0.85rem;border-style:dashed}
+    @media(max-width:640px){.episode-nav{flex-direction:column;align-items:stretch}.episode-nav .nav-button{justify-content:flex-start}}
 
     /* ── Responsive ── */
     @media(max-width:640px){
@@ -169,6 +199,7 @@
         <a href="{{ "schedule.md" | relref . }}">Schedule</a>
         <a href="{{ "about.md" | relref . }}">About</a>
         <a href="{{ "contact.md" | relref . }}">Contact</a>
+        <a href="{{ "index.xml" | relURL }}"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle;margin-right:3px"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/></svg>RSS</a>
         <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">GitHub</a>
       </div>
       <p>Wavecast Radio: Tune in to Tech. Powered by <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">Wavecast</a>, built with Hugo.</p>

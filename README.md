@@ -38,7 +38,8 @@ Both components are **bidirectionally synced** - pausing the footer pauses all i
 - **Keyboard shortcuts**: Space (play/pause), Left/Right (skip), M (mute)
 - **Media Session API**: integrates with OS media controls (lock screen, notification centre)
 - **Accessible**: ARIA labels, `:focus-visible` rings, semantic controls
-- **Well tested**: Go integration tests, JS unit tests (Vitest), Playwright E2E
+- **Well tested**: Go integration tests, JS unit tests (Vitest), Playwright E2E, RSS output tests
+- **Podcast RSS feed**: iTunes-compatible podcast RSS generation from Hugo content with automatic detection
 
 ---
 
@@ -298,6 +299,83 @@ Multiple players on the same page use separate `sessionStorage` keys (`podcastPl
 
 ---
 
+## Podcast RSS Feed
+
+Wavecast provides a built-in podcast RSS template at `layouts/_default/rss.xml`. When podcast metadata is configured in your `hugo.toml`, the template automatically renders an iTunes-compatible podcast feed suitable for submission to Apple Podcasts, Spotify, and other directories. Without podcast config, it falls back to a clean standard RSS 2.0 feed.
+
+### Enabling the podcast feed
+
+Add a `[params.podcast]` section to your site's `hugo.toml`. The template detects at least one of `author`, `image`, or `description` and switches into podcast mode:
+
+```toml
+[params.podcast]
+  description = "A weekly show about open-source and software engineering."
+  author = "Your Name"
+  summary  = "Longer show description (up to 4000 characters). Shown on the ⓘ info popup in podcast apps."
+  image    = "/podcast-cover.jpg"    # ≥1400×1400 px recommended
+  explicit = false                    # "true" or "false"
+  type     = "episodic"               # "episodic" or "serial"
+  owner_name  = "Your Name"
+  owner_email = "you@example.com"
+  language = "en-us"                  # overrides site.languageCode if set
+  copyright = "© 2026 Your Name"
+
+  [[params.podcast.categories]]
+    category = "Technology"
+  [[params.podcast.categories]]
+    category = "Education"
+    subcategory = "Courses"           # optional
+```
+
+### Episode front matter
+
+Add a `podcast:` key to each episode's YAML front matter. Only `src` is required for an item to appear in the feed:
+
+```yaml
+---
+title: "Episode 42: The Big One"
+date: 2026-06-01
+podcast:
+  src: "https://example.com/audio/ep42.mp3"
+  type: "audio/mpeg"        # MIME type (default: audio/mpeg)
+  duration: "00:45:00"      # HH:MM:SS or seconds
+  season: 2                 # season number
+  episode: 42               # episode number
+  explicit: false           # overrides site-level explicit
+  author: "Guest Host"      # overrides site-level author
+  guid: "unique-ep-42"      # falls back to permalink
+  episodeType: "full"       # "full", "trailer", or "bonus"
+  subtitle: "A short episode teaser (≤255 chars, appears in Description column)"
+  summary: "Full episode summary, up to 4000 characters."
+---
+```
+
+### How it works
+
+| Scenario | RSS output |
+|----------|-----------|
+| No `[params.podcast]` in config | Standard RSS 2.0 (suitable for blogs) |
+| `[params.podcast]` with `author`, `image`, or `description` | Full iTunes podcast RSS with itunes: namespace |
+| Episode has `podcast.src` (local file) | Enclosure with `length` auto-resolved from Hugo resources |
+| Episode has `podcast.src` (remote URL) | Enclosure with `length="0"` |
+| Episode has NO `podcast.src` | Omitted from feed entirely |
+
+### Feed output
+
+The feed is available at `/index.xml` (home page). Hugo automatically enables RSS output for the home page by default. You can also enable it for section pages in your `hugo.toml`:
+
+```toml
+[outputs]
+  home    = ["html", "rss"]
+  section = ["html", "rss"]
+```
+
+### Validating
+
+Once your site is live, validate the feed at [https://validator.w3.org/feed/](https://validator.w3.org/feed/).
+
+---
+
 ## CSS Theming
 
 The player renders in a Shadow DOM with a default dark theme. The external stylesheet provides a light theme that activates automatically. Both are fully customizable via CSS custom properties defined on `<podcast-player>` and `<podcast-footer>`.
@@ -416,8 +494,10 @@ assets/
   js/sources.js             # Re-exports for test imports
   demo/demo-audio.wav       # Demo audio file for the example site
 layouts/
+  _default/
+    rss.xml                   # Podcast RSS template (auto-detects podcast config)
   _shortcodes/
-    podcast-player.html     # Hugo shortcode template
+    podcast-player.html       # Hugo shortcode template
 tests/
   hugo/                     # Go integration tests (builds Hugo sites per case)
   js/                       # Vitest unit tests (80)

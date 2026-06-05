@@ -3,12 +3,15 @@
 {{- $prevEp     := .prevEp     -}}
 {{- $nextEp     := .nextEp     -}}
 {{- $programUrl := .programUrl -}}
-<div class="nav-buttons">
-  <a href="{{ $programUrl }}" class="nav-button">{{ printf "← %s" $program }}</a>
+{{- /* SVG arrow icons — shared between all buttons */ -}}
+{{- $arrowLeft  := `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>` -}}
+{{- $arrowRight := `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>` -}}
+<div class="nav-buttons episode-nav">
+  <a href="{{ $programUrl }}" class="nav-button episode-nav-back">{{ safeHTML $arrowLeft }}{{ $program }}</a>
   {{- with $prevEp }}
-  <a href="{{ .RelPermalink }}" class="nav-button">← Previous Episode</a>
+  <a href="{{ .RelPermalink }}" class="nav-button episode-nav-prev">{{ safeHTML $arrowLeft }}{{ .Title }}</a>
   {{- end }}
   {{- with $nextEp }}
-  <a href="{{ .RelPermalink }}" class="nav-button nav-button-primary">Next Episode →</a>
+  <a href="{{ .RelPermalink }}" class="nav-button nav-button-primary episode-nav-next">{{ .Title }}{{ safeHTML $arrowRight }}</a>
   {{- end }}
 </div>
