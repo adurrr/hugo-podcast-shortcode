@@ -1,0 +1,144 @@
+{{- /* ── Wavecast RSS Template ───────────────────────────────────────────────
+      Detects [params.podcast] config (requires at least one of author,
+      image, or description to be set) and renders either:
+        • iTunes podcast RSS (with all podcast metadata)  ← when enabled
+        • Standard RSS 2.0 feed                           ← fallback
+
+      Episode front matter (all optional):
+        podcast:
+          src: "https://..."      # audio URL or resource path (required for enclosure)
+          type: "audio/mpeg"      # MIME type (default: audio/mpeg)
+          length: 24986000        # file size in bytes (optional; resolved for local)
+          duration: "00:45:00"    # HH:MM:SS or seconds
+          season: 2               # season number
+          episode: 5              # episode number
+          explicit: true|false    # default: site config or false
+          author: "Guest Host"    # falls back to site podcast author
+          guid: "unique-id"       # falls back to permalink
+          episodeType: "full"     # full|trailer|bonus (default: full)
+      See README for full docs.
+   ──────────────────────────────────────────────────────────────────────── */ -}}
+{{- $podcast := .Site.Params.podcast -}}
+{{- $hasPodcast := false -}}
+{{- with $podcast }}
+  {{- if or .author .image .description }}
+    {{- $hasPodcast = true }}
+  {{- end }}
+{{- end -}}
+{{- $pctx := . -}}
+{{- if .IsHome }}{{ $pctx = .Site }}{{ end -}}
+{{- $pages := slice -}}
+{{- if or $.IsHome $.IsSection -}}
+  {{- $pages = $pctx.RegularPages -}}
+{{- else -}}
+  {{- $pages = $pctx.Pages -}}
+{{- end -}}
+{{- $limit := .Site.Config.Services.RSS.Limit -}}
+{{- if ge $limit 1 -}}
+  {{- $pages = $pages | first $limit -}}
+{{- end -}}
+{{- printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML -}}
+<rss version="2.0"
+  {{- if $podcast }} xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"{{ end }}
+     xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+  {{- if $hasPodcast -}}
+    {{/* ── iTunes Podcast RSS ── */}}
+    <title>{{ .Site.Title }}</title>
+    <link>{{ .Site.BaseURL }}</link>
+    {{- with $podcast.description }}<description>{{ . }}</description>{{ else }}<description>{{ .Site.Params.description | default .Site.Title }}</description>{{ end }}
+    <language>{{ $podcast.language | default .Site.Language.Locale }}</language>
+    {{- with $podcast.copyright }}<copyright>{{ . }}</copyright>{{ end }}
+    {{- with $podcast.author }}<itunes:author>{{ . }}</itunes:author>{{ end }}
+    {{- with $podcast.summary }}<itunes:summary>{{ . | transform.XMLEscape | safeHTML }}</itunes:summary>{{ end }}
+    {{- with $podcast.subtitle }}<itunes:subtitle>{{ . }}</itunes:subtitle>{{ end }}
+    {{- with $podcast.image }}<itunes:image href="{{ . | absURL }}" />{{ end }}
+    {{- range $podcast.categories }}
+    <itunes:category text="{{ .category }}">
+      {{- with .subcategory }}<itunes:category text="{{ . }}" />{{ end }}
+    </itunes:category>
+    {{- end }}
+    <itunes:explicit>{{ $podcast.explicit | default "false" }}</itunes:explicit>
+    {{- with $podcast.owner_name }}<itunes:owner><itunes:name>{{ . }}</itunes:name>{{ with $podcast.owner_email }}<itunes:email>{{ . }}</itunes:email>{{ end }}</itunes:owner>{{ end }}
+    <itunes:type>{{ $podcast.type | default "episodic" }}</itunes:type>
+    {{- with $podcast.block }}<itunes:block>{{ . }}</itunes:block>{{ end }}
+    <generator>Hugo — wavecast theme</generator>
+    {{ with .OutputFormats.Get "rss" }}
+      {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | safeHTML }}
+    {{ end }}
+    {{- if not (eq (len $pages) 0) }}
+    <lastBuildDate>{{ (index ($pages | first 1) 0).Lastmod.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>
+    {{- end }}
+
+    {{- range $pages }}
+      {{- $p := . -}}
+      {{- $pPod := .Params.podcast -}}
+      {{- $src := $pPod.src | default $pPod.audio | default "" -}}
+      {{- if $src }}
+      <item>
+        <title>{{ .Title }}</title>
+        {{- with $pPod.guid }}<guid isPermaLink="false">{{ . }}</guid>{{ else }}<guid>{{ .Permalink }}</guid>{{ end }}
+        <link>{{ .Permalink }}</link>
+        <pubDate>{{ .PublishDate.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
+        <description>{{ .Summary | transform.XMLEscape | safeHTML }}</description>
+        {{- /* ── Resolve audio enclosure ── */ -}}
+        {{- $enclosureURL := $src -}}
+        {{- $enclosureType := $pPod.type | default "audio/mpeg" -}}
+        {{- $enclosureLen := $pPod.length | default 0 -}}
+        {{- if not (or (hasPrefix $src "http://") (hasPrefix $src "https://")) -}}
+          {{- $res := or ($p.Resources.GetMatch $src) (resources.GetMatch $src) -}}
+          {{- if $res }}
+            {{- $enclosureURL = $res.Permalink }}
+            {{- $enclosureType = $res.MediaType.Type }}
+            {{- $enclosureLen = len $res.Content }}
+          {{- end }}
+        {{- end }}
+        <enclosure url="{{ $enclosureURL }}" length="{{ $enclosureLen }}" type="{{ $enclosureType }}" />
+        {{- with $pPod.duration }}<itunes:duration>{{ . }}</itunes:duration>{{ end }}
+        {{- with $pPod.author }}<itunes:author>{{ . }}</itunes:author>{{ else }}{{ with $podcast.author }}<itunes:author>{{ . }}</itunes:author>{{ end }}{{ end }}
+        {{- with $pPod.subtitle }}<itunes:subtitle>{{ . | transform.XMLEscape | safeHTML }}</itunes:subtitle>{{ end }}
+        {{- with $pPod.summary }}<itunes:summary>{{ . | transform.XMLEscape | safeHTML }}</itunes:summary>{{ end }}
+        {{- $explicit := $pPod.explicit | default $podcast.explicit | default "false" }}<itunes:explicit>{{ $explicit }}</itunes:explicit>
+        {{- with $pPod.season }}<itunes:season>{{ . }}</itunes:season>{{ end }}
+        {{- with $pPod.episode }}<itunes:episode>{{ . }}</itunes:episode>{{ end }}
+        {{- with $pPod.episodeType }}<itunes:episodeType>{{ . }}</itunes:episodeType>{{ else }}<itunes:episodeType>full</itunes:episodeType>{{ end }}
+      </item>
+      {{- end }}
+    {{- end }}
+  {{- else -}}
+    {{/* ── Standard RSS 2.0 (no podcast config) ── */}}
+    {{- $authorEmail := "" -}}
+    {{- with site.Params.author -}}
+      {{- if reflect.IsMap . -}}
+        {{- with .email }}{{ $authorEmail = . }}{{ end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $authorName := "" -}}
+    {{- with site.Params.author -}}
+      {{- if reflect.IsMap . -}}
+        {{- with .name }}{{ $authorName = . }}{{ end -}}
+      {{- else }}{{ $authorName = . }}{{ end -}}
+    {{- end -}}
+    <title>{{ if eq .Title .Site.Title }}{{ .Site.Title }}{{ else }}{{ with .Title }}{{ . }} on {{ end }}{{ .Site.Title }}{{ end }}</title>
+    <link>{{ .Permalink }}</link>
+    <description>Recent content {{ if ne .Title .Site.Title }}{{ with .Title }}in {{ . }} {{ end }}{{ end }}on {{ .Site.Title }}</description>
+    <generator>Hugo</generator>
+    <language>{{ site.Language.Locale }}</language>
+    {{ with $authorEmail }}<managingEditor>{{ . }}{{ with $authorName }} ({{ . }}){{ end }}</managingEditor>{{ end }}
+    {{ with $authorEmail }}<webMaster>{{ . }}{{ with $authorName }} ({{ . }}){{ end }}</webMaster>{{ end }}
+    {{ with .Site.Copyright }}<copyright>{{ . }}</copyright>{{ end }}
+    {{ if not .Date.IsZero }}<lastBuildDate>{{ (index $pages.ByLastmod.Reverse 0).Lastmod.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>{{ end }}
+    {{ with .OutputFormats.Get "rss" }}{{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | safeHTML }}{{ end }}
+    {{- range $pages }}
+      <item>
+        <title>{{ .Title }}</title>
+        <link>{{ .Permalink }}</link>
+        <pubDate>{{ .PublishDate.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
+        {{ with $authorEmail }}<author>{{ . }}{{ with $authorName }} ({{ . }}){{ end }}</author>{{ end }}
+        <guid>{{ .Permalink }}</guid>
+        <description>{{ .Summary | transform.XMLEscape | safeHTML }}</description>
+      </item>
+    {{- end }}
+  {{- end }}
+  </channel>
+</rss>

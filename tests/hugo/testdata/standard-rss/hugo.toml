@@ -1,8 +1,4 @@
 baseURL = "https://example.org/"
 title = "Standard Blog (No Podcast Config)"
 
-[module]
-  [[module.imports]]
-    path = "github.com/adurrr/wavecast"
-
 # No [params.podcast] — should render standard RSS 2.0
