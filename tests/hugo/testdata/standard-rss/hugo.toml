@@ -1,0 +1,4 @@
+baseURL = "https://example.org/"
+title = "Standard Blog (No Podcast Config)"
+
+# No [params.podcast] — should render standard RSS 2.0

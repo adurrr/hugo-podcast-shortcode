@@ -14,10 +14,29 @@ ignoreLogs = ["warning-goldmark-raw-html"]
   [[module.imports]]
     path = "github.com/adurrr/wavecast"
 
-# Site-wide description
+# ── RSS / Podcast feed ──
+# Configuring [params.podcast] enables an iTunes-compatible podcast RSS
+# feed.  Omit the whole section for a plain RSS 2.0 feed.
+[params.podcast]
+  description = "Wavecast Radio brings you the best in tech podcasting, from Infrastructure as Code to open-source culture and modern DevOps practices."
+  author = "Wavecast Radio"
+  summary  = "A demo podcast showcasing the Hugo Wavecast theme. Each episode features a full persistent audio player, chapter markers, and episode notes — all powered by standard Markdown front matter."
+  image    = "/wavecast/logo.png"
+  explicit = false
+  type     = "episodic"
+  owner_name  = "Wavecast Demo"
+  owner_email = "demo@wavecast.example"
+  language = "en-us"
+  copyright = "© 2025 Wavecast Radio"
+
+  [[params.podcast.categories]]
+    category = "Technology"
+  [[params.podcast.categories]]
+    category = "Leisure"
+    subcategory = "Hobbies"
+
 [params]
   description = "Wavecast Radio: Tune in to Tech. A demo radio station showcasing the Wavecast persistent podcast-player Web Component for Hugo."
-
   [params.podcastPlayer]
     source = "local"
     persistent = true

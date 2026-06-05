@@ -40,13 +40,16 @@ func buildHugoSite(t *testing.T, name string, envVars ...string) string {
 	// Clean previous output
 	os.RemoveAll(outputDir)
 
-	cmd := exec.Command("hugo", "--source", siteDir, "--destination", outputDir, "--quiet")
+	cmd := exec.Command("hugo", "--source", siteDir, "--destination", outputDir)
 	cmd.Env = append(os.Environ(), envVars...)
 	cmd.Dir = siteDir
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Fatalf("hugo build failed for %s:\n%s\n%v", name, string(output), err)
+		// Capture stderr separately when build fails, since Hugo routes
+		// error messages there.  CombinedOutput already merges both,
+		// but we keep the explicit separation for clarity.
+		t.Fatalf("hugo build failed for %s (exit: %v):\n%s", name, err, string(output))
 	}
 
 	return outputDir
