@@ -1,0 +1,44 @@
+{{- /* Carousel – wavecast utility shortcode
+  Usage: {{< carousel >}}
+    ![Alt 1](img1.jpg)
+    ![Alt 2](img2.jpg)
+  {{< /carousel >}}
+  Each direct child element becomes a slide.
+*/ -}}
+{{- $id := printf "wvc-carousel-%d" .Ordinal -}}
+
+<div id="{{ $id }}" class="wvc-carousel" role="region" aria-roledescription="carousel" aria-label="Image carousel">
+  <div class="wvc-carousel__slides">
+    {{ .InnerDeindent | .Page.RenderString }}
+  </div>
+  <button class="wvc-carousel__prev" aria-label="Previous slide">&lsaquo;</button>
+  <button class="wvc-carousel__next" aria-label="Next slide">&rsaquo;</button>
+</div>
+
+{{- /* Minimal JS for prev/next buttons (scroll-snap handles the rest).
+     Buttons are hidden when 0 or 1 slide exists. */ -}}
+<script>
+(function() {
+  var el = document.getElementById('{{ $id }}');
+  if (!el) return;
+  var slides = el.querySelector('.wvc-carousel__slides');
+  if (!slides) return;
+  var prev = el.querySelector('.wvc-carousel__prev');
+  var next = el.querySelector('.wvc-carousel__next');
+  var children = slides.children;
+
+  // Hide navigation when there's nothing to scroll
+  if (children.length <= 1) {
+    if (prev) { prev.style.display = 'none'; prev.setAttribute('aria-hidden', 'true'); }
+    if (next) { next.style.display = 'none'; next.setAttribute('aria-hidden', 'true'); }
+    return;
+  }
+
+  var scrollAmount = function() {
+    return children[0].offsetWidth + parseFloat(getComputedStyle(slides).gap || 0);
+  };
+
+  prev.addEventListener('click', function() { slides.scrollBy({ left: -scrollAmount(), behavior: 'smooth' }); });
+  next.addEventListener('click', function() { slides.scrollBy({ left:  scrollAmount(), behavior: 'smooth' }); });
+})();
+</script>

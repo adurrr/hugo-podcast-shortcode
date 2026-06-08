@@ -1,0 +1,50 @@
+{{- /* This file only renders combined tabs: labels + panels.
+     The tab.html child shortcode stores data in .Parent.Store.
+     See tab.html for per-tab logic.
+     Uses CSS-only radio-button pattern. Radios are clipped (not hidden) so
+     keyboard users can Tab to the group and use arrow keys to switch tabs. */ -}}
+{{- .Inner -}}
+{{- $tabs := .Store.Get "tabs" | default slice -}}
+{{- if gt (len $tabs) 5 -}}
+  {{- errorf "tabs shortcode supports a maximum of 5 tabs (got %d) in %s" (len $tabs) .Position -}}
+{{- end -}}
+{{- $id := printf "wvc-tabs-%d" .Ordinal -}}
+
+<div id="{{ $id }}" class="wvc-tabs">
+  {{- /* Radio inputs — visually clipped, still focusable. Screen readers
+        announce them as "radio button, name, X of Y". Arrow keys change
+        selection natively. */ -}}
+  {{- range $i, $t := $tabs -}}
+  <input type="radio"
+    name="wvc-tabgroup-{{ $id }}"
+    id="wvc-tab-{{ $id }}-{{ $i }}"
+    aria-label="{{ $t.name }}"
+    {{- if eq $i 0 }} checked{{ end -}}
+  >
+  {{- end -}}
+
+  {{- /* Tab labels — visual only. Clicking a label checks the corresponding
+        radio via the for/id association. */ -}}
+  <div class="wvc-tabs__labels">
+    {{- range $i, $t := $tabs -}}
+    <label for="wvc-tab-{{ $id }}-{{ $i }}"
+           class="wvc-tabs__label"
+           id="wvc-tablabel-{{ $id }}-{{ $i }}"
+    >{{ $t.name }}</label>
+    {{- end -}}
+  </div>
+
+  {{- /* Tab panels */ -}}
+  <div class="wvc-tabs__panels">
+    {{- range $i, $t := $tabs -}}
+    <div id="wvc-tabpanel-{{ $id }}-{{ $i }}"
+         class="wvc-tabs__panel"
+         role="tabpanel"
+         aria-labelledby="wvc-tablabel-{{ $id }}-{{ $i }}"
+         {{- if ne $i 0 }} hidden{{ end -}}
+    >
+      {{ $t.content | safeHTML }}
+    </div>
+    {{- end -}}
+  </div>
+</div>

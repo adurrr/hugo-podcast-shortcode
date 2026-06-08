@@ -1,0 +1,354 @@
+/* ── Wavecast Utility Shortcodes ──────────────────────────────────────────
+   Dark-mode aware, minimal-JS, accessible. Prefix: wvc-
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* ── Design tokens ── */
+:root {
+  --wvc-note: #0ea5e9;
+  --wvc-note-bg: #f0f9ff;
+  --wvc-tip: #22c55e;
+  --wvc-tip-bg: #f0fdf4;
+  --wvc-warning: #f59e0b;
+  --wvc-warning-bg: #fffbeb;
+  --wvc-danger: #ef4444;
+  --wvc-danger-bg: #fef2f2;
+  --wvc-primary: #4f46e5;
+  --wvc-primary-hover: #4338ca;
+  --wvc-secondary: #6b7280;
+  --wvc-secondary-hover: #4b5563;
+  --wvc-outline-border: #d1d5db;
+  --wvc-outline-hover-bg: #f3f4f6;
+  --wvc-tab-border: #d1d5db;
+  --wvc-tab-active-border: #4f46e5;
+  --wvc-tab-active-text: #4f46e5;
+  --wvc-radius: 0.5rem;
+}
+
+[data-theme="dark"] {
+  --wvc-note-bg: #0c2d48;
+  --wvc-tip-bg: #0a2e1a;
+  --wvc-warning-bg: #2e2200;
+  --wvc-danger-bg: #3b0a0a;
+  --wvc-outline-border: #4b5563;
+  --wvc-outline-hover-bg: #1f2937;
+  --wvc-tab-border: #4b5563;
+  --wvc-tab-active-border: #818cf8;
+  --wvc-tab-active-text: #a5b4fc;
+  --wvc-primary: #6366f1;
+  --wvc-primary-hover: #818cf8;
+  --wvc-secondary: #9ca3af;
+  --wvc-secondary-hover: #d1d5db;
+}
+
+/* ── Admonition ── */
+.wvc-admonition {
+  border-left: 4px solid;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0 var(--wvc-radius) var(--wvc-radius) 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+.wvc-admonition--note  { border-color: var(--wvc-note);   background: var(--wvc-note-bg);   }
+.wvc-admonition--tip   { border-color: var(--wvc-tip);    background: var(--wvc-tip-bg);    }
+.wvc-admonition--warning { border-color: var(--wvc-warning); background: var(--wvc-warning-bg); }
+.wvc-admonition--danger { border-color: var(--wvc-danger);  background: var(--wvc-danger-bg);  }
+
+.wvc-admonition__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+.wvc-admonition__icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.wvc-admonition--note  .wvc-admonition__icon { color: var(--wvc-note);   }
+.wvc-admonition--tip   .wvc-admonition__icon { color: var(--wvc-tip);    }
+.wvc-admonition--warning .wvc-admonition__icon { color: var(--wvc-warning); }
+.wvc-admonition--danger .wvc-admonition__icon { color: var(--wvc-danger);  }
+
+.wvc-admonition__title {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.wvc-admonition__content > :first-child { margin-top: 0; }
+.wvc-admonition__content > :last-child  { margin-bottom: 0; }
+.wvc-admonition__content p { margin: 0.4rem 0; }
+
+/* ── Button ── */
+.wvc-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--wvc-radius);
+  text-decoration: none;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  line-height: 1.4;
+}
+.wvc-button--primary {
+  background: var(--wvc-primary);
+  color: #fff;
+}
+.wvc-button--primary:hover { background: var(--wvc-primary-hover); color: #fff; }
+
+.wvc-button--secondary {
+  background: var(--wvc-secondary);
+  color: #fff;
+}
+.wvc-button--secondary:hover { background: var(--wvc-secondary-hover); color: #fff; }
+
+.wvc-button--outline {
+  background: transparent;
+  color: var(--wvc-primary);
+  border-color: var(--wvc-outline-border);
+}
+.wvc-button--outline:hover { background: var(--wvc-outline-hover-bg); color: var(--wvc-primary-hover); }
+
+.wvc-button:focus-visible {
+  outline: 2px solid var(--wvc-primary);
+  outline-offset: 2px;
+}
+.wvc-button--primary:focus-visible {
+  outline-color: var(--wvc-primary-hover);
+  box-shadow: 0 0 0 2px rgba(79,70,229,0.35);
+}
+.wvc-button--secondary:focus-visible {
+  outline-color: var(--wvc-secondary-hover);
+}
+
+.wvc-button__icon { font-size: 1.1rem; line-height: 1; }
+
+/* ── Figure ── */
+.wvc-figure {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+.wvc-figure img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--wvc-radius);
+  display: block;
+  margin: 0 auto;
+}
+.wvc-figure__caption,
+.wvc-video__caption {
+  margin-top: 0.6rem;
+  font-size: 0.88rem;
+  color: #6b7280;
+  font-style: italic;
+}
+[data-theme="dark"] .wvc-figure__caption,
+[data-theme="dark"] .wvc-video__caption { color: #9ca3af; }
+
+/* ── Video ── */
+.wvc-video {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+.wvc-video video {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--wvc-radius);
+  display: block;
+  margin: 0 auto;
+}
+
+/* ── Gallery ── */
+.wvc-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+.wvc-gallery a { display: block; }
+.wvc-gallery img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--wvc-radius);
+  display: block;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.wvc-gallery img:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ── Lightbox (CSS-only, triggered by :target) ── */
+.wvc-lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.85);
+  align-items: center;
+  justify-content: center;
+}
+.wvc-lightbox:target {
+  display: flex;
+}
+.wvc-lightbox img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: var(--wvc-radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.wvc-lightbox__close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  color: #fff;
+  font-size: 2rem;
+  text-decoration: none;
+  line-height: 1;
+  opacity: 0.8;
+}
+.wvc-lightbox__close:hover { opacity: 1; }
+
+/* ── Carousel ── */
+.wvc-carousel {
+  position: relative;
+  margin: 1.5rem 0;
+  --wvc-carousel-gap: 0.75rem;
+}
+.wvc-carousel__slides {
+  display: flex;
+  gap: var(--wvc-carousel-gap);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  border-radius: var(--wvc-radius);
+}
+.wvc-carousel__slides > * {
+  scroll-snap-align: start;
+  flex: 0 0 calc(100% - var(--wvc-carousel-gap));
+  min-width: 0;
+}
+.wvc-carousel__slides img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--wvc-radius);
+  display: block;
+}
+.wvc-carousel__prev,
+.wvc-carousel__next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.2s;
+  padding: 0;
+}
+.wvc-carousel__prev:hover,
+.wvc-carousel__next:hover { background: rgba(0,0,0,0.75); }
+.wvc-carousel__prev { left: 0.5rem; }
+.wvc-carousel__next { right: 0.5rem; }
+
+/* ── Tabs ── */
+.wvc-tabs {
+  margin: 1.5rem 0;
+  position: relative;  /* containing block for clipped radio inputs */
+}
+.wvc-tabs__labels {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--wvc-tab-border);
+  margin-bottom: 1rem;
+  gap: 0;
+}
+.wvc-tabs__label {
+  display: inline-block;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+.wvc-tabs__label:hover { color: var(--wvc-tab-active-text); }
+
+/* Visually-hidden radio inputs — still focusable for keyboard navigation */
+.wvc-tabs input[type="radio"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus indicator: highlight corresponding label when radio receives keyboard focus */
+.wvc-tabs input[type="radio"]:nth-of-type(1):focus-visible ~ .wvc-tabs__labels label:nth-of-type(1),
+.wvc-tabs input[type="radio"]:nth-of-type(2):focus-visible ~ .wvc-tabs__labels label:nth-of-type(2),
+.wvc-tabs input[type="radio"]:nth-of-type(3):focus-visible ~ .wvc-tabs__labels label:nth-of-type(3),
+.wvc-tabs input[type="radio"]:nth-of-type(4):focus-visible ~ .wvc-tabs__labels label:nth-of-type(4),
+.wvc-tabs input[type="radio"]:nth-of-type(5):focus-visible ~ .wvc-tabs__labels label:nth-of-type(5) {
+  outline: 2px solid var(--wvc-tab-active-border);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Show panel whose radio is checked (overrides [hidden] attribute) */
+.wvc-tabs input[type="radio"]:nth-of-type(1):checked ~ .wvc-tabs__panels .wvc-tabs__panel:nth-of-type(1),
+.wvc-tabs input[type="radio"]:nth-of-type(2):checked ~ .wvc-tabs__panels .wvc-tabs__panel:nth-of-type(2),
+.wvc-tabs input[type="radio"]:nth-of-type(3):checked ~ .wvc-tabs__panels .wvc-tabs__panel:nth-of-type(3),
+.wvc-tabs input[type="radio"]:nth-of-type(4):checked ~ .wvc-tabs__panels .wvc-tabs__panel:nth-of-type(4),
+.wvc-tabs input[type="radio"]:nth-of-type(5):checked ~ .wvc-tabs__panels .wvc-tabs__panel:nth-of-type(5) {
+  display: block;
+}
+
+/* Active label style */
+.wvc-tabs input[type="radio"]:nth-of-type(1):checked ~ .wvc-tabs__labels label:nth-of-type(1),
+.wvc-tabs input[type="radio"]:nth-of-type(2):checked ~ .wvc-tabs__labels label:nth-of-type(2),
+.wvc-tabs input[type="radio"]:nth-of-type(3):checked ~ .wvc-tabs__labels label:nth-of-type(3),
+.wvc-tabs input[type="radio"]:nth-of-type(4):checked ~ .wvc-tabs__labels label:nth-of-type(4),
+.wvc-tabs input[type="radio"]:nth-of-type(5):checked ~ .wvc-tabs__labels label:nth-of-type(5) {
+  border-bottom-color: var(--wvc-tab-active-border);
+  color: var(--wvc-tab-active-text);
+}
+
+.wvc-tabs__panel {
+  display: none;
+  padding: 0.5rem 0;
+}
+.wvc-tabs__panel > :first-child { margin-top: 0; }
+.wvc-tabs__panel > :last-child  { margin-bottom: 0; }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .wvc-gallery { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .wvc-gallery img { height: 140px; }
+  .wvc-carousel__prev,
+  .wvc-carousel__next { width: 2rem; height: 2rem; font-size: 1.2rem; }
+  .wvc-carousel__prev { left: 0.25rem; }
+  .wvc-carousel__next { right: 0.25rem; }
+  .wvc-tabs__label { padding: 0.5rem 0.75rem; font-size: 0.82rem; }
+}

@@ -1,0 +1,9 @@
+{{- /* Tab – child of tabs shortcode
+  Usage: inside {{< tabs >}}...{{< /tabs >}}
+    {{< tab name="Tab 1" >}}Content{{< /tab >}}
+  Content is markdown-rendered here and stored as safe HTML.
+*/ -}}
+{{- $name := .Get "name" | default (printf "Tab %d" .Ordinal) -}}
+{{- $content := .InnerDeindent | .Page.RenderString -}}
+{{- $tabs := .Parent.Store.Get "tabs" | default slice -}}
+{{- .Parent.Store.Set "tabs" ($tabs | append (dict "name" $name "content" $content)) -}}
