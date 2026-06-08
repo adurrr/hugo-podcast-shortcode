@@ -1,15 +1,23 @@
 {{- /* Video – wavecast utility shortcode
   Usage: {{< video src="video.mp4" poster="poster.jpg" caption="Video caption" >}}
   HTML5 <video> with optional poster and caption.
+  Autoplay always implies muted (browser requirement).
 */ -}}
 {{- $src := .Get "src" -}}
 {{- $poster := .Get "poster" -}}
 {{- $caption := .Get "caption" -}}
 {{- $width := .Get "width" -}}
-{{- $autoplay := .Get "autoplay" | default false -}}
-{{- $loop := .Get "loop" | default false -}}
-{{- $muted := .Get "muted" | default false -}}
-{{- $controls := .Get "controls" | default true -}}
+{{- $autoplay := eq (.Get "autoplay" | default "false") "true" -}}
+{{- $loop := eq (.Get "loop" | default "false") "true" -}}
+{{- $muted := or $autoplay (eq (.Get "muted" | default "false") "true") -}}
+{{- $controls := ne (.Get "controls" | default "true") "false" -}}
+{{- /* Auto-detect video type from file extension */ -}}
+{{- $vidtype := .Get "type" | default "" -}}
+{{- if not $vidtype -}}
+  {{- if hasSuffix $src ".webm" }}{{ $vidtype = "video/webm" }}
+  {{- else if hasSuffix $src ".ogg" }}{{ $vidtype = "video/ogg" }}
+  {{- else }}{{ $vidtype = "video/mp4" }}{{ end -}}
+{{- end -}}
 
 <figure class="wvc-video">
   <video
@@ -20,7 +28,7 @@
     {{- with $poster }} poster="{{ . }}"{{ end -}}
     {{- with $width }} width="{{ . }}"{{ end -}}
   >
-    <source src="{{ $src }}" type="video/mp4">
+    <source src="{{ $src }}" type="{{ $vidtype }}">
     Your browser does not support the video tag.
   </video>
   {{- with $caption -}}

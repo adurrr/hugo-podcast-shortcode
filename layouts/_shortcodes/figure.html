@@ -9,8 +9,9 @@
 {{- $href := .Get "href" -}}
 {{- $class := .Get "class" | default "" -}}
 
+{{- $isExternal := or (hasPrefix $href "http://") (hasPrefix $href "https://") (hasPrefix $href "//") -}}
 <figure class="wvc-figure{{ with $class }} {{ . }}{{ end }}">
-  {{- if $href }}<a href="{{ $href }}" target="_blank" rel="noopener">{{ end -}}
+  {{- if $href }}<a href="{{ $href }}"{{ if $isExternal }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ end -}}
 
   {{- if or (hasPrefix $src "http://") (hasPrefix $src "https://") -}}
     <img src="{{ $src }}" alt="{{ $alt }}" loading="lazy"

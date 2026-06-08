@@ -5,6 +5,9 @@
      keyboard users can Tab to the group and use arrow keys to switch tabs. */ -}}
 {{- .Inner -}}
 {{- $tabs := .Store.Get "tabs" | default slice -}}
+{{- if gt (len $tabs) 5 -}}
+  {{- errorf "tabs shortcode supports a maximum of 5 tabs (got %d) in %s" (len $tabs) .Position -}}
+{{- end -}}
 {{- $id := printf "wvc-tabs-%d" .Ordinal -}}
 
 <div id="{{ $id }}" class="wvc-tabs">

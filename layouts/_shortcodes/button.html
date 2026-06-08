@@ -9,8 +9,7 @@
 
 <a href="{{ $url }}"
    class="wvc-button wvc-button--{{ $variant }}"
-   {{- if $isExternal }} target="_blank" rel="noopener"{{ end -}}
-   role="button"
+   {{- if $isExternal }} target="_blank" rel="noopener noreferrer"{{ end -}}
 >
   {{- with $icon -}}
   <span class="wvc-button__icon" aria-hidden="true">{{ . }}</span>

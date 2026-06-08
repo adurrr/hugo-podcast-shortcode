@@ -45,7 +45,6 @@ func TestButtonPrimary_Renders(t *testing.T) {
 	assertContains(t, content, "wvc-button--primary")
 	assertContains(t, content, "Learn More")
 	assertContains(t, content, `href="/about"`)
-	assertContains(t, content, `role="button"`)
 }
 
 func TestButtonExternal_OpensNewTab(t *testing.T) {
@@ -54,7 +53,7 @@ func TestButtonExternal_OpensNewTab(t *testing.T) {
 	assertContains(t, content, "wvc-button--secondary")
 	assertContains(t, content, `href="https://example.com/"`)
 	assertContains(t, content, `target="_blank"`)
-	assertContains(t, content, `rel="noopener"`)
+	assertContains(t, content, `rel="noopener noreferrer"`)
 }
 
 func TestButtonIcon_Renders(t *testing.T) {
