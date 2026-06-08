@@ -1,0 +1,30 @@
+{{- /* Carousel – wavecast utility shortcode
+  Usage: {{< carousel >}}{{< slide >}}...{{< /slide >}}{{< /carousel >}}
+  Each direct child becomes a slide.
+*/ -}}
+{{- $id := printf "wvc-carousel-%d" .Ordinal -}}
+
+<div id="{{ $id }}" class="wvc-carousel" role="region" aria-roledescription="carousel" aria-label="Image carousel">
+  <div class="wvc-carousel__slides">
+    {{ .InnerDeindent | .Page.RenderString }}
+  </div>
+  <button class="wvc-carousel__prev" aria-label="Previous slide">&lsaquo;</button>
+  <button class="wvc-carousel__next" aria-label="Next slide">&rsaquo;</button>
+</div>
+
+{{- /* Minimal JS for prev/next buttons (scroll-snap handles the rest) */ -}}
+<script>
+(function() {
+  var el = document.getElementById('{{ $id }}');
+  if (!el) return;
+  var slides = el.querySelector('.wvc-carousel__slides');
+  var prev = el.querySelector('.wvc-carousel__prev');
+  var next = el.querySelector('.wvc-carousel__next');
+  var scrollAmount = function() {
+    var item = slides.children[0];
+    return item ? item.offsetWidth + parseFloat(getComputedStyle(slides).gap || 0) : slides.offsetWidth;
+  };
+  prev.addEventListener('click', function() { slides.scrollBy({ left: -scrollAmount(), behavior: 'smooth' }); });
+  next.addEventListener('click', function() { slides.scrollBy({ left:  scrollAmount(), behavior: 'smooth' }); });
+})();
+</script>

@@ -1,0 +1,30 @@
+{{- /* Admonition – wavecast utility shortcode
+  Usage: {{< admonition type="note" title="Note" >}}...{{< /admonition >}}
+  types: note | tip | warning | danger
+  Icons: Feather-style open-source SVG (MIT licensed)
+*/ -}}
+{{- $type := .Get "type" | default "note" -}}
+{{- $title := .Get "title" -}}
+
+<aside class="wvc-admonition wvc-admonition--{{ $type }}" role="note">
+  <div class="wvc-admonition__header">
+    <span class="wvc-admonition__icon" aria-hidden="true">
+      {{- if eq $type "tip" -}}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a5 5 0 0 0-3 9v1a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1a5 5 0 0 0-3-9Z"/></svg>
+      {{- else if eq $type "warning" -}}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      {{- else if eq $type "danger" -}}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      {{- else -}}
+        {{- /* note (default) */ -}}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      {{- end -}}
+    </span>
+    {{- with $title -}}
+    <strong class="wvc-admonition__title">{{ . }}</strong>
+    {{- end -}}
+  </div>
+  <div class="wvc-admonition__content">
+    {{ .InnerDeindent | .Page.RenderString }}
+  </div>
+</aside>

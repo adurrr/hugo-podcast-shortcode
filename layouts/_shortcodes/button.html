@@ -1,0 +1,19 @@
+{{- /* Button – wavecast utility shortcode
+  Usage: {{< button url="..." variant="primary" icon="→" >}}Label{{< /button >}}
+  variants: primary | secondary | outline
+*/ -}}
+{{- $url := .Get "url" -}}
+{{- $variant := .Get "variant" | default "primary" -}}
+{{- $icon := .Get "icon" -}}
+{{- $isExternal := or (hasPrefix $url "http://") (hasPrefix $url "https://") -}}
+
+<a href="{{ $url }}"
+   class="wvc-button wvc-button--{{ $variant }}"
+   {{- if $isExternal }} target="_blank" rel="noopener"{{ end -}}
+   role="button"
+>
+  {{- with $icon -}}
+  <span class="wvc-button__icon" aria-hidden="true">{{ . }}</span>
+  {{- end -}}
+  <span>{{ .Inner }}</span>
+</a>

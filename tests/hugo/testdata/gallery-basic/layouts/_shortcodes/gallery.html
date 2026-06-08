@@ -1,0 +1,7 @@
+{{- /* Gallery – wavecast utility shortcode
+  Usage: {{< gallery >}}[![alt](thumb.jpg)](full.jpg) ...{{< /gallery >}}
+  CSS grid of thumbnails with optional CSS-only lightbox.
+*/ -}}
+<div class="wvc-gallery">
+  {{ .InnerDeindent | .Page.RenderString }}
+</div>

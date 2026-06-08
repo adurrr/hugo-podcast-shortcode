@@ -23,6 +23,11 @@
   {{- if $playerCSS }}
   <link rel="stylesheet" href="{{ $playerCSS.RelPermalink }}">
   {{- end }}
+  {{- /* Utility shortcodes CSS (admonition, button, figure, video, tabs, gallery, carousel) */ -}}
+  {{- $utilCSS := resources.Get "css/shortcodes.css" -}}
+  {{- if $utilCSS }}
+  <link rel="stylesheet" href="{{ $utilCSS.RelPermalink }}">
+  {{- end }}
   <style>
     /* ── Reset & base ── */
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -118,21 +123,76 @@
     main h2{font-size:1.35rem;font-weight:700;margin:1.5rem 0 0.5rem}
     main h3{font-size:1.1rem;font-weight:600;margin:1rem 0 0.25rem}
     main p{margin-bottom:0.75rem}
-    main pre{margin:1rem 0;overflow-x:auto;padding-left:0.75rem}
     main ul,main ol{margin:0.5rem 0 0.75rem;padding-left:1.25rem}
     main li{margin-bottom:0.25rem}
     main table{width:100%;border-collapse:collapse;font-size:0.85rem;margin:1rem 0}
     main th{font-weight:700;text-align:left;padding:0.4rem 0.6rem;border-bottom:2px solid var(--border)}
     main td{padding:0.35rem 0.6rem;border-bottom:1px solid var(--border)}
 
+    /* ── Code blocks ── */
+    .highlight,main pre{
+      margin:1.25rem 0;
+      border-radius:var(--radius);
+    }
+    /* Chroma blocks: keep inline syntax colours, enable horizontal scroll */
+    .highlight pre{
+      margin:0;
+      border-radius:var(--radius);
+      overflow-x:auto;
+    }
+    /* Plain <pre> blocks: theme-aware background */
+    main pre:not(.highlight pre){
+      padding:0.9rem 1.1rem;
+      overflow-x:auto;
+      font-family:ui-monospace,SFMono-Regular,'Cascadia Code','Fira Code',Menlo,Consolas,monospace;
+      font-size:0.88rem;
+      line-height:1.6;
+      background:var(--code-bg);
+      color:var(--code-text);
+      border:1px solid var(--code-border);
+      border-radius:var(--radius);
+    }
+    :root,[data-theme="light"]{
+      --code-bg:#f1f5f9;
+      --code-text:#334155;
+      --code-border:#e2e8f0;
+    }
+    [data-theme="dark"]{
+      --code-bg:#1e293b;
+      --code-text:#cbd5e1;
+      --code-border:#334155;
+    }
+    /* Code block scrollbars */
+    .highlight pre::-webkit-scrollbar,main pre::-webkit-scrollbar{height:6px}
+    .highlight pre::-webkit-scrollbar-thumb,main pre::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.4);border-radius:3px}
+
     /* ── Code copy button ── */
-    .highlight{position:relative}
-    .highlight .code-copy-btn{visibility:hidden;position:absolute;top:0;right:0;z-index:10;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:0 var(--radius) 0 var(--radius);color:var(--text-muted);opacity:0;transition:opacity .15s,visibility .15s}
-    .highlight:hover .code-copy-btn,.highlight .code-copy-btn:focus-visible{visibility:visible;opacity:1}
-    .highlight .code-copy-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
-    .highlight .code-copy-btn.copied{background:var(--accent);border-color:var(--accent);color:#fff}
-    .highlight .code-copy-btn.copied svg{display:none}
-    .highlight .code-copy-btn.copied::after{content:"Copied!";font-size:0.65rem;font-weight:600;white-space:nowrap}
+    .highlight,pre{position:relative}
+    .highlight .code-copy-btn,pre > .code-copy-btn{
+      visibility:hidden;position:absolute;top:6px;right:6px;z-index:10;
+      display:inline-flex;align-items:center;justify-content:center;
+      width:32px;height:32px;cursor:pointer;
+      background:rgba(0,0,0,0.35);color:rgba(255,255,255,0.9);
+      border:none;border-radius:var(--radius);
+      opacity:0;transition:opacity .15s,visibility .15s,background .15s;
+    }
+    .highlight:hover .code-copy-btn,.highlight .code-copy-btn:focus-visible,
+    pre:hover > .code-copy-btn,pre > .code-copy-btn:focus-visible{
+      visibility:visible;opacity:1;
+    }
+    .highlight .code-copy-btn:hover,pre > .code-copy-btn:hover{
+      background:rgba(0,0,0,0.6);
+    }
+    .highlight .code-copy-btn:active,pre > .code-copy-btn:active{
+      background:var(--accent);
+    }
+    .highlight .code-copy-btn.copied,pre > .code-copy-btn.copied{
+      background:var(--accent);color:#fff;
+    }
+    .highlight .code-copy-btn.copied svg,pre > .code-copy-btn.copied svg{display:none}
+    .highlight .code-copy-btn.copied::after,pre > .code-copy-btn.copied::after{
+      content:"Copied!";font-size:0.65rem;font-weight:600;white-space:nowrap;
+    }
 
     /* ── Links (content areas) ── */
     main a{color:var(--accent);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--accent) 25%,transparent);text-underline-offset:2px;transition:text-decoration-color .15s}

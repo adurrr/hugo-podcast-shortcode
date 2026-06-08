@@ -1,0 +1,37 @@
+{{- /* Figure – wavecast utility shortcode
+  Usage: {{< figure src="img.jpg" caption="My caption" alt="Description" width="600" >}}
+  Supports local resources and remote URLs. Lazy loading by default.
+*/ -}}
+{{- $src := .Get "src" -}}
+{{- $alt := .Get "alt" | default "" -}}
+{{- $caption := .Get "caption" -}}
+{{- $width := .Get "width" -}}
+{{- $href := .Get "href" -}}
+{{- $class := .Get "class" | default "" -}}
+
+<figure class="wvc-figure{{ with $class }} {{ . }}{{ end }}">
+  {{- if $href }}<a href="{{ $href }}" target="_blank" rel="noopener">{{ end -}}
+
+  {{- if or (hasPrefix $src "http://") (hasPrefix $src "https://") -}}
+    <img src="{{ $src }}" alt="{{ $alt }}" loading="lazy"
+      {{- with $width }} width="{{ . }}"{{ end -}}
+    >
+  {{- else -}}
+    {{- $res := or (.Page.Resources.GetMatch $src) (resources.GetMatch $src) -}}
+    {{- if $res -}}
+      <img src="{{ $res.RelPermalink }}" alt="{{ $alt }}" loading="lazy"
+        {{- with $width }} width="{{ . }}"{{ end -}}
+      >
+    {{- else -}}
+      <img src="{{ $src }}" alt="{{ $alt }}" loading="lazy"
+        {{- with $width }} width="{{ . }}"{{ end -}}
+      >
+    {{- end -}}
+  {{- end -}}
+
+  {{- if $href }}</a>{{ end -}}
+
+  {{- with $caption -}}
+  <figcaption class="wvc-figure__caption">{{ . | $.Page.RenderString }}</figcaption>
+  {{- end -}}
+</figure>
