@@ -140,6 +140,33 @@ class PodcastPlayer extends HTMLElement {
   /** Staleness threshold (seconds) — discard saved position older than this. */
   static get STATE_TTL_SECONDS() { return 3600; }
 
+  /* ------------------------------------------------------------------ */
+  /*  i18n — default English strings, overridable via window.wavecast   */
+  /* ------------------------------------------------------------------ */
+
+  static get DEFAULT_I18N() {
+    return {
+      player_region: "Podcast Player",
+      player_cover_alt: "Cover",
+      player_cover_of: "Cover: {title}",
+      player_rewind_title: "Rewind 15s",
+      player_rewind_label: "Rewind 15 seconds",
+      player_play: "Play",
+      player_pause: "Pause",
+      player_forward_title: "Forward 15s",
+      player_forward_label: "Forward 15 seconds",
+      player_seek: "Seek position",
+      player_mute_title: "Mute",
+      player_mute_label: "Toggle mute",
+      player_volume: "Volume",
+      player_speed: "Playback speed",
+      player_speed_label: "Playback speed {rate}×",
+      player_episode: "Podcast",
+      player_error: "Playback error",
+      player_no_source: "No audio source available",
+    };
+  }
+
   constructor() {
     super();
     /** @type {ShadowRoot} */
@@ -176,6 +203,21 @@ class PodcastPlayer extends HTMLElement {
     this._onPodcastClose = this._onPodcastClose.bind(this);
     this._onBeforeUnload = this._onBeforeUnload.bind(this);
     this._onStateChange = this._onStateChange.bind(this);
+
+    // i18n — merge window.wavecast.i18n over English defaults
+    const extI18n = (window.wavecast && window.wavecast.i18n) || {};
+    this._i = Object.assign({}, PodcastPlayer.DEFAULT_I18N, extI18n);
+
+    // Tiny helper: replace {key} placeholders in translated strings
+    this._t = (key, vars) => {
+      let s = this._i[key] || key;
+      if (vars) {
+        Object.keys(vars).forEach(k => {
+          s = s.replace("{" + k + "}", vars[k]);
+        });
+      }
+      return s;
+    };
   }
 
   /* ------------------------------------------------------------------ */
@@ -405,21 +447,21 @@ class PodcastPlayer extends HTMLElement {
           .chapters      { margin-top: 0; width: 100%; }
         }
       </style>
-      <div class="player" part="player" role="region" aria-label="Podcast Player">
+      <div class="player" part="player" role="region" aria-label="${this._t("player_region")}">
         <div class="title-row" part="header">
           <p class="title" part="title"></p>
           <slot name="description"></slot>
         </div>
         <div class="media-row" part="media-row">
           <div class="poster-wrap" part="poster-wrap">
-            <img class="poster" part="poster" src="" alt="Cover" hidden>
+            <img class="poster" part="poster" src="" alt="${this._t("player_cover_alt")}" hidden>
             <div class="play-overlay" part="play-overlay">
               <button class="btn btn-skip-back" part="skip-back-btn"
-                      title="Rewind 15s" aria-label="Rewind 15 seconds">${ICON_SKIP_BACK}</button>
+                      title="${this._t("player_rewind_title")}" aria-label="${this._t("player_rewind_label")}">${ICON_SKIP_BACK}</button>
               <button class="btn btn-play" part="play-btn"
-                      title="Play" aria-label="Play" aria-pressed="false"><svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg></button>
+                      title="${this._t("player_play")}" aria-label="${this._t("player_play")}" aria-pressed="false"><svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg></button>
               <button class="btn btn-skip-fwd" part="skip-fwd-btn"
-                      title="Forward 15s" aria-label="Forward 15 seconds">${ICON_SKIP_FWD}</button>
+                      title="${this._t("player_forward_title")}" aria-label="${this._t("player_forward_label")}">${ICON_SKIP_FWD}</button>
             </div>
           </div>
           <div class="body-area" part="body">
@@ -427,7 +469,7 @@ class PodcastPlayer extends HTMLElement {
               <div class="progress-wrap" part="progress-wrap">
                 <input type="range" class="progress" part="progress"
                        min="0" max="100" value="0"
-                       aria-label="Seek position" aria-valuetext="0:00 of 0:00">
+                       aria-label="${this._t("player_seek")}" aria-valuetext="0:00 of 0:00">
               </div>
               <span class="time time-current" part="time-current">--:--</span>
               <span class="time time-sep" part="time-sep">/</span>
@@ -436,13 +478,13 @@ class PodcastPlayer extends HTMLElement {
             <div class="extras-row" part="extras">
               <div class="vol-wrap" part="vol-wrap">
                 <button class="btn btn-mute" part="mute-btn"
-                        title="Mute" aria-label="Toggle mute" aria-pressed="false">${ICON_VOL_FULL}</button>
+                        title="${this._t("player_mute_title")}" aria-label="${this._t("player_mute_label")}" aria-pressed="false">${ICON_VOL_FULL}</button>
                 <input type="range" class="volume" part="volume"
                        min="0" max="1" step="0.05" value="1"
-                       aria-label="Volume">
+                       aria-label="${this._t("player_volume")}">
               </div>
               <button class="btn rate-btn" part="rate-btn"
-                      title="Playback speed" aria-label="Playback speed">1×</button>
+                      title="${this._t("player_speed")}" aria-label="${this._t("player_speed")}">1×</button>
             </div>
           </div>
         </div>
@@ -588,7 +630,7 @@ class PodcastPlayer extends HTMLElement {
       this._els.poster.src = val;
       this._els.poster.hidden = false;
       const title = this.getAttribute("title") || "";
-      this._els.poster.alt = title ? `Cover: ${title}` : "Cover";
+      this._els.poster.alt = title ? this._t("player_cover_of", {title}) : this._t("player_cover_alt");
     } else {
       this._els.poster.src = "";
       this._els.poster.hidden = true;
@@ -755,7 +797,7 @@ class PodcastPlayer extends HTMLElement {
       this._audio.playbackRate = next;
     }
     this._els.rateBtn.textContent = next + "\u00d7";
-    this._els.rateBtn.setAttribute("aria-label", `Playback speed ${next}\u00d7`);
+    this._els.rateBtn.setAttribute("aria-label", this._t("player_speed_label", {rate: next+"\u00d7"}));
     this._dispatchStateChange({ playbackRate: next });
   }
 
@@ -803,7 +845,7 @@ class PodcastPlayer extends HTMLElement {
     // Update Media Session metadata
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: this.getAttribute("title") || "Podcast",
+        title: this.getAttribute("title") || this._t("player_episode"),
         artist: "",
         album: "",
         artwork: this.getAttribute("poster")
@@ -815,9 +857,9 @@ class PodcastPlayer extends HTMLElement {
 
   _onPlay() {
     this._els.playBtn.innerHTML = '<svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M144 96h96v320h-96zM272 96h96v320h-96z"/></svg>';
-    this._els.playBtn.setAttribute("aria-label", "Pause");
+    this._els.playBtn.setAttribute("aria-label", this._t("player_pause"));
     this._els.playBtn.setAttribute("aria-pressed", "true");
-    this._els.playBtn.title = "Pause";
+    this._els.playBtn.title = this._t("player_pause");
     this._dispatchState();
     this._updateMediaSessionPlayback();
 
@@ -856,9 +898,9 @@ class PodcastPlayer extends HTMLElement {
 
   _onPause() {
     this._els.playBtn.innerHTML = '<svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg>';
-    this._els.playBtn.setAttribute("aria-label", "Play");
+    this._els.playBtn.setAttribute("aria-label", this._t("player_play"));
     this._els.playBtn.setAttribute("aria-pressed", "false");
-    this._els.playBtn.title = "Play";
+    this._els.playBtn.title = this._t("player_play");
     this._dispatchState();
     this._updateMediaSessionPlayback();
 
@@ -892,10 +934,10 @@ class PodcastPlayer extends HTMLElement {
 
   _onError() {
     const err = this._audio.error;
-    let msg = "Playback error";
+    let msg = this._t("player_error");
     if (err && err.message) msg += ": " + err.message;
     else if (this._audio.networkState === this._audio.NETWORK_NO_SOURCE) {
-      msg = "No audio source available";
+      msg = this._t("player_no_source");
     }
     this._els.error.textContent = msg;
     this._els.error.hidden = false;
@@ -973,9 +1015,9 @@ class PodcastPlayer extends HTMLElement {
     } else {
       // Ensure button shows play icon
       this._els.playBtn.innerHTML = '<svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg>';
-      this._els.playBtn.setAttribute("aria-label", "Play");
+      this._els.playBtn.setAttribute("aria-label", this._t("player_play"));
       this._els.playBtn.setAttribute("aria-pressed", "false");
-      this._els.playBtn.title = "Play";
+      this._els.playBtn.title = this._t("player_play");
     }
   }
 
@@ -986,9 +1028,9 @@ class PodcastPlayer extends HTMLElement {
     }
     // Always show play icon on close
     this._els.playBtn.innerHTML = '<svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M176 96l256 160-256 160V96z"/></svg>';
-    this._els.playBtn.setAttribute("aria-label", "Play");
+    this._els.playBtn.setAttribute("aria-label", this._t("player_play"));
     this._els.playBtn.setAttribute("aria-pressed", "false");
-    this._els.playBtn.title = "Play";
+    this._els.playBtn.title = this._t("player_play");
   }
 
   /** Respond to a play event from the footer or another inline player.
@@ -1003,9 +1045,9 @@ class PodcastPlayer extends HTMLElement {
     if (mySrc === src || src.endsWith(mySrc) || mySrc.endsWith(src)) {
       // Same source: someone else started our track — sync button to show pause
       this._els.playBtn.innerHTML = '<svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M144 96h96v320h-96zM272 96h96v320h-96z"/></svg>';
-      this._els.playBtn.setAttribute("aria-label", "Pause");
+      this._els.playBtn.setAttribute("aria-label", this._t("player_pause"));
       this._els.playBtn.setAttribute("aria-pressed", "true");
-      this._els.playBtn.title = "Pause";
+      this._els.playBtn.title = this._t("player_pause");
     } else if (!this._audio.paused) {
       // Different source: stop our playback (only one song at a time)
       this._audio.pause();
@@ -1363,6 +1405,35 @@ class PodcastFooter extends HTMLElement {
   static PERSISTENCE_KEY = "podcastPlayerState:footer";
   static STATE_TTL_SECONDS = 3600; // 1 hour
 
+  /* ------------------------------------------------------------------ */
+  /*  i18n — default English strings, overridable via window.wavecast   */
+  /* ------------------------------------------------------------------ */
+
+  static get DEFAULT_I18N() {
+    return {
+      player_region: "Podcast Player",
+      player_cover_alt: "Cover",
+      player_cover_of: "Cover: {title}",
+      player_rewind_title: "Rewind 15s",
+      player_rewind_label: "Rewind 15 seconds",
+      player_play: "Play",
+      player_pause: "Pause",
+      player_forward_title: "Forward 15s",
+      player_forward_label: "Forward 15 seconds",
+      player_seek: "Seek position",
+      player_mute_title: "Mute",
+      player_mute_label: "Toggle mute",
+      player_volume: "Volume",
+      player_speed: "Playback speed",
+      player_speed_label: "Playback speed {rate}×",
+      player_episode: "Podcast",
+      player_error: "Playback error",
+      player_no_source: "No audio source available",
+      player_close: "Close player",
+      player_unknown_episode: "Unknown Episode",
+    };
+  }
+
   constructor() {
     super();
     this._shadow = this.attachShadow({ mode: "open" });
@@ -1381,6 +1452,21 @@ class PodcastFooter extends HTMLElement {
     this._onExternalPause = this._onExternalPause.bind(this);
     this._onExternalSeek = this._onExternalSeek.bind(this);
     this._onStateChange = this._onStateChange.bind(this);
+
+    // i18n — merge window.wavecast.i18n over English defaults
+    const extI18n = (window.wavecast && window.wavecast.i18n) || {};
+    this._i = Object.assign({}, PodcastFooter.DEFAULT_I18N, extI18n);
+
+    // Tiny helper: replace {key} placeholders in translated strings
+    this._t = (key, vars) => {
+      let s = this._i[key] || key;
+      if (vars) {
+        Object.keys(vars).forEach(k => {
+          s = s.replace("{" + k + "}", vars[k]);
+        });
+      }
+      return s;
+    };
   }
 
   connectedCallback() {
@@ -1408,12 +1494,12 @@ class PodcastFooter extends HTMLElement {
   _syncUI() {
     if (this._audio.paused) {
       this._els.playBtn.innerHTML = `<svg viewBox="0 0 512 512" width="22" height="22"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z"/></svg>`;
-      this._els.playBtn.setAttribute("aria-label", "Play");
-      this._els.playBtn.title = "Play";
+      this._els.playBtn.setAttribute("aria-label", this._t("player_play"));
+      this._els.playBtn.title = this._t("player_play");
     } else {
       this._els.playBtn.innerHTML = `<svg viewBox="0 0 512 512" width="22" height="22"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm-16 328c0 8.8-7.2 16-16 16h-48c-8.8 0-16-7.2-16-16V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v160zm112 0c0 8.8-7.2 16-16 16h-48c-8.8 0-16-7.2-16-16V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v160z"/></svg>`;
-      this._els.playBtn.setAttribute("aria-label", "Pause");
-      this._els.playBtn.title = "Pause";
+      this._els.playBtn.setAttribute("aria-label", this._t("player_pause"));
+      this._els.playBtn.title = this._t("player_pause");
     }
     this._setMuteIcon();
     this._els.volume.value = this._audio.muted ? 0 : this._audio.volume;
@@ -1571,35 +1657,35 @@ class PodcastFooter extends HTMLElement {
         </div>
         <div class="controls">
           <button class="btn btn-skip-back" part="skip-back-btn"
-                  title="Rewind 15s" aria-label="Rewind 15 seconds">
+                  title="${this._t("player_rewind_title")}" aria-label="${this._t("player_rewind_label")}">
             <svg viewBox="0 0 20 20" width="16" height="16"><path fill="currentColor" d="M9 20C13.95 20 18 16 18 11.1111C18 6.22222 13.95 2.22222 9 2.22222V0L3.375 3.33333L9 6.66667V4.44444C12.7125 4.44444 15.75 7.44444 15.75 11.1111C15.75 14.7778 12.7125 17.7778 9 17.7778C5.2875 17.7778 2.25 14.7778 2.25 11.1111H0C0 16 4.05 20 9 20ZM5.89659 7.77778H7.20825V14.3545H5.87143V9.47977H5.81166C5.67326 9.69814 5.21088 9.96789 4.5 9.96789V8.8632C5.32726 8.8632 5.88086 8.17919 5.89659 7.77778ZM13.5 12.1612C13.5031 13.4907 12.528 14.4444 11.0937 14.4444C9.76002 14.4444 8.78807 13.632 8.76291 12.4952H10.084C10.1155 13.0058 10.5527 13.3526 11.0937 13.3526C11.7322 13.3526 12.1883 12.8805 12.1883 12.1965C12.1883 11.5061 11.7228 11.0276 11.0748 11.0244C10.6942 11.0244 10.3105 11.1946 10.1123 11.4676L8.90131 11.246L9.20642 7.77778H13.1446V8.91458H10.3294L10.1626 10.562H10.2004C10.4269 10.2376 10.9144 9.99679 11.4806 9.99679C12.6413 9.99679 13.5031 10.9024 13.5 12.1612Z"/></svg>
           </button>
           <button class="btn btn-play" part="play-btn"
-                  title="Play" aria-label="Play" aria-pressed="false">
+                  title="${this._t("player_play")}" aria-label="${this._t("player_play")}" aria-pressed="false">
             <svg viewBox="0 0 512 512" width="22" height="22"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z"/></svg>
           </button>
           <button class="btn btn-skip-fwd" part="skip-fwd-btn"
-                  title="Forward 15s" aria-label="Forward 15 seconds">
+                  title="${this._t("player_forward_title")}" aria-label="${this._t("player_forward_label")}">
             <svg viewBox="0 0 20 20" width="16" height="16"><path fill="currentColor" d="M9 20C4.05 20 0 16 0 11.1111C0 6.22222 4.05 2.22222 9 2.22222V0L14.625 3.33333L9 6.66667V4.44444C5.2875 4.44444 2.25 7.44444 2.25 11.1111C2.25 14.7778 5.2875 17.7778 9 17.7778C12.7125 17.7778 15.75 14.7778 15.75 11.1111H18C18 16 13.95 20 9 20ZM5.89659 7.77778H7.20825V14.3545H5.87143V9.47977H5.81166C5.67326 9.69814 5.21088 9.96789 4.5 9.96789V8.8632C5.32726 8.8632 5.88086 8.17919 5.89659 7.77778ZM13.5 12.1612C13.5031 13.4907 12.528 14.4444 11.0937 14.4444C9.76002 14.4444 8.78807 13.632 8.76291 12.4952H10.084C10.1155 13.0058 10.5527 13.3526 11.0937 13.3526C11.7322 13.3526 12.1883 12.8805 12.1883 12.1965C12.1883 11.5061 11.7228 11.0276 11.0748 11.0244C10.6942 11.0244 10.3105 11.1946 10.1123 11.4676L8.90131 11.246L9.20642 7.77778H13.1446V8.91458H10.3294L10.1626 10.562H10.2004C10.4269 10.2376 10.9144 9.99679 11.4806 9.99679C12.6413 9.99679 13.5031 10.9024 13.5 12.1612Z"/></svg>
           </button>
         </div>
         <div class="progress-wrap">
           <input type="range" class="progress" part="progress" min="0" max="100" value="0"
-                 aria-label="Seek position" aria-valuetext="0:00 of 0:00">
+                 aria-label="${this._t("player_seek")}" aria-valuetext="0:00 of 0:00">
         </div>
         <span class="time" part="time-current">--:--</span>
         <span class="time-sep" part="time-sep">/</span>
         <span class="time" part="time-duration">--:--</span>
         <div class="vol-wrap" part="vol-wrap">
-          <button class="btn mute-btn" part="mute-btn" title="Mute" aria-label="Toggle mute">
+          <button class="btn mute-btn" part="mute-btn" title="${this._t("player_mute_title")}" aria-label="${this._t("player_mute_label")}">
             <svg viewBox="0 0 576 512" width="18" height="18"><path fill="currentColor" d="M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zm233.32-51.08c-11.17-7.33-26.18-4.24-33.51 6.95-7.34 11.17-4.22 26.18 6.95 33.51 66.27 43.49 105.82 116.6 105.82 195.58 0 78.98-39.55 152.09-105.82 195.58-11.17 7.32-14.29 22.34-6.95 33.5 7.04 10.71 21.93 14.56 33.51 6.95C528.27 439.58 576 351.33 576 256S528.27 72.43 448.35 19.97zM480 256c0-63.53-32.06-121.94-85.77-156.24-11.19-7.14-26.03-3.82-33.12 7.46s-3.78 26.21 7.41 33.36C408.27 165.97 432 209.11 432 256s-23.73 90.03-63.48 115.42c-11.19 7.14-14.5 22.07-7.41 33.36 6.51 10.36 21.12 15.14 33.12 7.46C447.94 377.94 480 319.54 480 256z"/></svg>
           </button>
           <input type="range" class="volume" part="volume" min="0" max="1" step="0.05" value="1"
-                 aria-label="Volume">
+                 aria-label="${this._t("player_volume")}">
         </div>
         <button class="rate-btn" part="rate-btn"
-                title="Playback speed" aria-label="Playback speed">1×</button>
-        <button class="close" part="close-btn" title="Close player" aria-label="Close player">
+                title="${this._t("player_speed")}" aria-label="${this._t("player_speed")}">1×</button>
+        <button class="close" part="close-btn" title="${this._t("player_close")}" aria-label="${this._t("player_close")}">
           <svg viewBox="0 0 12 12" width="14" height="14"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M3 9l6-6m0 6L3 3"/></svg>
         </button>
       </div>
@@ -1673,7 +1759,7 @@ class PodcastFooter extends HTMLElement {
     }
 
     // New source — load and play
-    this._els.title.textContent = title || "Unknown Episode";
+    this._els.title.textContent = title || this._t("player_unknown_episode");
     this._els.source.textContent = src.replace(/^https?:\/\//, "").split("/")[0] || src;
 
     if (poster) {
@@ -1859,8 +1945,8 @@ class PodcastFooter extends HTMLElement {
 
   _onPlay() {
     this._els.playBtn.innerHTML = `<svg viewBox="0 0 512 512" width="22" height="22"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm-16 328c0 8.8-7.2 16-16 16h-48c-8.8 0-16-7.2-16-16V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v160zm112 0c0 8.8-7.2 16-16 16h-48c-8.8 0-16-7.2-16-16V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v160z"/></svg>`;
-    this._els.playBtn.setAttribute("aria-label", "Pause");
-    this._els.playBtn.title = "Pause";
+    this._els.playBtn.setAttribute("aria-label", this._t("player_pause"));
+    this._els.playBtn.title = this._t("player_pause");
 
     // Notify inline players to sync their UI
     this.dispatchEvent(new CustomEvent("podcast-play", {
@@ -1877,8 +1963,8 @@ class PodcastFooter extends HTMLElement {
 
   _onPause() {
     this._els.playBtn.innerHTML = `<svg viewBox="0 0 512 512" width="22" height="22"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z"/></svg>`;
-    this._els.playBtn.setAttribute("aria-label", "Play");
-    this._els.playBtn.title = "Play";
+    this._els.playBtn.setAttribute("aria-label", this._t("player_play"));
+    this._els.playBtn.title = this._t("player_play");
 
     // Notify inline players to sync their UI
     this.dispatchEvent(new CustomEvent("podcast-pause", {
@@ -1950,7 +2036,7 @@ class PodcastFooter extends HTMLElement {
       this._els.volume.value = this._audio.muted ? 0 : this._audio.volume;
       this._setMuteIcon();
       this._els.rateBtn.textContent = (state.playbackRate || 1) + "×";
-      this._els.title.textContent = state.title || "Unknown Episode";
+      this._els.title.textContent = state.title || this._t("player_unknown_episode");
       this._els.source.textContent = state.src.replace(/^https?:\/\//, "").split("/")[0] || state.src;
 
       if (state.poster) {

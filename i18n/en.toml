@@ -1,0 +1,338 @@
+# ── Podcast Player ──
+[player_play]
+other = "Play"
+
+[player_pause]
+other = "Pause"
+
+[player_rewind_title]
+other = "Rewind 15s"
+
+[player_rewind_label]
+other = "Rewind 15 seconds"
+
+[player_forward_title]
+other = "Forward 15s"
+
+[player_forward_label]
+other = "Forward 15 seconds"
+
+[player_mute_title]
+other = "Mute"
+
+[player_mute_label]
+other = "Toggle mute"
+
+[player_volume]
+other = "Volume"
+
+[player_speed]
+other = "Playback speed"
+
+[player_speed_label]
+other = "Playback speed {rate}×"
+
+[player_seek]
+other = "Seek position"
+
+[player_cover_alt]
+other = "Cover"
+
+[player_cover_of]
+other = "Cover: {title}"
+
+[player_episode]
+other = "Podcast"
+
+[player_close]
+other = "Close player"
+
+[player_region]
+other = "Podcast Player"
+
+[player_error]
+other = "Playback error"
+
+[player_no_source]
+other = "No audio source available"
+
+[player_unknown_episode]
+other = "Unknown Episode"
+
+# ── Carousel ──
+[carousel_label]
+other = "Image carousel"
+
+[carousel_previous]
+other = "Previous slide"
+
+[carousel_next]
+other = "Next slide"
+
+# ── Video ──
+[video_unsupported]
+other = "Your browser does not support the video tag."
+
+# ── Code Copy ──
+[code_copy_title]
+other = "Copy code"
+
+[code_copy_label]
+other = "Copy code to clipboard"
+
+[code_copied]
+other = "Copied!"
+
+[code_copied_label]
+other = "Code copied"
+
+# ── Language Switcher ──
+[lang_select]
+other = "Select language"
+
+[lang_label]
+other = "Language"
+
+# ── Site Header / Footer ──
+[site_title]
+other = "Wavecast Radio"
+
+[footer_rss]
+other = "RSS"
+
+[footer_github]
+other = "GitHub"
+
+[footer_text]
+other = "Wavecast Radio: Tune in to Tech. Powered by <a href=\"https://github.com/adurrr/wavecast\" target=\"_blank\" rel=\"noopener\">Wavecast</a>, built with Hugo."
+
+# ── Home Page ──
+[home_info_card]
+other = """<strong>Notice the player at the bottom of the page?</strong> That's Wavecast's sticky footer player. It follows you across all pages, stays in sync with every episode, and remembers your position, volume, and speed. Try navigating between shows while audio is playing."""
+
+[home_section_programs]
+other = "Our Programs"
+
+[home_section_programs_desc]
+other = "Four shows covering the technology topics that matter."
+
+[home_section_episodes]
+other = "Latest Episodes"
+
+[home_section_episodes_desc]
+other = "Recently aired episodes across all programs."
+
+[home_section_about]
+other = "About Wavecast"
+
+[home_section_about_desc]
+other = "The technology behind the station."
+
+[home_feature_persistent_title]
+other = "Persistent Audio"
+
+[home_feature_persistent_desc]
+other = "Navigate pages without restarting. Footer player follows you everywhere."
+
+[home_feature_sync_title]
+other = "Bidirectional Sync"
+
+[home_feature_sync_desc]
+other = "Play or pause any inline player, and the footer stays perfectly in sync."
+
+[home_feature_theme_title]
+other = "Hugo Theme & Module"
+
+[home_feature_theme_desc]
+other = "Drop into any Hugo site. Works as a theme or as a Hugo module."
+
+[home_feature_podcasts_title]
+other = "Real Podcasts"
+
+[home_feature_podcasts_desc]
+other = "Episodes from Coder Radio, Reality 2.0, DevSecOps Talks, and more."
+
+[home_cta_learn]
+other = "Learn More About Wavecast"
+
+[home_cta_github]
+other = "GitHub"
+
+# ── About Page ──
+[about_title]
+other = "About Wavecast Radio"
+
+[about_tagline]
+other = "Tune in to Tech"
+
+[about_desc]
+other = """Wavecast Radio is a live demo built with <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">Wavecast</a>, an open source persistent <strong>&lt;podcast-player&gt;</strong> Web Component for Hugo. Professional program pages, episode listings with chapters and posters, and audio that never stops even as you navigate between pages."""
+
+[about_cta_programs]
+other = "Browse Programs"
+
+[about_cta_schedule]
+other = "View Schedule"
+
+[about_section_how]
+other = "How It Works"
+
+[about_section_how_desc]
+other = """The sticky footer player uses <code>data-turbolinks-permanent</code> to survive page navigation. Start an episode, click through to other pages, and the audio keeps playing uninterrupted. The footer syncs bidirectionally with every inline player on the page: pausing one pauses both."""
+
+[about_feature_persistent_desc]
+other = "Navigate between pages without restarting. Your audio survives navigation."
+
+[about_feature_sync_desc]
+other = "Inline and footer players stay in sync. Pause one, both pause."
+
+[about_feature_chapters_title]
+other = "Chapters"
+
+[about_feature_chapters_desc]
+other = "Timestamp-labeled navigation within episodes for easy browsing."
+
+[about_feature_sources_title]
+other = "Multiple Sources"
+
+[about_feature_sources_desc]
+other = "Local audio, remote MP3s, AzuraCast streams, and iVoox episodes."
+
+[about_section_stack]
+other = "Tech Stack"
+
+[about_section_stack_desc]
+other = "Built with modern tools for performance and reliability."
+
+[about_stack_hugo_desc]
+other = "v0.158+, Modules & Themes"
+
+[about_stack_webcomp_desc]
+other = "Vanilla JS, Shadow DOM"
+
+[about_stack_turbo_desc]
+other = "Fast navigation"
+
+[about_stack_tests_desc]
+other = "Vitest + Playwright"
+
+[about_section_attribution]
+other = "Real Podcasts, Real Audio"
+
+[about_section_attribution_desc]
+other = "The episodes on this site embed real tech podcasts, used with attribution."
+
+[about_attr_coder_desc]
+other = "Programming and developer culture by Jupiter Broadcasting"
+
+[about_attr_reality_desc]
+other = "Open source and technology conversations"
+
+[about_attr_devsecops_desc]
+other = "DevOps, security, and SRE discussions"
+
+[about_attr_oss_desc]
+other = "Open source project highlights"
+
+[about_cta_github]
+other = "View on GitHub"
+
+[about_cta_contact]
+other = "Contact"
+
+# ── Schedule Page ──
+[schedule_title]
+other = "Schedule"
+
+[schedule_desc]
+other = "Our weekly programming lineup. All times are Eastern."
+
+[schedule_day_monday]
+other = "Monday"
+
+[schedule_day_tuesday]
+other = "Tuesday"
+
+[schedule_day_wednesday]
+other = "Wednesday"
+
+[schedule_day_thursday]
+other = "Thursday"
+
+[schedule_day_friday]
+other = "Friday"
+
+[schedule_day_mon]
+other = "Mon"
+
+[schedule_day_tue]
+other = "Tue"
+
+[schedule_day_wed]
+other = "Wed"
+
+[schedule_day_thu]
+other = "Thu"
+
+[schedule_day_fri]
+other = "Fri"
+
+[schedule_section_weekly]
+other = "Weekly Schedule"
+
+[schedule_section_weekly_desc]
+other = "One show each day. Click any program to learn more."
+
+[schedule_no_programs]
+other = "No programs today"
+
+[schedule_section_upcoming]
+other = "Upcoming Episodes"
+
+[schedule_listen_now]
+other = "Listen Now"
+
+[schedule_cta_programs]
+other = "Browse Programs"
+
+[schedule_cta_home]
+other = "Back to Home"
+
+# ── Programs List Page ──
+[programs_list_title]
+other = "Our Programs"
+
+[programs_list_desc]
+other = "Four shows exploring the technologies that define our industry."
+
+[programs_list_cta_home]
+other = "← Back to Home"
+
+[programs_list_cta_schedule]
+other = "View Schedule"
+
+# ── Program Single Page ──
+[program_section_episodes]
+other = "Episodes"
+
+[program_listen]
+other = "Listen →"
+
+[program_cta_all]
+other = "← All Programs"
+
+[program_cta_schedule]
+other = "Schedule"
+
+# ── Episode Page ──
+[episode_show_notes]
+other = "Show Notes"
+
+[episode_attribution]
+other = "Episode from <a href=\"{{ .url }}\" target=\"_blank\" rel=\"noopener\">{{ .text }}</a>. Used with attribution."
+
+# ── Program Card ──
+[program_card_episodes]
+other = "{{ .count }} episodes"
+
+

@@ -1,0 +1,39 @@
+{{- if hugo.IsMultilingual }}
+  {{- /* Build a lookup for per-page translations */}}
+  {{- $translations := dict }}
+  {{- range .Site.Home.AllTranslations }}
+    {{- $translations = merge $translations (dict .Language.Lang .) }}
+  {{- end }}
+  {{- range .Translations }}
+    {{- $translations = merge $translations (dict .Language.Lang .) }}
+  {{- end }}
+
+  <div class="lang-dropdown">
+    <button class="lang-trigger" aria-expanded="false" aria-haspopup="true" aria-label="{{ i18n "lang_select" }}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      <span>{{ .Site.Language.LanguageName }}</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lang-chevron">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </button>
+    <ul class="lang-menu" role="menu">
+      {{- range .Site.Languages }}
+        {{- if ne .Lang $.Site.Language.Lang }}
+          {{- with index $translations .Lang }}
+      <li role="none">
+        <a href="{{ .Permalink }}" lang="{{ .Language.Lang }}" role="menuitem" class="lang-option">{{ .Language.LanguageName }}</a>
+      </li>
+          {{- else }}
+      <li role="none">
+        <a href="{{ .Lang | absLangURL }}" lang="{{ .Lang }}" role="menuitem" class="lang-option">{{ .LanguageName }}</a>
+      </li>
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    </ul>
+  </div>
+{{- end }}

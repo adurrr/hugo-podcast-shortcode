@@ -2,56 +2,56 @@
 {{ define "main" }}
 
 <section class="hero">
-  <h1>About Wavecast Radio</h1>
-  <p class="tagline">Tune in to Tech</p>
-  <p>Wavecast Radio is a live demo built with <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">Wavecast</a>, an open source persistent <strong>&lt;podcast-player&gt;</strong> Web Component for Hugo. Professional program pages, episode listings with chapters and posters, and audio that never stops even as you navigate between pages.</p>
+  <h1>{{ i18n "about_title" }}</h1>
+  <p class="tagline">{{ i18n "about_tagline" }}</p>
+  <p>{{ i18n "about_desc" | safeHTML }}</p>
   <div class="nav-buttons">
-    <a href="{{ relref . "programs/_index.md" }}" class="nav-button nav-button-primary">Browse Programs</a>
-    <a href="{{ relref . "schedule.md" }}" class="nav-button">View Schedule</a>
+    <a href="{{ relref . "programs/_index.md" }}" class="nav-button nav-button-primary">{{ i18n "about_cta_programs" }}</a>
+    <a href="{{ relref . "schedule.md" }}" class="nav-button">{{ i18n "about_cta_schedule" }}</a>
   </div>
 </section>
 
 {{- /* How It Works */ -}}
 <section class="demo-section">
-  <h2>How It Works</h2>
-  <p class="desc">The sticky footer player uses <code>data-turbolinks-permanent</code> to survive page navigation. Start an episode, click through to other pages, and the audio keeps playing uninterrupted. The footer syncs bidirectionally with every inline player on the page: pausing one pauses both.</p>
+  <h2>{{ i18n "about_section_how" }}</h2>
+  <p class="desc">{{ i18n "about_section_how_desc" | safeHTML }}</p>
 
   <div class="program-grid">
     <div class="program-card" style="cursor:default">
       <div class="program-card-icon">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
-      <h3>Persistent Audio</h3>
-      <p>Navigate between pages without restarting. Your audio survives navigation.</p>
+      <h3>{{ i18n "home_feature_persistent_title" }}</h3>
+      <p>{{ i18n "about_feature_persistent_desc" }}</p>
     </div>
     <div class="program-card" style="cursor:default">
       <div class="program-card-icon">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
       </div>
-      <h3>Bidirectional Sync</h3>
-      <p>Inline and footer players stay in sync. Pause one, both pause.</p>
+      <h3>{{ i18n "home_feature_sync_title" }}</h3>
+      <p>{{ i18n "about_feature_sync_desc" }}</p>
     </div>
     <div class="program-card" style="cursor:default">
       <div class="program-card-icon">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       </div>
-      <h3>Chapters</h3>
-      <p>Timestamp-labeled navigation within episodes for easy browsing.</p>
+      <h3>{{ i18n "about_feature_chapters_title" }}</h3>
+      <p>{{ i18n "about_feature_chapters_desc" }}</p>
     </div>
     <div class="program-card" style="cursor:default">
       <div class="program-card-icon">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
       </div>
-      <h3>Multiple Sources</h3>
-      <p>Local audio, remote MP3s, AzuraCast streams, and iVoox episodes.</p>
+      <h3>{{ i18n "about_feature_sources_title" }}</h3>
+      <p>{{ i18n "about_feature_sources_desc" }}</p>
     </div>
   </div>
 </section>
 
 {{- /* Tech Stack */ -}}
 <section class="demo-section">
-  <h2>Tech Stack</h2>
-  <p class="desc">Built with modern tools for performance and reliability.</p>
+  <h2>{{ i18n "about_section_stack" }}</h2>
+  <p class="desc">{{ i18n "about_section_stack_desc" }}</p>
 
   <div class="program-grid">
     <div class="program-card" style="cursor:default;text-align:center;align-items:center">
@@ -59,62 +59,62 @@
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg>
       </div>
       <h3>Hugo</h3>
-      <p>v0.158+, Modules &amp; Themes</p>
+      <p>{{ i18n "about_stack_hugo_desc" }}</p>
     </div>
     <div class="program-card" style="cursor:default;text-align:center;align-items:center">
       <div class="program-card-icon">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       </div>
       <h3>Web Components</h3>
-      <p>Vanilla JS, Shadow DOM</p>
+      <p>{{ i18n "about_stack_webcomp_desc" }}</p>
     </div>
     <div class="program-card" style="cursor:default;text-align:center;align-items:center">
       <div class="program-card-icon">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
       </div>
       <h3>Turbolinks 5</h3>
-      <p>Fast navigation</p>
+      <p>{{ i18n "about_stack_turbo_desc" }}</p>
     </div>
     <div class="program-card" style="cursor:default;text-align:center;align-items:center">
       <div class="program-card-icon">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
       </div>
       <h3>80 Unit Tests</h3>
-      <p>Vitest + Playwright</p>
+      <p>{{ i18n "about_stack_tests_desc" }}</p>
     </div>
   </div>
 </section>
 
 {{- /* Attribution */ -}}
 <section class="demo-section">
-  <h2>Real Podcasts, Real Audio</h2>
-  <p class="desc">The episodes on this site embed real tech podcasts, used with attribution.</p>
+  <h2>{{ i18n "about_section_attribution" }}</h2>
+  <p class="desc">{{ i18n "about_section_attribution_desc" }}</p>
 
   <div class="program-grid">
     <a href="https://coder.show" target="_blank" rel="noopener" class="program-card">
       <h3>Coder Radio</h3>
-      <p>Programming and developer culture by Jupiter Broadcasting</p>
+      <p>{{ i18n "about_attr_coder_desc" }}</p>
     </a>
     <a href="https://www.reality2cast.com/" target="_blank" rel="noopener" class="program-card">
       <h3>Reality 2.0</h3>
-      <p>Open source and technology conversations</p>
+      <p>{{ i18n "about_attr_reality_desc" }}</p>
     </a>
     <a href="https://devsecops.fm/" target="_blank" rel="noopener" class="program-card">
       <h3>DevSecOps Talks</h3>
-      <p>DevOps, security, and SRE discussions</p>
+      <p>{{ i18n "about_attr_devsecops_desc" }}</p>
     </a>
     <a href="https://opensourcesystempodcast.vf.io/" target="_blank" rel="noopener" class="program-card">
       <h3>Open Source Podcast</h3>
-      <p>Open source project highlights</p>
+      <p>{{ i18n "about_attr_oss_desc" }}</p>
     </a>
   </div>
 </section>
 
 {{- /* CTA */ -}}
 <div class="nav-buttons" style="margin-bottom:2rem">
-  <a href="{{ relref . "programs/_index.md" }}" class="nav-button nav-button-primary">Browse Programs</a>
-  <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener" class="nav-button">View on GitHub</a>
-  <a href="{{ relref . "contact.md" }}" class="nav-button">Contact</a>
+  <a href="{{ relref . "programs/_index.md" }}" class="nav-button nav-button-primary">{{ i18n "about_cta_programs" }}</a>
+  <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener" class="nav-button">{{ i18n "about_cta_github" }}</a>
+  <a href="{{ relref . "contact.md" }}" class="nav-button">{{ i18n "about_cta_contact" }}</a>
 </div>
 
 {{ end }}

@@ -1,0 +1,10 @@
+[player_play]
+other = "Reproducir"
+[carousel_label]
+other = "Carrusel de imágenes"
+[carousel_previous]
+other = "Diapositiva anterior"
+[carousel_next]
+other = "Diapositiva siguiente"
+[video_unsupported]
+other = "Su navegador no soporta la etiqueta de video."

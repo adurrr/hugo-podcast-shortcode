@@ -5,6 +5,12 @@
 (function () {
   'use strict';
 
+  var i18n = (window.wavecast && window.wavecast.i18n) || {};
+  var CODE_COPY_TITLE = i18n.code_copy_title || 'Copy code';
+  var CODE_COPY_LABEL = i18n.code_copy_label || 'Copy code to clipboard';
+  var CODE_COPIED = i18n.code_copied || 'Copied!';
+  var CODE_COPIED_LABEL = i18n.code_copied_label || 'Code copied';
+
   // Collect both .highlight wrappers and standalone <pre> elements.
   // Filter out <pre> that are already inside .highlight (they get a button
   // via the parent).  Also skip <pre> that are empty or inside the
@@ -31,8 +37,8 @@
     var btn = document.createElement('button');
     btn.className = 'code-copy-btn';
     btn.type = 'button';
-    btn.title = 'Copy code';
-    btn.setAttribute('aria-label', 'Copy code to clipboard');
+    btn.title = CODE_COPY_TITLE;
+    btn.setAttribute('aria-label', CODE_COPY_LABEL);
     btn.innerHTML =
       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
       '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>' +
@@ -70,12 +76,12 @@
 
   function showCopied(btn) {
     btn.classList.add('copied');
-    btn.title = 'Copied!';
-    btn.setAttribute('aria-label', 'Code copied');
+    btn.title = CODE_COPIED;
+    btn.setAttribute('aria-label', CODE_COPIED_LABEL);
     setTimeout(function () {
       btn.classList.remove('copied');
-      btn.title = 'Copy code';
-      btn.setAttribute('aria-label', 'Copy code to clipboard');
+      btn.title = CODE_COPY_TITLE;
+      btn.setAttribute('aria-label', CODE_COPY_LABEL);
     }, 2000);
   }
 

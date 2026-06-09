@@ -1,10 +1,18 @@
 <!DOCTYPE html>
-<html lang="{{ .Site.LanguageCode }}" data-theme="light">
+<html lang="{{ .Site.Language.Lang }}" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ block "title" . }}{{ .Site.Title }}{{ end }}</title>
   <meta name="description" content="{{ site.Params.description }}">
+  {{- if .IsTranslated }}
+    {{- range .Translations }}
+    <link rel="alternate" hreflang="{{ .Language.Lang }}" href="{{ .Permalink }}">
+    {{- end }}
+  {{- end -}}
+  {{- if hugo.IsMultilingual }}
+    <link rel="alternate" hreflang="x-default" href="{{ .Site.BaseURL }}">
+  {{- end -}}
   {{ with .OutputFormats.Get "rss" -}}
     {{ printf `<link rel=%q type=%q href=%q title=%q>` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
   {{ end -}}
@@ -58,6 +66,36 @@
     /* ── GitHub icon link ── */
     .github-link{display:inline-flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:0.35rem;line-height:1;text-decoration:none;transition:background .15s,border-color .15s,color .15s}
     .github-link:hover{background:var(--border);color:var(--accent)}
+
+    /* ── Language dropdown ── */
+    .lang-dropdown { position:relative; display:inline-flex; align-items:center }
+    .lang-trigger {
+      display:inline-flex; align-items:center; gap:4px;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--radius); color:var(--text);
+      cursor:pointer; font-size:0.82rem; padding:0.35rem 0.65rem;
+      transition:background .15s,border-color .15s; white-space:nowrap
+    }
+    .lang-trigger:hover { background:var(--border) }
+    .lang-trigger:focus-visible { outline:2px solid var(--accent); outline-offset:1px }
+    .lang-trigger .lang-chevron { transition:transform .2s }
+    .lang-trigger[aria-expanded="true"] .lang-chevron { transform:rotate(180deg) }
+    .lang-menu {
+      display:none; position:absolute; top:100%; right:0;
+      min-width:120px; background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--radius); box-shadow:0 4px 12px rgba(0,0,0,0.12);
+      padding:4px 0; z-index:200; list-style:none; margin:0
+    }
+    .lang-trigger:focus ~ .lang-menu,
+    .lang-trigger[aria-expanded="true"] ~ .lang-menu,
+    .lang-dropdown:hover .lang-menu,
+    .lang-menu:focus-within { display:block }
+    .lang-option {
+      display:block; padding:6px 14px; font-size:0.85rem;
+      color:var(--text); text-decoration:none;
+      transition:background .15s,color .15s; white-space:nowrap
+    }
+    .lang-option:hover { background:var(--accent); color:#fff }
 
     /* ── Hero ── */
     .hero{padding:2rem 0 1rem}
@@ -219,7 +257,8 @@
       header .container{gap:0.5rem}
       header nav{order:4;width:100%;justify-content:flex-start;padding-top:0.35rem;border-top:1px solid var(--border)}
       .github-link{order:2}
-      #theme-toggle{order:3}
+      .lang-dropdown{order:3}
+      #theme-toggle{order:4}
       .program-grid{grid-template-columns:1fr}
     }
   </style>
@@ -229,19 +268,20 @@
     <div class="container">
       <a href="{{ .Site.Home.RelPermalink }}" class="site-title">
         <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="11" fill="currentColor"/><circle cx="12" cy="12" r="7" fill="#fff"/><path d="M6.5 18a6 6 0 0 0 11 0" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M4.5 16a9 9 0 0 0 15 0" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M3 14.5a11 11 0 0 0 18 0" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><polygon points="9.5,7.5 16.5,12 9.5,16.5" fill="currentColor"/></svg>
-        Wavecast Radio
+        {{ i18n "site_title" }}
       </a>
       <nav>
-        <a href="{{ .Site.Home.RelPermalink }}" class="nav-link">Home</a>
-        <a href="{{ "programs/_index.md" | relref . }}" class="nav-link">Programs</a>
-        <a href="{{ "schedule.md" | relref . }}" class="nav-link">Schedule</a>
-        <a href="{{ "about.md" | relref . }}" class="nav-link">About</a>
-        <a href="{{ "contact.md" | relref . }}" class="nav-link">Contact</a>
+        {{- $prefix := $.Site.Home.RelPermalink }}
+        {{- range .Site.Menus.main }}
+        {{- $menuPath := strings.TrimPrefix "/wavecast/" .URL }}
+        <a href="{{ $prefix }}{{ $menuPath }}" class="nav-link">{{ .Name }}</a>
+        {{- end }}
       </nav>
       <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener" class="github-link" aria-label="View on GitHub">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
       </a>
-      <button id="theme-toggle" aria-label="Toggle color theme"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Dark</button>
+      {{- partial "language-switcher.html" . -}}
+      {{- partial "theme-toggle.html" . -}}
     </div>
   </header>
 
@@ -254,15 +294,15 @@
   <footer>
     <div class="container">
       <div class="footer-nav">
-        <a href="{{ .Site.Home.RelPermalink }}">Home</a>
-        <a href="{{ "programs/_index.md" | relref . }}">Programs</a>
-        <a href="{{ "schedule.md" | relref . }}">Schedule</a>
-        <a href="{{ "about.md" | relref . }}">About</a>
-        <a href="{{ "contact.md" | relref . }}">Contact</a>
-        <a href="{{ "index.xml" | relURL }}"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle;margin-right:3px"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/></svg>RSS</a>
-        <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">GitHub</a>
+        {{- $prefix := $.Site.Home.RelPermalink }}
+        {{- range .Site.Menus.main }}
+        {{- $menuPath := strings.TrimPrefix "/wavecast/" .URL }}
+        <a href="{{ $prefix }}{{ $menuPath }}">{{ .Name }}</a>
+        {{- end }}
+        <a href="{{ "index.xml" | relURL }}"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle;margin-right:3px"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/></svg>{{ i18n "footer_rss" }}</a>
+        <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">{{ i18n "footer_github" }}</a>
       </div>
-      <p>Wavecast Radio: Tune in to Tech. Powered by <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">Wavecast</a>, built with Hugo.</p>
+      <p>{{ i18n "footer_text" | safeHTML }}</p>
     </div>
   </footer>
 
@@ -301,5 +341,49 @@
       });
     })();
   </script>
+  {{- /* i18n — inject translatable strings for JS components */}}
+  {{- $i18nKeys := slice
+    "player_play" "player_pause"
+    "player_rewind_title" "player_rewind_label"
+    "player_forward_title" "player_forward_label"
+    "player_mute_title" "player_mute_label"
+    "player_volume" "player_speed" "player_speed_label"
+    "player_seek" "player_cover_alt" "player_cover_of"
+    "player_episode" "player_close" "player_region"
+    "player_error" "player_no_source" "player_unknown_episode"
+    "code_copy_title" "code_copy_label" "code_copied" "code_copied_label"
+  -}}
+  <script>
+  window.wavecast = window.wavecast || {};
+  window.wavecast.i18n = {
+    {{- range $i18nKeys }}
+    {{ . | jsonify | safeJS }}: {{ i18n . | jsonify | safeJS }},
+    {{- end }}
+  };
+  </script>
+  {{- /* Browser language auto-detection — redirect to preferred language on first visit */}}
+  {{- if hugo.IsMultilingual }}
+  <script>
+  (function() {
+    var KEY = 'lang-pref';
+    try {
+      if (sessionStorage.getItem(KEY)) return;
+      sessionStorage.setItem(KEY, '1');
+    } catch(e) { return; }
+
+    var current = '{{ .Site.Language.Lang }}';
+    var browser = (navigator.language || navigator.userLanguage || '').split('-')[0];
+    if (!browser || browser === current) return;
+
+    {{- range .Site.Languages }}
+      {{- if ne .Lang $.Site.Language.Lang }}
+    if (browser === '{{ .Lang }}') {
+      window.location.href = '{{ $.Site.BaseURL }}{{ .Lang }}/';
+    }
+      {{- end }}
+    {{- end }}
+  })();
+  </script>
+  {{- end }}
 </body>
 </html>

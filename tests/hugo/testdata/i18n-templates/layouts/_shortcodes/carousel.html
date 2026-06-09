@@ -1,0 +1,11 @@
+{{- $images := .Get "images" | default "" -}}
+{{- $images := split $images "," -}}
+<div class="wvc-carousel" id="wvc-carousel-{{ .Ordinal }}" aria-label="{{ i18n "carousel_label" }}">
+  <div class="wvc-carousel__track">
+    {{- range $images }}
+    <div class="wvc-carousel__slide"><img src="{{ . }}" alt="" loading="lazy"></div>
+    {{- end }}
+  </div>
+  <button class="wvc-carousel__btn wvc-carousel__btn--prev" aria-label="{{ i18n "carousel_previous" }}" type="button">&lsaquo;</button>
+  <button class="wvc-carousel__btn wvc-carousel__btn--next" aria-label="{{ i18n "carousel_next" }}" type="button">&rsaquo;</button>
+</div>

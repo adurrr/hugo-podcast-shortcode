@@ -11,7 +11,7 @@
   {{- $sorted := sort $progEpisodes "Params.episode" "desc" }}
 
   <section class="demo-section">
-    <h2>Episodes</h2>
+    <h2>{{ i18n "program_section_episodes" }}</h2>
     {{- range $sorted }}
     <div class="episode-entry">
       <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
@@ -24,13 +24,13 @@
         {{- end }}
       </div>
       {{- end }}
-      <a href="{{ .RelPermalink }}" class="nav-button" style="margin-top:1rem">Listen →</a>
+      <a href="{{ .RelPermalink }}" class="nav-button" style="margin-top:1rem">{{ i18n "program_listen" }}</a>
     </div>
     {{- end }}
   </section>
 
   <div class="nav-buttons">
-    <a href="{{ relref . "programs/_index.md" }}" class="nav-button">← All Programs</a>
-    <a href="{{ relref . "schedule.md" }}" class="nav-button nav-button-primary">Schedule</a>
+    <a href="{{ relref . "programs/_index.md" }}" class="nav-button">{{ i18n "program_cta_all" }}</a>
+    <a href="{{ relref . "schedule.md" }}" class="nav-button nav-button-primary">{{ i18n "program_cta_schedule" }}</a>
   </div>
 {{ end }}

@@ -1,0 +1,8 @@
+[carousel_label]
+other = "Image carousel"
+[carousel_previous]
+other = "Previous slide"
+[carousel_next]
+other = "Next slide"
+[video_unsupported]
+other = "Your browser does not support the video tag."

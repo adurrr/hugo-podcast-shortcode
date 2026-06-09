@@ -7,12 +7,12 @@
 */ -}}
 {{- $id := printf "wvc-carousel-%d" .Ordinal -}}
 
-<div id="{{ $id }}" class="wvc-carousel" role="region" aria-roledescription="carousel" aria-label="Image carousel">
+<div id="{{ $id }}" class="wvc-carousel" role="region" aria-roledescription="carousel" aria-label="{{ i18n "carousel_label" }}">
   <div class="wvc-carousel__slides">
     {{ .InnerDeindent | .Page.RenderString }}
   </div>
-  <button class="wvc-carousel__prev" aria-label="Previous slide">&lsaquo;</button>
-  <button class="wvc-carousel__next" aria-label="Next slide">&rsaquo;</button>
+  <button class="wvc-carousel__prev" aria-label="{{ i18n "carousel_previous" }}">&lsaquo;</button>
+  <button class="wvc-carousel__next" aria-label="{{ i18n "carousel_next" }}">&rsaquo;</button>
 </div>
 
 {{- /* Minimal JS for prev/next buttons (scroll-snap handles the rest).
