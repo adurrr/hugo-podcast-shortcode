@@ -1,0 +1,5 @@
+{{- $src := .Get "src" -}}
+<video controls class="wvc-video">
+  <source src="{{ $src }}" type="video/mp4">
+  {{ i18n "video_unsupported" }}
+</video>

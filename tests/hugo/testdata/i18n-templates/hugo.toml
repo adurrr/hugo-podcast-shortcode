@@ -1,0 +1,3 @@
+baseURL = "https://example.com/"
+title = "i18n Templates Test"
+languageCode = "en-us"

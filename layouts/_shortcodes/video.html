@@ -29,7 +29,7 @@
     {{- with $width }} width="{{ . }}"{{ end -}}
   >
     <source src="{{ $src }}" type="{{ $vidtype }}">
-    Your browser does not support the video tag.
+    {{ i18n "video_unsupported" }}
   </video>
   {{- with $caption -}}
   <figcaption class="wvc-video__caption">{{ . | $.Page.RenderString }}</figcaption>

@@ -2,6 +2,74 @@ baseURL = "https://adurrr.github.io/wavecast/"
 title = "Wavecast Radio"
 languageCode = "en-us"
 ignoreLogs = ["warning-goldmark-raw-html"]
+refLinksErrorLevel = "WARNING"
+refLinksNotFoundURL = "/"
+
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
+
+[languages]
+  [languages.en]
+    contentDir = "content"
+    languageName = "English"
+    weight = 1
+    title = "Wavecast Radio"
+    [languages.en.params]
+      description = "Wavecast Radio: Tune in to Tech. A demo radio station showcasing the Wavecast persistent podcast-player Web Component for Hugo."
+
+      [languages.en.params.podcast]
+        description = "Wavecast Radio brings you the best in tech podcasting, from Infrastructure as Code to open-source culture and modern DevOps practices."
+        author = "Wavecast Radio"
+        summary  = "A demo podcast showcasing the Hugo Wavecast theme. Each episode features a full persistent audio player, chapter markers, and episode notes — all powered by standard Markdown front matter."
+        image    = "/wavecast/logo.png"
+        explicit = false
+        type     = "episodic"
+        owner_name  = "Wavecast Demo"
+        owner_email = "demo@wavecast.example"
+        language = "en-us"
+        copyright = "© 2025 Wavecast Radio"
+
+        [[languages.en.params.podcast.categories]]
+          category = "Technology"
+        [[languages.en.params.podcast.categories]]
+          category = "Leisure"
+          subcategory = "Hobbies"
+
+      [languages.en.params.podcastPlayer]
+        source = "local"
+        persistent = true
+        preload = "metadata"
+
+  [languages.es]
+    contentDir = "content/es"
+    languageName = "Español"
+    weight = 2
+    title = "Wavecast Radio"
+    [languages.es.params]
+      description = "Wavecast Radio: Sintoniza la tecnología. Una emisora demo que muestra el componente Wavecast de podcast-player persistente para Hugo."
+
+      [languages.es.params.podcast]
+        description = "Wavecast Radio te trae lo mejor del podcasting tecnológico, desde Infraestructura como Código hasta cultura open source y prácticas modernas de DevOps."
+        author = "Wavecast Radio"
+        summary  = "Un podcast demo que muestra el tema Hugo Wavecast. Cada episodio incluye un reproductor de audio persistente completo, marcadores de capítulos y notas del episodio: todo impulsado por front matter estándar de Markdown."
+        image    = "/wavecast/logo.png"
+        explicit = false
+        type     = "episodic"
+        owner_name  = "Wavecast Demo"
+        owner_email = "demo@wavecast.example"
+        language = "es-es"
+        copyright = "© 2025 Wavecast Radio"
+
+        [[languages.es.params.podcast.categories]]
+          category = "Technology"
+        [[languages.es.params.podcast.categories]]
+          category = "Leisure"
+          subcategory = "Hobbies"
+
+      [languages.es.params.podcastPlayer]
+        source = "local"
+        persistent = true
+        preload = "metadata"
 
 # Allow raw HTML in Markdown
 [markup]
@@ -14,53 +82,44 @@ ignoreLogs = ["warning-goldmark-raw-html"]
   [[module.imports]]
     path = "github.com/adurrr/wavecast"
 
-# ── RSS / Podcast feed ──
-# Configuring [params.podcast] enables an iTunes-compatible podcast RSS
-# feed.  Omit the whole section for a plain RSS 2.0 feed.
-[params.podcast]
-  description = "Wavecast Radio brings you the best in tech podcasting, from Infrastructure as Code to open-source culture and modern DevOps practices."
-  author = "Wavecast Radio"
-  summary  = "A demo podcast showcasing the Hugo Wavecast theme. Each episode features a full persistent audio player, chapter markers, and episode notes — all powered by standard Markdown front matter."
-  image    = "/wavecast/logo.png"
-  explicit = false
-  type     = "episodic"
-  owner_name  = "Wavecast Demo"
-  owner_email = "demo@wavecast.example"
-  language = "en-us"
-  copyright = "© 2025 Wavecast Radio"
+[[languages.en.menu.main]]
+  name = "Home"
+  url = "/"
+  weight = 10
+[[languages.en.menu.main]]
+  name = "Programs"
+  url = "/programs/"
+  weight = 20
+[[languages.en.menu.main]]
+  name = "Schedule"
+  url = "/schedule/"
+  weight = 30
+[[languages.en.menu.main]]
+  name = "About"
+  url = "/about/"
+  weight = 40
+[[languages.en.menu.main]]
+  name = "Contact"
+  url = "/contact/"
+  weight = 50
 
-  [[params.podcast.categories]]
-    category = "Technology"
-  [[params.podcast.categories]]
-    category = "Leisure"
-    subcategory = "Hobbies"
-
-[params]
-  description = "Wavecast Radio: Tune in to Tech. A demo radio station showcasing the Wavecast persistent podcast-player Web Component for Hugo."
-  [params.podcastPlayer]
-    source = "local"
-    persistent = true
-    preload = "metadata"
-
-# Menu configuration for radio station navigation
-[menu]
-  [[menu.main]]
-    name = "Home"
-    url = "/"
-    weight = 10
-  [[menu.main]]
-    name = "Programs"
-    url = "/programs/"
-    weight = 20
-  [[menu.main]]
-    name = "Schedule"
-    url = "/schedule/"
-    weight = 30
-  [[menu.main]]
-    name = "About"
-    url = "/about/"
-    weight = 40
-  [[menu.main]]
-    name = "Contact"
-    url = "/contact/"
-    weight = 50
+[[languages.es.menu.main]]
+  name = "Inicio"
+  url = "/"
+  weight = 10
+[[languages.es.menu.main]]
+  name = "Programas"
+  url = "/programs/"
+  weight = 20
+[[languages.es.menu.main]]
+  name = "Horario"
+  url = "/schedule/"
+  weight = 30
+[[languages.es.menu.main]]
+  name = "Acerca de"
+  url = "/about/"
+  weight = 40
+[[languages.es.menu.main]]
+  name = "Contacto"
+  url = "/contact/"
+  weight = 50

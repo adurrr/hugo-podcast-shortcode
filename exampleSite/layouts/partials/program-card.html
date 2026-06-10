@@ -10,5 +10,5 @@
   </div>
   <h3>{{ $title }}</h3>
   <p>{{ $desc }}</p>
-  <span class="program-card-episodes">{{ $eps }} episodes</span>
+  <span class="program-card-episodes">{{ i18n "program_card_episodes" (dict "count" $eps) }}</span>
 </a>

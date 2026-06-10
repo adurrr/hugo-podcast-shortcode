@@ -1,0 +1,11 @@
+baseURL = "https://example.com/"
+defaultContentLanguage = "en"
+title = "i18n Test Site"
+
+[languages]
+  [languages.en]
+    contentDir = "content"
+    weight = 1
+  [languages.es]
+    contentDir = "content.es"
+    weight = 2

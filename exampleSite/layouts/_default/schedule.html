@@ -1,23 +1,23 @@
 {{- /* Schedule page template */ -}}
 {{ define "main" }}
   {{ partial "hero.html" (dict
-    "title"       "Schedule"
-    "description" "Our weekly programming lineup. All times are Eastern."
+    "title"       (i18n "schedule_title")
+    "description" (i18n "schedule_desc")
   ) }}
 
   {{- $blocks := .Params.schedule_blocks }}
   {{- $days := slice
-    (dict "name" "Monday"    "label" "Mon")
-    (dict "name" "Tuesday"   "label" "Tue")
-    (dict "name" "Wednesday" "label" "Wed")
-    (dict "name" "Thursday"  "label" "Thu")
-    (dict "name" "Friday"    "label" "Fri")
+    (dict "name" (i18n "schedule_day_monday")    "label" (i18n "schedule_day_mon"))
+    (dict "name" (i18n "schedule_day_tuesday")   "label" (i18n "schedule_day_tue"))
+    (dict "name" (i18n "schedule_day_wednesday") "label" (i18n "schedule_day_wed"))
+    (dict "name" (i18n "schedule_day_thursday")  "label" (i18n "schedule_day_thu"))
+    (dict "name" (i18n "schedule_day_friday")    "label" (i18n "schedule_day_fri"))
   }}
 
   {{- /* Weekly Schedule - card-based day columns */ -}}
   <section class="demo-section">
-    <h2>Weekly Schedule</h2>
-    <p class="desc">One show each day. Click any program to learn more.</p>
+    <h2>{{ i18n "schedule_section_weekly" }}</h2>
+    <p class="desc">{{ i18n "schedule_section_weekly_desc" }}</p>
     <div class="program-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
       {{- range $days }}
       <div class="program-card" style="cursor:default;align-items:center;text-align:center">
@@ -39,7 +39,7 @@
           {{- end }}
         {{- end }}
         {{- if not $found }}
-        <p style="font-size:0.85rem;color:var(--text-muted)">No programs today</p>
+        <p style="font-size:0.85rem;color:var(--text-muted)">{{ i18n "schedule_no_programs" }}</p>
         {{- end }}
       </div>
       {{- end }}
@@ -49,7 +49,7 @@
   {{- /* Upcoming Episodes */ -}}
   {{- with .Params.upcoming }}
   <section class="demo-section">
-    <h2>Upcoming Episodes</h2>
+    <h2>{{ i18n "schedule_section_upcoming" }}</h2>
     {{- range . }}
     <div class="episode-entry">
       <h3>{{ .title }} <span style="font-weight:400;color:var(--text-muted);font-size:0.9rem"> -  {{ .program }}</span></h3>
@@ -59,14 +59,14 @@
       {{- if not (hasPrefix $eu "http") }}
         {{- $eu = printf "%s%s" (strings.TrimSuffix "/" $.Site.BaseURL) $eu }}
       {{- end }}
-      <a href="{{ $eu }}" class="nav-button" style="margin-top:0.5rem">Listen Now</a>
+      <a href="{{ $eu }}" class="nav-button" style="margin-top:0.5rem">{{ i18n "schedule_listen_now" }}</a>
     </div>
     {{- end }}
   </section>
   {{- end }}
 
   <div class="nav-buttons">
-    <a href="{{ ref . "programs/_index.md" }}" class="nav-button nav-button-primary">Browse Programs</a>
-    <a href="{{ .Site.Home.RelPermalink }}" class="nav-button">Back to Home</a>
+    <a href="{{ ref . "programs/_index.md" }}" class="nav-button nav-button-primary">{{ i18n "schedule_cta_programs" }}</a>
+    <a href="{{ .Site.Home.RelPermalink }}" class="nav-button">{{ i18n "schedule_cta_home" }}</a>
   </div>
 {{ end }}

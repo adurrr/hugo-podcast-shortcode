@@ -1,0 +1,338 @@
+# ── Podcast Player ──
+[player_play]
+other = "Reproducir"
+
+[player_pause]
+other = "Pausa"
+
+[player_rewind_title]
+other = "Retroceder 15s"
+
+[player_rewind_label]
+other = "Retroceder 15 segundos"
+
+[player_forward_title]
+other = "Adelantar 15s"
+
+[player_forward_label]
+other = "Adelantar 15 segundos"
+
+[player_mute_title]
+other = "Silenciar"
+
+[player_mute_label]
+other = "Alternar silencio"
+
+[player_volume]
+other = "Volumen"
+
+[player_speed]
+other = "Velocidad de reproducción"
+
+[player_speed_label]
+other = "Velocidad {rate}×"
+
+[player_seek]
+other = "Posición de búsqueda"
+
+[player_cover_alt]
+other = "Portada"
+
+[player_cover_of]
+other = "Portada: {title}"
+
+[player_episode]
+other = "Podcast"
+
+[player_close]
+other = "Cerrar reproductor"
+
+[player_region]
+other = "Reproductor de Podcast"
+
+[player_error]
+other = "Error de reproducción"
+
+[player_no_source]
+other = "No hay fuente de audio disponible"
+
+[player_unknown_episode]
+other = "Episodio desconocido"
+
+# ── Carousel ──
+[carousel_label]
+other = "Carrusel de imágenes"
+
+[carousel_previous]
+other = "Diapositiva anterior"
+
+[carousel_next]
+other = "Diapositiva siguiente"
+
+# ── Video ──
+[video_unsupported]
+other = "Su navegador no admite la etiqueta de video."
+
+# ── Code Copy ──
+[code_copy_title]
+other = "Copiar código"
+
+[code_copy_label]
+other = "Copiar código al portapapeles"
+
+[code_copied]
+other = "¡Copiado!"
+
+[code_copied_label]
+other = "Código copiado"
+
+# ── Language Switcher ──
+[lang_select]
+other = "Seleccionar idioma"
+
+[lang_label]
+other = "Idioma"
+
+# ── Site Header / Footer ──
+[site_title]
+other = "Wavecast Radio"
+
+[footer_rss]
+other = "RSS"
+
+[footer_github]
+other = "GitHub"
+
+[footer_text]
+other = "Wavecast Radio: Sintoniza la tecnología. Con la tecnología de <a href=\"https://github.com/adurrr/wavecast\" target=\"_blank\" rel=\"noopener\">Wavecast</a>, construido con Hugo."
+
+# ── Home Page ──
+[home_info_card]
+other = """<strong>¿Notas el reproductor en la parte inferior de la página?</strong> Es el reproductor persistente de Wavecast. Te sigue a través de todas las páginas, se mantiene sincronizado con cada episodio y recuerda tu posición, volumen y velocidad. Prueba a navegar entre programas mientras se reproduce el audio."""
+
+[home_section_programs]
+other = "Nuestros Programas"
+
+[home_section_programs_desc]
+other = "Cuatro programas que cubren los temas tecnológicos que importan."
+
+[home_section_episodes]
+other = "Últimos Episodios"
+
+[home_section_episodes_desc]
+other = "Episodios recién emitidos de todos los programas."
+
+[home_section_about]
+other = "Acerca de Wavecast"
+
+[home_section_about_desc]
+other = "La tecnología detrás de la emisora."
+
+[home_feature_persistent_title]
+other = "Audio Persistente"
+
+[home_feature_persistent_desc]
+other = "Navega entre páginas sin reiniciar. El reproductor del pie te sigue a todas partes."
+
+[home_feature_sync_title]
+other = "Sincronización Bidireccional"
+
+[home_feature_sync_desc]
+other = "Reproduce o pausa cualquier reproductor en línea, y el pie se mantiene perfectamente sincronizado."
+
+[home_feature_theme_title]
+other = "Tema y Módulo de Hugo"
+
+[home_feature_theme_desc]
+other = "Insértalo en cualquier sitio Hugo. Funciona como tema o como módulo de Hugo."
+
+[home_feature_podcasts_title]
+other = "Podcasts Reales"
+
+[home_feature_podcasts_desc]
+other = "Episodios de Coder Radio, Reality 2.0, DevSecOps Talks y más."
+
+[home_cta_learn]
+other = "Más información sobre Wavecast"
+
+[home_cta_github]
+other = "GitHub"
+
+# ── About Page ──
+[about_title]
+other = "Acerca de Wavecast Radio"
+
+[about_tagline]
+other = "Sintoniza la tecnología"
+
+[about_desc]
+other = """Wavecast Radio es una demo en vivo construida con <a href="https://github.com/adurrr/wavecast" target="_blank" rel="noopener">Wavecast</a>, un componente web <strong>&lt;podcast-player&gt;</strong> persistente de código abierto para Hugo. Páginas de programas profesionales, listados de episodios con capítulos y pósters, y audio que nunca se detiene mientras navegas entre páginas."""
+
+[about_cta_programs]
+other = "Explorar Programas"
+
+[about_cta_schedule]
+other = "Ver Horario"
+
+[about_section_how]
+other = "Cómo Funciona"
+
+[about_section_how_desc]
+other = """El reproductor persistente del pie de página usa <code>data-turbolinks-permanent</code> para sobrevivir a la navegación. Inicia un episodio, navega a otras páginas y el audio se reproduce sin interrupciones. El pie se sincroniza bidireccionalmente con cada reproductor en línea: pausar uno pausa ambos."""
+
+[about_feature_persistent_desc]
+other = "Navega entre páginas sin reiniciar. Tu audio sobrevive la navegación."
+
+[about_feature_sync_desc]
+other = "Los reproductores en línea y del pie se mantienen sincronizados. Pausa uno, ambos pausan."
+
+[about_feature_chapters_title]
+other = "Capítulos"
+
+[about_feature_chapters_desc]
+other = "Navegación con marcas de tiempo dentro de los episodios para una fácil exploración."
+
+[about_feature_sources_title]
+other = "Múltiples Fuentes"
+
+[about_feature_sources_desc]
+other = "Audio local, MP3 remotos, transmisiones AzuraCast y episodios de iVoox."
+
+[about_section_stack]
+other = "Stack Tecnológico"
+
+[about_section_stack_desc]
+other = "Construido con herramientas modernas para rendimiento y fiabilidad."
+
+[about_stack_hugo_desc]
+other = "v0.158+, Módulos y Temas"
+
+[about_stack_webcomp_desc]
+other = "Vanilla JS, Shadow DOM"
+
+[about_stack_turbo_desc]
+other = "Navegación rápida"
+
+[about_stack_tests_desc]
+other = "Vitest + Playwright"
+
+[about_section_attribution]
+other = "Podcasts Reales, Audio Real"
+
+[about_section_attribution_desc]
+other = "Los episodios en este sitio incorporan podcasts tecnológicos reales, usados con atribución."
+
+[about_attr_coder_desc]
+other = "Programación y cultura de desarrollo por Jupiter Broadcasting"
+
+[about_attr_reality_desc]
+other = "Conversaciones sobre código abierto y tecnología"
+
+[about_attr_devsecops_desc]
+other = "Debates sobre DevOps, seguridad y SRE"
+
+[about_attr_oss_desc]
+other = "Destacados de proyectos de código abierto"
+
+[about_cta_github]
+other = "Ver en GitHub"
+
+[about_cta_contact]
+other = "Contacto"
+
+# ── Schedule Page ──
+[schedule_title]
+other = "Horario"
+
+[schedule_desc]
+other = "Nuestra programación semanal. Todos los horarios están en hora del Este."
+
+[schedule_day_monday]
+other = "Lunes"
+
+[schedule_day_tuesday]
+other = "Martes"
+
+[schedule_day_wednesday]
+other = "Miércoles"
+
+[schedule_day_thursday]
+other = "Jueves"
+
+[schedule_day_friday]
+other = "Viernes"
+
+[schedule_day_mon]
+other = "Lun"
+
+[schedule_day_tue]
+other = "Mar"
+
+[schedule_day_wed]
+other = "Mié"
+
+[schedule_day_thu]
+other = "Jue"
+
+[schedule_day_fri]
+other = "Vie"
+
+[schedule_section_weekly]
+other = "Horario Semanal"
+
+[schedule_section_weekly_desc]
+other = "Un programa cada día. Haz clic en cualquier programa para saber más."
+
+[schedule_no_programs]
+other = "Sin programas hoy"
+
+[schedule_section_upcoming]
+other = "Próximos Episodios"
+
+[schedule_listen_now]
+other = "Escuchar Ahora"
+
+[schedule_cta_programs]
+other = "Explorar Programas"
+
+[schedule_cta_home]
+other = "Volver al Inicio"
+
+# ── Programs List Page ──
+[programs_list_title]
+other = "Nuestros Programas"
+
+[programs_list_desc]
+other = "Cuatro programas que exploran las tecnologías que definen nuestra industria."
+
+[programs_list_cta_home]
+other = "← Volver al Inicio"
+
+[programs_list_cta_schedule]
+other = "Ver Horario"
+
+# ── Program Single Page ──
+[program_section_episodes]
+other = "Episodios"
+
+[program_listen]
+other = "Escuchar →"
+
+[program_cta_all]
+other = "← Todos los Programas"
+
+[program_cta_schedule]
+other = "Horario"
+
+# ── Episode Page ──
+[episode_show_notes]
+other = "Notas del Episodio"
+
+[episode_attribution]
+other = "Episodio de <a href=\"{{ .url }}\" target=\"_blank\" rel=\"noopener\">{{ .text }}</a>. Usado con atribución."
+
+# ── Program Card ──
+[program_card_episodes]
+other = "{{ .count }} episodios"
+
+

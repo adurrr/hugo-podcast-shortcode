@@ -48,7 +48,7 @@
 
   {{- with .Params.show_notes }}
   <div class="demo-section">
-    <h2>Show Notes</h2>
+    <h2>{{ i18n "episode_show_notes" }}</h2>
     <ul class="link-list">
       {{- range . }}
       <li>{{ . | markdownify }}</li>
@@ -59,7 +59,7 @@
 
   {{- with .Params.attribution }}
   <p style="margin-top:2rem;font-size:0.85rem;color:var(--text-muted)">
-    Episode from <a href="{{ .url }}" target="_blank" rel="noopener">{{ .text }}</a>. Used with attribution.
+    {{ i18n "episode_attribution" (dict "url" .url "text" .text) | safeHTML }}
   </p>
   {{- end }}
 
