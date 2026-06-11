@@ -1,0 +1,27 @@
+{{- /* docs-nav.html - prev/next navigation for documentation section pages */ -}}
+{{- $repo := .Site.Params.docs.editURL | default "https://github.com/adurrr/wavecast/edit/main/exampleSite" }}
+{{- if or .PrevInSection .NextInSection (ne .Path "") .File }}
+<nav class="docs-nav" aria-label="Documentation pages">
+  <div class="docs-nav__prev">
+    {{- with .PrevInSection }}
+    <a href="{{ .RelPermalink }}" class="docs-nav__link docs-nav__link--prev">
+      <span class="docs-nav__direction">← {{ i18n "docs_previous" | default "Previous" }}</span>
+      <span class="docs-nav__title">{{ .Title }}</span>
+    </a>
+    {{- end }}
+  </div>
+  <div class="docs-nav__next">
+    {{- with .NextInSection }}
+    <a href="{{ .RelPermalink }}" class="docs-nav__link docs-nav__link--next">
+      <span class="docs-nav__direction">{{ i18n "docs_next" | default "Next" }} →</span>
+      <span class="docs-nav__title">{{ .Title }}</span>
+    </a>
+    {{- end }}
+  </div>
+</nav>
+{{- with .File }}
+<div class="docs-edit">
+  <a href="{{ $repo }}/content/{{ .Path }}" target="_blank" rel="noopener">{{ i18n "docs_edit" | default "Edit this page on GitHub" }}</a>
+</div>
+{{- end }}
+{{- end }}

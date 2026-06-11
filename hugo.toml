@@ -8,6 +8,12 @@
   [module.hugoVersion]
     min = "0.146.0"
 
+# ── Default menus: users can override in their site config ──
+[[menu.main]]
+  name = "Home"
+  url = "/"
+  weight = 10
+
 [params]
   [params.podcastPlayer]
     # Default audio type

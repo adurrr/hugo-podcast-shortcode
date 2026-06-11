@@ -87,6 +87,10 @@ defaultContentLanguageInSubdir = false
   url = "/"
   weight = 10
 [[languages.en.menu.main]]
+  name = "Docs"
+  url = "/docs/"
+  weight = 15
+[[languages.en.menu.main]]
   name = "Programs"
   url = "/programs/"
   weight = 20
@@ -107,6 +111,10 @@ defaultContentLanguageInSubdir = false
   name = "Inicio"
   url = "/"
   weight = 10
+[[languages.es.menu.main]]
+  name = "Docs"
+  url = "/docs/"
+  weight = 15
 [[languages.es.menu.main]]
   name = "Programas"
   url = "/programs/"

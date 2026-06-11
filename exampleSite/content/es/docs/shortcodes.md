@@ -1,6 +1,8 @@
 ---
 title: "Shortcodes de Utilidad"
 description: "Advertencias, botones, figuras, videos, pestañas, galerías y carruseles: todo incluido con Wavecast."
+date: 2026-01-01
+weight: 50
 ---
 
 Wavecast incluye un conjunto de shortcodes de utilidad para crear páginas de contenido enriquecido sin HTML personalizado.
@@ -111,17 +113,17 @@ Pestañas solo con CSS (botones de radio). Útiles para ejemplos de código en m
 ~~~
 {{</* tabs */>}}
 {{</* tab name="HTML" */>}}
-```html
+```
 <button class="btn">Click me</button>
 ```
 {{</* /tab */>}}
 {{</* tab name="CSS" */>}}
-```css
+```
 .btn { padding: 0.5rem 1rem; border-radius: 8px; }
 ```
 {{</* /tab */>}}
 {{</* tab name="JavaScript" */>}}
-```js
+```
 document.querySelector('.btn').addEventListener('click', () => alert('Hola'));
 ```
 {{</* /tab */>}}
@@ -130,17 +132,17 @@ document.querySelector('.btn').addEventListener('click', () => alert('Hola'));
 
 {{< tabs >}}
 {{< tab name="HTML" >}}
-```html
+```
 <button class="btn">Click me</button>
 ```
 {{< /tab >}}
 {{< tab name="CSS" >}}
-```css
+```
 .btn { padding: 0.5rem 1rem; border-radius: 8px; }
 ```
 {{< /tab >}}
 {{< tab name="JavaScript" >}}
-```js
+```
 document.querySelector('.btn').addEventListener('click', () => alert('Hola'));
 ```
 {{< /tab >}}
