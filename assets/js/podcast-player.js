@@ -33,8 +33,8 @@
  */
 export function detectSourceType(url) {
   if (!url) return "local";
-  if (/ivoox\.com/i.test(url)) return "ivoox";
-  if (/azuracast/i.test(url) || /\.stream\./i.test(url)) return "azuracast";
+  if (/^(https?:)?\/\/[^\/]*ivoox\.com/i.test(url)) return "ivoox";
+  if (/azuracast\./i.test(url) || /\.stream\./i.test(url)) return "azuracast";
   return "local";
 }
 
@@ -71,6 +71,9 @@ export class AzuracastAdapter {
     if (src) return src;
     const apiUrl = this.element.getAttribute("azuracast-api-url");
     if (!apiUrl) throw new Error("AzuracastAdapter: missing azuracast-api-url attribute");
+    // Validate scheme before fetching to prevent client-side SSRF
+    const parsed = new URL(apiUrl);
+    if (parsed.protocol !== "https:") throw new Error("AzuracastAdapter: azuracast-api-url must use HTTPS");
     const resp = await fetch(apiUrl);
     if (!resp.ok) throw new Error(`AzuracastAdapter: API error ${resp.status}`);
     const data = await resp.json();
@@ -95,6 +98,14 @@ export class IvooxAdapter {
   async resolve() {
     const src = this.element.getAttribute("src");
     if (!/ivoox\.com/i.test(src)) return src;
+    // Validate scheme and domain to prevent client-side SSRF
+    try {
+      const parsed = new URL(src);
+      if (parsed.protocol !== "https:" || !parsed.hostname.endsWith("ivoox.com")) {
+        console.warn("IvooxAdapter: refusing to fetch non-ivoox.com or non-HTTPS URL", src);
+        return src;
+      }
+    } catch { return src; }
     try {
       const resp = await fetch(src);
       if (!resp.ok) return src;
@@ -113,6 +124,24 @@ export class IvooxAdapter {
 }
 
 /* ---- Open-source SVG icons (Feather/Lucide, MIT licensed) ---- */
+
+/**
+ * Compare two URLs by pathname + search, ignoring protocol/domain differences.
+ * Falls back to suffix matching for non-URL strings.
+ * @param {string} a
+ * @param {string} b
+ * @returns {boolean}
+ */
+function urlsMatch(a, b) {
+  try {
+    const uA = new URL(a, document.baseURI);
+    const uB = new URL(b, document.baseURI);
+    if (uA.pathname === uB.pathname && uA.search === uB.search) return true;
+    // Also match if paths differ only by trailing slash
+    return uA.pathname.replace(/\/$/, "") === uB.pathname.replace(/\/$/, "")
+      && uA.search === uB.search;
+  } catch { return a.endsWith(b) || b.endsWith(a); }
+}
 const ICON_SKIP_BACK =
   '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>';
 const ICON_SKIP_FWD =
@@ -1007,7 +1036,7 @@ class PodcastPlayer extends HTMLElement {
     const src = e.detail && e.detail.src;
     const mySrc = this._audio.src || this.getAttribute("src") || "";
     // Only react if the event matches our source (or if unknown — backward compat)
-    if (src && src !== mySrc && !src.endsWith(mySrc) && !mySrc.endsWith(src)) return;
+    if (src && src !== mySrc && !urlsMatch(src, mySrc) && !urlsMatch(mySrc, src)) return;
 
     if (this._audio.src && !this._audio.paused) {
       this._audio.pause();
@@ -1042,7 +1071,7 @@ class PodcastPlayer extends HTMLElement {
     const mySrc = this._audio.src || this.getAttribute("src") || "";
     if (!mySrc || !src) return;
 
-    if (mySrc === src || src.endsWith(mySrc) || mySrc.endsWith(src)) {
+    if (mySrc === src || urlsMatch(src, mySrc) || urlsMatch(mySrc, src)) {
       // Same source: someone else started our track — sync button to show pause
       this._els.playBtn.innerHTML = '<svg viewBox="0 0 512 512" width="24" height="24"><path fill="currentColor" d="M144 96h96v320h-96zM272 96h96v320h-96z"/></svg>';
       this._els.playBtn.setAttribute("aria-label", this._t("player_pause"));
@@ -1062,7 +1091,7 @@ class PodcastPlayer extends HTMLElement {
     // Only seek if the event's source matches ours — prevents a paused
     // player's progress bar interaction from affecting the active player.
     const mySrc = this._audio.src || this.getAttribute("src") || "";
-    if (src && mySrc && src !== mySrc && !src.endsWith(mySrc) && !mySrc.endsWith(src)) return;
+    if (src && mySrc && src !== mySrc && !urlsMatch(src, mySrc) && !urlsMatch(mySrc, src)) return;
     if (!this._audio.duration) return;
     // Silently seek without dispatching our own seek event
     this._audio.currentTime = Math.min(time, this._audio.duration);
@@ -1218,6 +1247,11 @@ class PodcastPlayer extends HTMLElement {
       if (currentSrc && state.src && !this._urlsMatch(state.src, currentSrc)) {
         return;
       }
+      // Validate restored src scheme to prevent sessionStorage manipulation
+      try {
+        const u = new URL(state.src, document.baseURI);
+        if (u.protocol !== "http:" && u.protocol !== "https:") return;
+      } catch (_) { return; }
 
       // Defer position + autoplay to loadedmetadata (where duration is known)
       this._pendingRestoreState = state;
@@ -1363,7 +1397,7 @@ class PodcastPlayer extends HTMLElement {
     const d = e.detail || {};
     // Only react if src matches
     const mySrc = this._audio.src || this.getAttribute("src") || "";
-    if (d.src && mySrc && d.src !== mySrc && !d.src.endsWith(mySrc) && !mySrc.endsWith(d.src)) return;
+    if (d.src && mySrc && d.src !== mySrc && !urlsMatch(d.src, mySrc) && !urlsMatch(mySrc, d.src)) return;
 
     // Guard against echo — suppress our own dispatch while updating UI
     this._suppressSync = true;
@@ -1786,7 +1820,7 @@ class PodcastFooter extends HTMLElement {
     const mySrc = this._audio.src || "";
     // Ignore pauses from a different source (avoids incorrectly stopping when
     // one player replaces another)
-    if (src && mySrc && src !== mySrc && !src.endsWith(mySrc) && !mySrc.endsWith(src)) return;
+    if (src && mySrc && src !== mySrc && !urlsMatch(src, mySrc) && !urlsMatch(mySrc, src)) return;
 
     if (this._audio.src && !this._audio.paused) {
       this._audio.pause();
@@ -1830,7 +1864,7 @@ class PodcastFooter extends HTMLElement {
     if (time == null || !isFinite(time)) return;
     // Only seek if the source matches what the footer is playing
     const mySrc = this._audio.src || "";
-    if (src && mySrc && src !== mySrc && !src.endsWith(mySrc) && !mySrc.endsWith(src)) return;
+    if (src && mySrc && src !== mySrc && !urlsMatch(src, mySrc) && !urlsMatch(mySrc, src)) return;
     if (!this._audio.duration) return;
     this._audio.currentTime = Math.min(time, this._audio.duration);
   }
@@ -1919,7 +1953,7 @@ class PodcastFooter extends HTMLElement {
     const d = e.detail || {};
     // Only react if src matches
     const mySrc = this._audio.src || "";
-    if (d.src && mySrc && d.src !== mySrc && !d.src.endsWith(mySrc) && !mySrc.endsWith(d.src)) return;
+    if (d.src && mySrc && d.src !== mySrc && !urlsMatch(d.src, mySrc) && !urlsMatch(mySrc, d.src)) return;
 
     this._suppressSync = true;
     try {
@@ -2027,6 +2061,15 @@ class PodcastFooter extends HTMLElement {
       sessionStorage.removeItem(PodcastFooter.PERSISTENCE_KEY);
 
       if (!state.src) return;
+
+      // Validate restored src scheme to prevent sessionStorage manipulation
+      try {
+        const u = new URL(state.src, document.baseURI);
+        if (u.protocol !== "http:" && u.protocol !== "https:") {
+          console.warn("PodcastFooter: ignoring restored src with unsafe scheme", u.protocol);
+          return;
+        }
+      } catch (_) { return; }
 
       // Restore volume/mute/rate immediately
       if (state.volume != null)        this._audio.volume = state.volume;

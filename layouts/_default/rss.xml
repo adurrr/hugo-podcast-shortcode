@@ -49,22 +49,22 @@
     {{- with $podcast.description }}<description>{{ . }}</description>{{ else }}<description>{{ .Site.Params.description | default .Site.Title }}</description>{{ end }}
     <language>{{ $podcast.language | default .Site.LanguageCode }}</language>
     {{- with $podcast.copyright }}<copyright>{{ . }}</copyright>{{ end }}
-    {{- with $podcast.author }}<itunes:author>{{ . }}</itunes:author>{{ end }}
+    {{- with $podcast.author }}<itunes:author>{{ . | transform.XMLEscape }}</itunes:author>{{ end }}
     {{- with $podcast.summary }}<itunes:summary>{{ . | transform.XMLEscape | safeHTML }}</itunes:summary>{{ end }}
-    {{- with $podcast.subtitle }}<itunes:subtitle>{{ . }}</itunes:subtitle>{{ end }}
-    {{- with $podcast.image }}<itunes:image href="{{ . | absURL }}" />{{ end }}
+    {{- with $podcast.subtitle }}<itunes:subtitle>{{ . | transform.XMLEscape }}</itunes:subtitle>{{ end }}
+    {{- with $podcast.image }}<itunes:image href="{{ . | absURL | transform.XMLEscape }}" />{{ end }}
     {{- range $podcast.categories }}
-    <itunes:category text="{{ .category }}">
-      {{- with .subcategory }}<itunes:category text="{{ . }}" />{{ end }}
+    <itunes:category text="{{ .category | transform.XMLEscape }}">
+      {{- with .subcategory }}<itunes:category text="{{ . | transform.XMLEscape }}" />{{ end }}
     </itunes:category>
     {{- end }}
     <itunes:explicit>{{ $podcast.explicit | default "false" }}</itunes:explicit>
-    {{- with $podcast.owner_name }}<itunes:owner><itunes:name>{{ . }}</itunes:name>{{ with $podcast.owner_email }}<itunes:email>{{ . }}</itunes:email>{{ end }}</itunes:owner>{{ end }}
+    {{- with $podcast.owner_name }}<itunes:owner><itunes:name>{{ . | transform.XMLEscape }}</itunes:name>{{ with $podcast.owner_email }}<itunes:email>{{ . | transform.XMLEscape }}</itunes:email>{{ end }}</itunes:owner>{{ end }}
     <itunes:type>{{ $podcast.type | default "episodic" }}</itunes:type>
     {{- with $podcast.block }}<itunes:block>{{ . }}</itunes:block>{{ end }}
     <generator>Hugo — wavecast theme</generator>
     {{ with .OutputFormats.Get "rss" }}
-      {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | safeHTML }}
+      {{ printf `<atom:link href="%s" rel="self" type="%s" />` (.Permalink | transform.XMLEscape) (.MediaType | transform.XMLEscape) | safeHTML }}
     {{ end }}
     {{- if not (eq (len $pages) 0) }}
     <lastBuildDate>{{ (index ($pages | first 1) 0).Lastmod.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>
@@ -93,7 +93,7 @@
             {{- $enclosureLen = len $res.Content }}
           {{- end }}
         {{- end }}
-        <enclosure url="{{ $enclosureURL }}" length="{{ $enclosureLen }}" type="{{ $enclosureType }}" />
+        <enclosure url="{{ $enclosureURL | transform.XMLEscape }}" length="{{ $enclosureLen }}" type="{{ $enclosureType | transform.XMLEscape }}" />
         {{- with $pPod.duration }}<itunes:duration>{{ . }}</itunes:duration>{{ end }}
         {{- with $pPod.author }}<itunes:author>{{ . }}</itunes:author>{{ else }}{{ with $podcast.author }}<itunes:author>{{ . }}</itunes:author>{{ end }}{{ end }}
         {{- with $pPod.subtitle }}<itunes:subtitle>{{ . | transform.XMLEscape | safeHTML }}</itunes:subtitle>{{ end }}

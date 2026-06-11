@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ block "title" . }}{{ .Site.Title }}{{ end }}</title>
   <meta name="description" content="{{ site.Params.description }}">
+  {{- /* Content Security Policy */ -}}
+  {{- $raw := printf "%d%s" now.Unix .Site.Title | sha256 -}}
+  {{- $cspNonce := substr $raw 0 20 -}}
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'nonce-{{ $cspNonce }}'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; media-src 'self' https:; connect-src 'self' https:; frame-ancestors 'none';">
   {{- if .IsTranslated }}
     {{- range .Translations }}
     <link rel="alternate" hreflang="{{ .Language.Lang }}" href="{{ .Permalink }}">
@@ -22,9 +26,9 @@
   <link rel="manifest" href="{{ "site.webmanifest" | relURL }}">
   {{ $turbolinks := resources.Get "js/vendor/turbolinks.js" | fingerprint }}
   <script src="{{ $turbolinks.RelPermalink }}" integrity="{{ $turbolinks.Data.Integrity }}"></script>
-  {{- $codeCopy := resources.Get "js/code-copy.js" -}}
+  {{- $codeCopy := resources.Get "js/code-copy.js" | fingerprint -}}
   {{- if $codeCopy }}
-  <script src="{{ $codeCopy.RelPermalink }}" defer></script>
+  <script src="{{ $codeCopy.RelPermalink }}" integrity="{{ $codeCopy.Data.Integrity }}" defer></script>
   {{- end }}
   {{- /* Always load podcast-player CSS so the persistent footer has theme support on every page */ -}}
   {{- $playerCSS := resources.Get "css/podcast-player.css" -}}
@@ -101,7 +105,7 @@
 
   <podcast-footer id="podcast-footer" data-turbolinks-permanent data-turbo-permanent hx-preserve></podcast-footer>
 
-  <script>
+  <script nonce="{{ $cspNonce }}">
     (function() {
       'use strict';
       var STORAGE_KEY = 'podcast-demo-theme';
@@ -179,7 +183,7 @@
     "player_error" "player_no_source" "player_unknown_episode"
     "code_copy_title" "code_copy_label" "code_copied" "code_copied_label"
   -}}
-  <script>
+  <script nonce="{{ $cspNonce }}">
   window.wavecast = window.wavecast || {};
   window.wavecast.i18n = {
     {{- range $i18nKeys }}
@@ -189,12 +193,12 @@
   </script>
   {{- /* Browser language auto-detection — redirect to preferred language on first visit */}}
   {{- if hugo.IsMultilingual }}
-  <script>
+  <script nonce="{{ $cspNonce }}">
   (function() {
     var KEY = 'lang-pref';
     try {
-      if (sessionStorage.getItem(KEY)) return;
-      sessionStorage.setItem(KEY, '1');
+      if (localStorage.getItem(KEY)) return;
+      localStorage.setItem(KEY, '1');
     } catch(e) { return; }
 
     var current = '{{ .Site.Language.Lang }}';
