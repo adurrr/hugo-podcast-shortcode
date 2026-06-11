@@ -3,13 +3,13 @@
   {{- /* Load podcast-player assets manually since the home page uses no shortcode */ -}}
   {{- if not (.Page.Store.Get "podcastPlayerAssetsLoaded") -}}
     {{- .Page.Store.Set "podcastPlayerAssetsLoaded" true }}
-    {{- $js := resources.Get "js/podcast-player.js" -}}
+    {{- $js := resources.Get "js/podcast-player.js" | fingerprint -}}
     {{- if $js }}
-    <script src="{{ $js.RelPermalink }}" type="module" defer></script>
+    <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" type="module" defer></script>
     {{- end }}
-    {{- $css := resources.Get "css/podcast-player.css" -}}
+    {{- $css := resources.Get "css/podcast-player.css" | fingerprint -}}
     {{- if $css }}
-    <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+    <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
     {{- end }}
   {{- end }}
 

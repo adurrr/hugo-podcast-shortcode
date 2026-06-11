@@ -4,6 +4,13 @@
   Autoplay always implies muted (browser requirement).
 */ -}}
 {{- $src := .Get "src" -}}
+{{- /* Validate video src URL scheme */ -}}
+{{- if $src }}
+  {{- $scheme := urls.Parse $src }}
+  {{- if and $scheme.Scheme (not (or (eq $scheme.Scheme "http") (eq $scheme.Scheme "https"))) }}
+    {{- errorf "video: src must use http or https scheme, got %q" $scheme.Scheme }}
+  {{- end }}
+{{- end -}}
 {{- $poster := .Get "poster" -}}
 {{- $caption := .Get "caption" -}}
 {{- $width := .Get "width" -}}

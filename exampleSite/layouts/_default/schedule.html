@@ -32,6 +32,10 @@
           {{- $found = true }}
           <span class="badge" style="background:var(--pp-surface);color:var(--pp-text-muted);text-transform:none;font-size:0.7rem;margin-bottom:0.25rem">{{ .time }}</span>
           {{- $u := .url }}
+          {{- /* Validate URL scheme — reject dangerous protocols */ -}}
+          {{- if and $u (not (or (hasPrefix $u "http://") (hasPrefix $u "https://") (hasPrefix $u "/") (hasPrefix $u "#") (hasPrefix $u "."))) -}}
+            {{- errorf "schedule: URL must be HTTP(S), relative, fragment, or dot-relative path, got %q" $u -}}
+          {{- end -}}
           {{- if not (hasPrefix $u "http") }}
             {{- $u = printf "%s%s" (strings.TrimSuffix "/" $.Site.BaseURL) $u }}
           {{- end }}
@@ -56,6 +60,10 @@
       <p class="episode-meta">{{ .day }} &middot; {{ .time }}</p>
       <p>{{ .description }}</p>
       {{- $eu := .url }}
+      {{- /* Validate URL scheme — reject dangerous protocols */ -}}
+      {{- if and $eu (not (or (hasPrefix $eu "http://") (hasPrefix $eu "https://") (hasPrefix $eu "/") (hasPrefix $eu "#") (hasPrefix $eu "."))) -}}
+        {{- errorf "schedule: URL must be HTTP(S), relative, fragment, or dot-relative path, got %q" $eu -}}
+      {{- end -}}
       {{- if not (hasPrefix $eu "http") }}
         {{- $eu = printf "%s%s" (strings.TrimSuffix "/" $.Site.BaseURL) $eu }}
       {{- end }}
