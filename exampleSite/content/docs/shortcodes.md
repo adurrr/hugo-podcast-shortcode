@@ -1,6 +1,8 @@
 ---
 title: "Utility Shortcodes"
-description: "Admonitions, buttons, figures, videos, tabs, galleries, and carousels — all included with Wavecast."
+description: "Admonitions, buttons, figures, videos, tabs, galleries, and carousels: all included with Wavecast."
+date: 2026-01-01
+weight: 50
 ---
 
 Wavecast ships a set of utility shortcodes for building rich content pages without custom HTML.
@@ -111,17 +113,17 @@ CSS-only tabs (radio buttons). Useful for code examples in multiple languages, o
 ~~~
 {{</* tabs */>}}
 {{</* tab name="HTML" */>}}
-```html
+```
 <button class="btn">Click me</button>
 ```
 {{</* /tab */>}}
 {{</* tab name="CSS" */>}}
-```css
+```
 .btn { padding: 0.5rem 1rem; border-radius: 8px; }
 ```
 {{</* /tab */>}}
 {{</* tab name="JavaScript" */>}}
-```js
+```
 document.querySelector('.btn').addEventListener('click', () => alert('Hi'));
 ```
 {{</* /tab */>}}
@@ -130,17 +132,17 @@ document.querySelector('.btn').addEventListener('click', () => alert('Hi'));
 
 {{< tabs >}}
 {{< tab name="HTML" >}}
-```html
+```
 <button class="btn">Click me</button>
 ```
 {{< /tab >}}
 {{< tab name="CSS" >}}
-```css
+```
 .btn { padding: 0.5rem 1rem; border-radius: 8px; }
 ```
 {{< /tab >}}
 {{< tab name="JavaScript" >}}
-```js
+```
 document.querySelector('.btn').addEventListener('click', () => alert('Hi'));
 ```
 {{< /tab >}}

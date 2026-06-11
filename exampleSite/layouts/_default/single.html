@@ -1,4 +1,10 @@
 {{- /* _default/single.html - generic single page template */ -}}
 {{ define "main" }}
-  {{ .Content }}
+  <article class="content">
+    {{ .Content }}
+  </article>
+  {{- $docsSections := .Site.Params.docs.sections | default (slice "docs") }}
+  {{- if in $docsSections .Section }}
+    {{- partial "docs-nav.html" . }}
+  {{- end }}
 {{ end }}

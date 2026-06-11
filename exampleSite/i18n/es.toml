@@ -108,7 +108,7 @@ other = "Wavecast Radio: Sintoniza la tecnología. Con la tecnología de <a href
 
 # ── Home Page ──
 [home_info_card]
-other = """<strong>¿Notas el reproductor en la parte inferior de la página?</strong> Es el reproductor persistente de Wavecast. Te sigue a través de todas las páginas, se mantiene sincronizado con cada episodio y recuerda tu posición, volumen y velocidad. Prueba a navegar entre programas mientras se reproduce el audio."""
+other = """<strong>¿Notas el reproductor en la parte inferior de la página?</strong> Es el reproductor persistente de Wavecast. Te sigue a través de todas las páginas, se mantiene sincronizado con cada episodio y recuerda tu posición, volumen y velocidad. Prueba a navegar entre programas mientras se reproduce el audio.<br><br>Este sitio está construido con Wavecast. <a href="{{ .url }}">Lee la documentación</a> para aprender a añadir este reproductor a tu propio sitio Hugo."""
 
 [home_section_programs]
 other = "Nuestros Programas"
@@ -157,6 +157,9 @@ other = "Más información sobre Wavecast"
 
 [home_cta_github]
 other = "GitHub"
+
+[home_cta_docs]
+other = "Documentación"
 
 # ── About Page ──
 [about_title]
@@ -330,6 +333,25 @@ other = "Notas del Episodio"
 
 [episode_attribution]
 other = "Episodio de <a href=\"{{ .url }}\" target=\"_blank\" rel=\"noopener\">{{ .text }}</a>. Usado con atribución."
+
+# ── Docs ──
+[docs_title]
+other = "Documentación"
+
+[docs_desc]
+other = "Aprende a usar Wavecast y sus funciones."
+
+[docs_previous]
+other = "Anterior"
+
+[docs_next]
+other = "Siguiente"
+
+[docs_index]
+other = "Índice de Documentación"
+
+[docs_edit]
+other = "Editar esta página en GitHub"
 
 # ── Program Card ──
 [program_card_episodes]

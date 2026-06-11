@@ -108,7 +108,7 @@ other = "Wavecast Radio: Tune in to Tech. Powered by <a href=\"https://github.co
 
 # ── Home Page ──
 [home_info_card]
-other = """<strong>Notice the player at the bottom of the page?</strong> That's Wavecast's sticky footer player. It follows you across all pages, stays in sync with every episode, and remembers your position, volume, and speed. Try navigating between shows while audio is playing."""
+other = """<strong>Notice the player at the bottom of the page?</strong> That's Wavecast's sticky footer player. It follows you across all pages, stays in sync with every episode, and remembers your position, volume, and speed. Try navigating between shows while audio is playing.<br><br>This site is built with Wavecast. <a href="{{ .url }}">Read the documentation</a> to learn how to add this player to your own Hugo site."""
 
 [home_section_programs]
 other = "Our Programs"
@@ -157,6 +157,9 @@ other = "Learn More About Wavecast"
 
 [home_cta_github]
 other = "GitHub"
+
+[home_cta_docs]
+other = "Read the Docs"
 
 # ── About Page ──
 [about_title]
@@ -330,6 +333,25 @@ other = "Show Notes"
 
 [episode_attribution]
 other = "Episode from <a href=\"{{ .url }}\" target=\"_blank\" rel=\"noopener\">{{ .text }}</a>. Used with attribution."
+
+# ── Docs ──
+[docs_title]
+other = "Documentation"
+
+[docs_desc]
+other = "Learn how to use Wavecast and its features."
+
+[docs_previous]
+other = "Previous"
+
+[docs_next]
+other = "Next"
+
+[docs_index]
+other = "Documentation Index"
+
+[docs_edit]
+other = "Edit this page on GitHub"
 
 # ── Program Card ──
 [program_card_episodes]
