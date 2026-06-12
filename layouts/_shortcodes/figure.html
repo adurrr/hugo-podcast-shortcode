@@ -8,6 +8,10 @@
 {{- $width := .Get "width" -}}
 {{- $href := .Get "href" -}}
 {{- $class := .Get "class" | default "" -}}
+{{- /* Validate URL scheme — reject dangerous protocols */ -}}
+{{- if and $href (not (or (hasPrefix $href "http://") (hasPrefix $href "https://") (hasPrefix $href "/") (hasPrefix $href "#") (hasPrefix $href "."))) -}}
+  {{- errorf "shortcode: URL must be HTTP(S), relative, fragment, or dot-relative path, got %q" $href -}}
+{{- end -}}
 
 {{- $isExternal := or (hasPrefix $href "http://") (hasPrefix $href "https://") (hasPrefix $href "//") -}}
 <figure class="wvc-figure{{ with $class }} {{ . }}{{ end }}">

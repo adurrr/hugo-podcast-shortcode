@@ -1,5 +1,8 @@
 {{- /* program-card.html - renders a single program card with icon, title, description, episodes */ -}}
 {{- $icon := .icon -}}
+{{- if not (findRE "<svg\\b" $icon) }}
+  {{- errorf "program card: icon must be a valid SVG element, got: %.20s" $icon }}
+{{- end -}}
 {{- $url  := .url -}}
 {{- $title := .title -}}
 {{- $desc := .description -}}

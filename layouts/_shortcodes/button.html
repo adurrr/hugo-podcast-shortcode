@@ -3,6 +3,10 @@
   variants: primary | secondary | outline
 */ -}}
 {{- $url := .Get "url" -}}
+{{- /* Validate URL scheme — reject dangerous protocols */ -}}
+{{- if and $url (not (or (hasPrefix $url "http://") (hasPrefix $url "https://") (hasPrefix $url "/") (hasPrefix $url "#") (hasPrefix $url "."))) -}}
+  {{- errorf "shortcode: URL must be HTTP(S), relative, fragment, or dot-relative path, got %q" $url -}}
+{{- end -}}
 {{- $variant := .Get "variant" | default "primary" -}}
 {{- $icon := .Get "icon" -}}
 {{- $isExternal := or (hasPrefix $url "http://") (hasPrefix $url "https://") -}}

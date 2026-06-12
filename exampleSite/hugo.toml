@@ -71,6 +71,9 @@ defaultContentLanguageInSubdir = false
         persistent = true
         preload = "metadata"
 
+# WARNING: unsafe=true allows raw HTML in Markdown content (including <script> tags).
+# Only enable this if all content authors are trusted. For sites with untrusted
+# contributors, set unsafe=false and use shortcodes for HTML needs.
 # Allow raw HTML in Markdown
 [markup]
   [markup.goldmark]

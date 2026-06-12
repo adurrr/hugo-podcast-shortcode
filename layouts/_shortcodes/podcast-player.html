@@ -38,6 +38,13 @@
 {{- if not $src -}}
   {{- errorf "podcast-player: required 'src' parameter is missing. See %s" .Position -}}
 {{- end -}}
+{{- /* Validate audio URL scheme */ -}}
+{{- if $src }}
+  {{- $scheme := urls.Parse $src }}
+  {{- if and $scheme.Scheme (not (or (eq $scheme.Scheme "http") (eq $scheme.Scheme "https"))) }}
+    {{- errorf "podcast-player: audio src must use http or https scheme, got %q" $scheme.Scheme }}
+  {{- end }}
+{{- end -}}
 
 {{- /* ---- 2. Site config defaults ---- */ -}}
 {{- $siteCfg := site.Params.podcastPlayer | default dict -}}
@@ -80,9 +87,9 @@
   {{- .Page.Store.Set "podcastPlayerAssetsLoaded" true -}}
 
   {{- /* JS — link directly if asset exists, else inline fallback */ -}}
-  {{- $js := resources.Get "js/podcast-player.js" -}}
+  {{- $js := resources.Get "js/podcast-player.js" | fingerprint -}}
   {{- if $js -}}
-    <script src="{{ $js.RelPermalink }}" type="module" defer></script>
+    <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" type="module" defer></script>
   {{- else -}}
     <script type="module">
       console.warn("podcast-player: JS asset not found — check your Hugo module setup.");
@@ -90,9 +97,9 @@
   {{- end -}}
 
   {{- /* CSS — link directly if asset exists */ -}}
-  {{- $css := resources.Get "css/podcast-player.css" -}}
+  {{- $css := resources.Get "css/podcast-player.css" | fingerprint -}}
   {{- if $css -}}
-    <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+    <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
   {{- end -}}
 {{- end -}}
 
