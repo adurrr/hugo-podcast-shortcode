@@ -2,7 +2,7 @@
 title: "Front Matter"
 description: "Campos de front matter para episodios, metadatos RSS de podcast y configuración del reproductor por página."
 date: 2026-01-01
-weight: 60
+weight: 20
 ---
 
 Wavecast usa el front matter de Hugo para configurar episodios tanto para el reproductor como para el feed RSS del podcast.

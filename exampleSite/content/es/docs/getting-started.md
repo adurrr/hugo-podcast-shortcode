@@ -2,7 +2,7 @@
 title: "Primeros Pasos"
 description: "Crea tu primer episodio con el shortcode podcast-player. Configuración mínima con un ejemplo funcional."
 date: 2026-01-01
-weight: 20
+weight: 60
 ---
 
 Después de instalar Wavecast, añade un reproductor de podcast a cualquier página con un solo shortcode.

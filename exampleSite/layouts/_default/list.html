@@ -3,7 +3,7 @@
   {{- if and (eq .Section "docs") .Pages }}
   <nav class="docs-index" aria-label="Documentation pages">
     <ul class="link-list">
-      {{- range .Pages }}
+      {{- range .Pages.Reverse }}
       <li><a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ with .Description }} <span class="docs-index-desc">{{ . }}</span>{{ end }}</li>
       {{- end }}
     </ul>

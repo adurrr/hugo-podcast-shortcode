@@ -2,7 +2,7 @@
 title: "Front Matter"
 description: "Episode front matter fields, podcast RSS metadata, and per-page player configuration."
 date: 2026-01-01
-weight: 60
+weight: 20
 ---
 
 Wavecast uses Hugo front matter to configure episodes for both the player and the podcast RSS feed.
@@ -11,7 +11,7 @@ Wavecast uses Hugo front matter to configure episodes for both the player and th
 
 Add a `podcast:` key to any page's YAML front matter to render a player:
 
-```
+```yaml
 ---
 title: "Episode 42: The Big One"
 date: 2026-06-01
@@ -36,7 +36,7 @@ podcast:
 
 You can also pass these directly as shortcode parameters:
 
-```
+```go-html-template
 {{</* podcast-player
   src="https://example.com/audio.mp3"
   title="Episode 42"
@@ -50,7 +50,7 @@ You can also pass these directly as shortcode parameters:
 
 For iTunes-compatible podcast RSS feeds, add additional fields to `podcast:` in your episode front matter:
 
-```
+```yaml
 ---
 title: "Episode 42: The Big One"
 date: 2026-06-01
@@ -89,7 +89,7 @@ podcast:
 
 Global podcast metadata goes in `hugo.toml` under `[params.podcast]`:
 
-```
+```toml
 [params.podcast]
   description = "A weekly show about open-source and software engineering."
   author = "Your Name"

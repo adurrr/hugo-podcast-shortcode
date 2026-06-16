@@ -2,7 +2,7 @@
 title: "Configuración Avanzada"
 description: "Adaptadores de fuente, API de eventos JavaScript, persistencia interna y atajos de teclado."
 date: 2026-01-01
-weight: 70
+weight: 10
 ---
 
 ## Adaptadores de Fuente

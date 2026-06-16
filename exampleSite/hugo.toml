@@ -79,6 +79,9 @@ defaultContentLanguageInSubdir = false
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
+  [markup.highlight]
+    noClasses = false
+    style = "monokai"
 
 # Import the local module for development
 [module]

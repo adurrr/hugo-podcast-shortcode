@@ -2,7 +2,7 @@
 title: "Shortcodes de Utilidad"
 description: "Advertencias, botones, figuras, videos, pestañas, galerías y carruseles: todo incluido con Wavecast."
 date: 2026-01-01
-weight: 50
+weight: 30
 ---
 
 Wavecast incluye un conjunto de shortcodes de utilidad para crear páginas de contenido enriquecido sin HTML personalizado.

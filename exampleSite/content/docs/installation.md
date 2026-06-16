@@ -2,7 +2,7 @@
 title: "Installation"
 description: "Install Wavecast as a Hugo theme or Hugo module. Step-by-step instructions for both paths."
 date: 2026-01-01
-weight: 10
+weight: 70
 ---
 
 Wavecast can be used in two ways. Choose the one that fits your project.
@@ -16,13 +16,13 @@ Wavecast can be used in two ways. Choose the one that fits your project.
 
 Recommended for most sites. Clone Wavecast into your `themes/` directory:
 
-```
+```shell
 git clone git@github.com:adurrr/wavecast.git themes/wavecast
 ```
 
 Then add to your site's `hugo.toml`:
 
-```
+```toml
 theme = "wavecast"
 ```
 
@@ -30,7 +30,7 @@ That's it. Hugo automatically discovers the shortcode (`layouts/_shortcodes/podc
 
 {{< admonition type="tip" title="Version Pinning" >}}
 Pin a specific release with a Git tag:
-```
+```shell
 cd themes/wavecast && git checkout v0.1.0
 ```
 {{< /admonition >}}
@@ -39,14 +39,14 @@ cd themes/wavecast && git checkout v0.1.0
 
 If you're already using Hugo modules or need to compose Wavecast with other modules:
 
-```
+```shell
 hugo mod init github.com/yourusername/your-site
 hugo mod get github.com/adurrr/wavecast
 ```
 
 Then in your site's `hugo.toml`:
 
-```
+```toml
 [module]
   [[module.imports]]
     path = "github.com/adurrr/wavecast"
@@ -68,7 +68,7 @@ Hugo resolves the module and makes the shortcode, JS, and CSS available automati
 
 Clone the repo and run the included example site:
 
-```
+```shell
 git clone git@github.com:adurrr/wavecast.git
 cd wavecast/exampleSite
 hugo server --port 1313
@@ -80,8 +80,8 @@ Open your browser to the URL shown in the server output (e.g. `http://localhost:
 
 After installing, check that the shortcode is recognized:
 
-```
-# In your Hugo project directory
+```shell
+cd wavecast/exampleSite
 hugo server --port 1313
 ```
 

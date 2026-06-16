@@ -11,7 +11,7 @@ The sticky footer player (`<podcast-footer>`) must be present in your site's bas
 
 Add this element just before the closing `</body>` tag in `layouts/_default/baseof.html`:
 
-```
+```html
 <podcast-footer id="podcast-footer"
   data-turbolinks-permanent
   data-turbo-permanent
@@ -65,7 +65,7 @@ The player survives page navigations using multiple strategies:
 
 If your site has a dark/light theme toggle, make sure the footer's CSS custom properties respond to your theme switching. The `<podcast-footer>` element responds to these selectors automatically:
 
-```
+```css
 /* Built-in selectors the player responds to */
 [data-theme="dark"] podcast-footer,
 .theme-dark podcast-footer,
@@ -76,7 +76,7 @@ html[data-theme="dark"] podcast-footer {
 
 If your theme uses different attribute names (e.g., `body.dark` or `[color-scheme="dark"]`), add your own rules:
 
-```
+```css
 body.dark podcast-footer {
   --podcast-player-bg: #1e1e2e;
   --podcast-player-text: #e0e0e0;
@@ -90,7 +90,7 @@ body.dark podcast-player {
 
 ## Example: Full baseof.html Footer Section
 
-```
+```html
 <!DOCTYPE html>
 <html lang="{{ .Site.LanguageCode }}">
   <head>

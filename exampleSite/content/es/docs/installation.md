@@ -2,7 +2,7 @@
 title: "Instalación"
 description: "Instala Wavecast como tema de Hugo o módulo de Hugo. Instrucciones paso a paso para ambas opciones."
 date: 2026-01-01
-weight: 10
+weight: 70
 ---
 
 Wavecast se puede usar de dos maneras. Elige la que mejor se adapte a tu proyecto.
