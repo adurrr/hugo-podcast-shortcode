@@ -1,7 +1,7 @@
 ---
 title: "Documentación"
 description: "Aprende a usar Wavecast: el componente web de reproductor de podcast persistente para Hugo."
-weight: 1
+weight: 80
 
 cascade:
   showDate: false
@@ -56,15 +56,3 @@ Ambos componentes están **sincronizados bidireccionalmente**: pausar el pie de 
 
 {{< button url="https://adurrr.github.io/wavecast/" variant="primary" icon="→" >}}Abrir Demo en Vivo{{< /button >}}
 {{< button url="https://github.com/adurrr/wavecast" variant="outline" icon="→" >}}Repositorio GitHub{{< /button >}}
-
-## Navegando la Documentación
-
-| Página | Lo que aprenderás |
-|------|------------------|
-| [Instalación]({{< ref "docs/installation" >}}) | Configuración como tema vs módulo, requisitos de Hugo |
-| [Primeros Pasos]({{< ref "docs/getting-started" >}}) | Primer episodio, configuración mínima, verificar que funciona |
-| [Configuración]({{< ref "docs/configuration" >}}) | Opciones de configuración, propiedades CSS, selectores `::part()` |
-| [Configuración de Inicio]({{< ref "docs/homepage-setup" >}}) | Reproductor de pie, atributos de framework, alternancia de tema |
-| [Shortcodes]({{< ref "docs/shortcodes" >}}) | Todos los shortcodes de utilidad con ejemplos en vivo |
-| [Front Matter]({{< ref "docs/front-matter" >}}) | Campos de audio, campos RSS de podcast, configuración por página |
-| [Avanzado]({{< ref "docs/advanced" >}}) | Adaptadores de fuente, API de eventos, persistencia, solución de problemas |

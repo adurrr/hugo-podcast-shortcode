@@ -30,6 +30,10 @@
   {{- if $codeCopy }}
   <script src="{{ $codeCopy.RelPermalink }}" integrity="{{ $codeCopy.Data.Integrity }}" defer></script>
   {{- end }}
+  {{- $syntaxCSS := resources.Get "css/syntax.css" -}}
+  {{- if $syntaxCSS }}
+  <link rel="stylesheet" href="{{ $syntaxCSS.RelPermalink }}">
+  {{- end }}
   {{- /* Always load podcast-player CSS so the persistent footer has theme support on every page */ -}}
   {{- $playerCSS := resources.Get "css/podcast-player.css" -}}
   {{- if $playerCSS }}
@@ -66,7 +70,7 @@
           <button class="nav-dropdown-toggle" aria-expanded="false" aria-haspopup="true">{{ .Name }} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
           <div class="nav-dropdown-menu">
             <a href="{{ .URL }}">{{ i18n "docs_index" | default "Documentation Index" }}</a>
-            {{- range $docsPages }}
+            {{- range $docsPages.Reverse }}
             <a href="{{ .RelPermalink }}">{{ .Title }}</a>
             {{- end }}
           </div>

@@ -2,7 +2,7 @@
 title: "Configuración"
 description: "Valores globales, todas las opciones de configuración, propiedades CSS personalizadas y selectores ::part() para tematización."
 date: 2026-01-01
-weight: 30
+weight: 50
 ---
 
 Establece valores predeterminados para todas las invocaciones de shortcodes en tu `hugo.toml`. Los parámetros por shortcode sobrescriben la configuración del sitio; la configuración del sitio sobrescribe los valores integrados.

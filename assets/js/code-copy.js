@@ -2,6 +2,7 @@
 // Targets Hugo's .highlight wrapper (Chroma syntax highlighting) AND
 // plain <pre> blocks (e.g. fenced code without a language specifier).
 // Falls back to document.execCommand for older browsers.
+// Re-runs on Turbolinks/Turbo navigation so buttons appear after page swaps.
 (function () {
   'use strict';
 
@@ -10,6 +11,8 @@
   var CODE_COPY_LABEL = i18n.code_copy_label || 'Copy code to clipboard';
   var CODE_COPIED = i18n.code_copied || 'Copied!';
   var CODE_COPIED_LABEL = i18n.code_copied_label || 'Code copied';
+
+  function addCopyButtons() {
 
   // Collect both .highlight wrappers and standalone <pre> elements.
   // Filter out <pre> that are already inside .highlight (they get a button
@@ -96,4 +99,16 @@
     container.removeChild(ta);
     showCopied(btn);
   }
+
+  } // end addCopyButtons
+
+  // ── Initial run ──
+  addCopyButtons();
+
+  // ── Re-run on Turbolinks / Turbo Drive navigation ──
+  // Without these listeners, clicking a navbar link (which Turbolinks
+  // intercepts) swaps the page body without re-running this script,
+  // leaving new code blocks without copy buttons.
+  document.addEventListener('turbolinks:load', addCopyButtons);
+  document.addEventListener('turbo:load', addCopyButtons);
 })();

@@ -2,14 +2,14 @@
 title: "Configuration"
 description: "Global defaults, all config options, CSS custom properties, and ::part() selectors for theming."
 date: 2026-01-01
-weight: 30
+weight: 50
 ---
 
 Set defaults for all shortcode invocations in your `hugo.toml`. Per-shortcode params override site config; site config overrides built-in defaults.
 
 ## Global Player Defaults
 
-```
+```toml
 [params]
   [params.podcastPlayer]
     source = "azuracast"
@@ -55,7 +55,7 @@ The player renders in a Shadow DOM with a default dark theme. The external style
 
 The light theme is the default. For dark mode, wrap the player in a container with `[data-theme="dark"]` or `.theme-dark`:
 
-```
+```css
 body.dark-mode podcast-player {
   --podcast-player-bg: #1e1e2e;
   --podcast-player-text: #e0e0e0;
@@ -70,7 +70,7 @@ The built-in dark selectors (`[data-theme="dark"]`, `.theme-dark`, `html[data-th
 
 Use `::part()` to style individual Shadow DOM elements from outside:
 
-```
+```css
 /* Play button */
 podcast-player::part(play-btn) { background: hotpink; }
 

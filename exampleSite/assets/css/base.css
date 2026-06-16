@@ -136,13 +136,31 @@ td a:hover{text-decoration:underline}
   margin:1.25rem 0;
   border-radius:var(--radius);
 }
+
+/* Override Chroma inline backgrounds so theme CSS variables control light/dark mode.
+   Chroma adds style="background-color:#272822;color:#f8f8f2" directly on <pre>.
+   PaperMod and Blowfish use the same !important pattern for theme compatibility. */
+.highlight > pre,
+.highlight > pre code{
+  background:var(--code-bg) !important;
+  color:var(--code-text) !important;
+}
+
 .highlight pre{
   margin:0;
-  border-radius:var(--radius);
+  padding:0.9rem 1.25rem;
   overflow-x:auto;
+  font-family:ui-monospace,SFMono-Regular,'Cascadia Code','Fira Code',Menlo,Consolas,monospace;
+  font-size:0.88rem;
+  line-height:1.6;
+  border-left:3px solid var(--accent);
+  border-radius:0 var(--radius) var(--radius) 0;
 }
+.highlight pre::-webkit-scrollbar{height:6px}
+.highlight pre::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.4);border-radius:3px}
+
 main pre:not(.highlight pre){
-  padding:0.9rem 1.1rem;
+  padding:0.9rem 1.25rem;
   overflow-x:auto;
   font-family:ui-monospace,SFMono-Regular,'Cascadia Code','Fira Code',Menlo,Consolas,monospace;
   font-size:0.88rem;
@@ -150,8 +168,12 @@ main pre:not(.highlight pre){
   background:var(--code-bg);
   color:var(--code-text);
   border:1px solid var(--code-border);
+  border-left:3px solid var(--accent);
   border-radius:var(--radius);
 }
+main pre::-webkit-scrollbar{height:6px}
+main pre::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.4);border-radius:3px}
+
 :root,[data-theme="light"]{
   --code-bg:#f1f5f9;
   --code-text:#334155;
@@ -162,22 +184,72 @@ main pre:not(.highlight pre){
   --code-text:#cbd5e1;
   --code-border:#334155;
 }
-.highlight pre::-webkit-scrollbar,main pre::-webkit-scrollbar{height:6px}
-.highlight pre::-webkit-scrollbar-thumb,main pre::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.4);border-radius:3px}
+
+/* ── Chroma syntax overrides for light mode ──
+   Monokai token colors are designed for dark backgrounds (#272822).
+   On light backgrounds (#f1f5f9), several token colors have poor contrast
+   (e.g., yellow strings at 1.4:1, cyan keywords at 2.3:1).
+   The following overrides improve readability without changing the palette feel. */
+
+/* Operators: remove highlight on < > / = and similar symbols (inherit base text color).
+   Also reset .err tokens — Chroma classifies non-standard syntax as errors but
+   in Hugo templates these are expected (e.g., < in {{< shortcode >}}).
+   Reset both color and background-color to remove the red highlight bar. */
+:root .chroma .o,
+[data-theme="light"] .chroma .o,
+:root .chroma .ow,
+[data-theme="light"] .chroma .ow,
+:root .chroma .err,
+[data-theme="light"] .chroma .err { color:inherit !important; background-color:transparent !important; }
+
+/* Strings: darken yellow (#e6db74 → #806f00) for light backgrounds.
+   Dark mode keeps the original Monokai yellow. */
+:root .chroma .s,
+[data-theme="light"] .chroma .s,
+:root .chroma .s1,
+[data-theme="light"] .chroma .s1,
+:root .chroma .s2,
+[data-theme="light"] .chroma .s2,
+:root .chroma .sa,
+[data-theme="light"] .chroma .sa,
+:root .chroma .sb,
+[data-theme="light"] .chroma .sb,
+:root .chroma .sc,
+[data-theme="light"] .chroma .sc,
+:root .chroma .dl,
+[data-theme="light"] .chroma .dl,
+:root .chroma .sd,
+[data-theme="light"] .chroma .sd,
+:root .chroma .sh,
+[data-theme="light"] .chroma .sh,
+:root .chroma .si,
+[data-theme="light"] .chroma .si,
+:root .chroma .sx,
+[data-theme="light"] .chroma .sx,
+:root .chroma .sr,
+[data-theme="light"] .chroma .sr,
+:root .chroma .ss,
+[data-theme="light"] .chroma .ss,
+:root .chroma .ld,
+[data-theme="light"] .chroma .ld { color:#806f00 !important; }
 
 /* ── Code copy button ── */
 .highlight,pre{position:relative}
 .highlight .code-copy-btn,pre > .code-copy-btn{
-  visibility:hidden;position:absolute;top:6px;right:6px;z-index:10;
+  position:absolute;top:6px;right:6px;z-index:10;
   display:inline-flex;align-items:center;justify-content:center;
   width:32px;height:32px;cursor:pointer;
-  background:rgba(0,0,0,0.35);color:rgba(255,255,255,0.9);
+  background:rgba(0,0,0,0.20);color:rgba(255,255,255,0.75);
   border:none;border-radius:var(--radius);
-  opacity:0;transition:opacity .15s,visibility .15s,background .15s;
+  opacity:0.6;transition:opacity .15s,background .15s;
 }
 .highlight:hover .code-copy-btn,.highlight .code-copy-btn:focus-visible,
 pre:hover > .code-copy-btn,pre > .code-copy-btn:focus-visible{
-  visibility:visible;opacity:1;
+  opacity:1;
+}
+[data-theme="dark"] .highlight .code-copy-btn,
+[data-theme="dark"] pre > .code-copy-btn{
+  background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.85);
 }
 .highlight .code-copy-btn:hover,pre > .code-copy-btn:hover{
   background:rgba(0,0,0,0.6);

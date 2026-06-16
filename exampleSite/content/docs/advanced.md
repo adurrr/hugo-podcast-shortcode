@@ -2,7 +2,7 @@
 title: "Advanced Configuration"
 description: "Source adapters, JavaScript events API, persistence internals, and keyboard shortcuts."
 date: 2026-01-01
-weight: 70
+weight: 10
 ---
 
 ## Source Adapters
@@ -13,7 +13,7 @@ The `source` parameter controls how the player resolves its audio URL. When omit
 
 Plays the URL as-is. Use for direct audio file links or local Hugo resources.
 
-```
+```go-html-template
 {{</* podcast-player src="https://example.com/audio.mp3" */>}}
 ```
 
@@ -23,7 +23,7 @@ Fetches the AzuraCast nowplaying API to discover the stream URL and enriches the
 
 Requires the `data-azuracast-api-url` attribute:
 
-```
+```go-html-template
 {{</* podcast-player
   src=""
   source="azuracast"
@@ -45,7 +45,7 @@ Fetches the iVoox episode page and extracts the audio URL from:
 
 On fetch failure, falls back to the `src` URL as-is.
 
-```
+```go-html-template
 {{</* podcast-player
   src="https://www.ivoox.com/episode-title_12345_1.html"
   source="ivoox"
@@ -58,7 +58,7 @@ On fetch failure, falls back to the `src` URL as-is.
 
 The component emits custom events that bubble through the DOM. Listen on any `<podcast-player>` or `<podcast-footer>` element:
 
-```
+```javascript
 document.querySelector("podcast-player")
   .addEventListener("player-state", (e) => {
     console.log(e.detail);
@@ -80,7 +80,7 @@ document.querySelector("podcast-player")
 
 State is saved per-source in `sessionStorage` using the key format:
 
-```
+```text
 podcastPlayerState:<src>
 ```
 

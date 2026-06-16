@@ -2,7 +2,7 @@
 title: "Getting Started"
 description: "Create your first episode with the podcast-player shortcode. Minimal setup with a working example."
 date: 2026-01-01
-weight: 20
+weight: 60
 ---
 
 After installing Wavecast, add a podcast player to any page with a single shortcode.
@@ -13,13 +13,13 @@ After installing Wavecast, add a podcast player to any page with a single shortc
 
    In `layouts/_default/baseof.html`, add just before `</body>`:
 
-   ```
+   ```html
    <podcast-footer id="podcast-footer" data-turbolinks-permanent data-turbo-permanent hx-preserve></podcast-footer>
    ```
 
 2. **Create an episode** in `content/episodes/my-first-episode.md`:
 
-   ```
+   ```markdown
    ---
    title: "Episode 1: Hello World"
    date: 2026-01-15
@@ -58,7 +58,7 @@ After installing Wavecast, add a podcast player to any page with a single shortc
 
 Place your audio file in your Hugo project's `assets/` directory:
 
-```
+```go-html-template
 {{</* podcast-player
   src="episodes/my-episode.mp3"
   title="Episode 42: Hello World"
