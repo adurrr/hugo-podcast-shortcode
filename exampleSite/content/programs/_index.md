@@ -4,7 +4,7 @@ title: "Programs"
 
 <section class="hero">
   <h1>Our Programs</h1>
-  <p>Four shows exploring the technologies that define our industry. Each program releases episodes weekly :  pick one and dive in.</p>
+  <p>Five shows exploring the technologies that define our industry. Each program releases episodes weekly :  pick one and dive in.</p>
 </section>
 
 <div class="program-grid">
@@ -14,7 +14,7 @@ title: "Programs"
     </div>
     <h3>Code &amp; Circuit</h3>
     <p>AI, cloud infrastructure, and the craft of software development. Hosted by developers, for developers.</p>
-    <span class="program-card-meta">2 episodes &middot; Weekly</span>
+    <span class="program-card-meta">3 episodes &middot; Weekly</span>
   </a>
 
   <a href="{{< relref "programs/security-brief" >}}" class="program-card">
@@ -23,7 +23,7 @@ title: "Programs"
     </div>
     <h3>The Security Brief</h3>
     <p>Cybersecurity stories, threat analysis, and defense strategies from the front lines.</p>
-    <span class="program-card-meta">2 episodes &middot; Biweekly</span>
+    <span class="program-card-meta">3 episodes &middot; Biweekly</span>
   </a>
 
   <a href="{{< relref "programs/open-source-spotlight" >}}" class="program-card">
@@ -32,7 +32,7 @@ title: "Programs"
     </div>
     <h3>Open Source Spotlight</h3>
     <p>Discovering the projects, communities, and people shaping open source software.</p>
-    <span class="program-card-meta">2 episodes &middot; Monthly</span>
+    <span class="program-card-meta">3 episodes &middot; Monthly</span>
   </a>
 
   <a href="{{< relref "programs/deploy-friday" >}}" class="program-card">
@@ -41,6 +41,15 @@ title: "Programs"
     </div>
     <h3>Deploy Friday</h3>
     <p>DevOps, SRE, platform engineering, and real stories from production.</p>
+    <span class="program-card-meta">3 episodes &middot; Weekly</span>
+  </a>
+
+  <a href="{{< relref "programs/linux-matter" >}}" class="program-card">
+    <div class="program-card-icon">
+      <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </div>
+    <h3>Linux Matter</h3>
+    <p>Linux desktops, distro news, kernel updates, and the open-source community that builds it.</p>
     <span class="program-card-meta">2 episodes &middot; Weekly</span>
   </a>
 </div>
