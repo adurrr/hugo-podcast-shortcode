@@ -20,7 +20,7 @@ defaultContentLanguageInSubdir = false
       [languages.en.params.podcast]
         description = "Wavecast Radio brings you the best in tech podcasting, from Infrastructure as Code to open-source culture and modern DevOps practices."
         author = "Wavecast Radio"
-        summary  = "A demo podcast showcasing the Hugo Wavecast theme. Each episode features a full persistent audio player, chapter markers, and episode notes — all powered by standard Markdown front matter."
+        summary  = "A demo podcast showcasing the Hugo Wavecast theme. Each episode features a full persistent audio player, chapter markers, and episode notes, all powered by standard Markdown front matter."
         image    = "/wavecast/logo.png"
         explicit = false
         type     = "episodic"

@@ -6,6 +6,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-06-16
+
+### Added
+
+- Linux Matter program to example site (Linux, open source, desktop focus) with 2 episodes
+- S1E3 episodes for all four existing programs (Code & Circuit, Security Brief, Open Source Spotlight, Deploy Friday)
+- Wednesday schedule slot for Linux Matter, refreshed upcoming episodes
+
+### Changed
+
+- Example site programs grid expanded to 5 cards, episode counts bumped to 3
+- Demo GIF replaced: 7 frames showcasing persistent player across page navigation, inline player in action, and light/dark mode (142 KB)
+- Updated demo alt text in README to describe expanded content
+
+### Fixed
+
+- Broken audio sources across 8 episodes: no-CORS SoundHelix URLs and 404 fabricated URLs replaced with verified Fireside.fm audio (CORS-enabled, HTTP 200)
+- YAML colon-parsing errors in show_notes lists across all new episode front matter
+- Future-dated episodes now render without `--buildFuture` flag
+
+### Previous (v1.2.x backport)
+
+- Language tags added to all 40+ fenced code blocks across 7 docs pages (EN and ES), enabling Chroma syntax highlighting
+- Code blocks styled with 0.9rem padding and 3px left accent border (Hextra/Docusaurus pattern)
+- Class-based highlighting (`noClasses = false`) with bundled `syntax.css` for light/dark theme-compatible token colors
+- Light mode readability: Monokai string colors overridden from yellow to dark gold, operator highlights reset to inherit
+- Copy-to-clipboard button always visible (opacity 0.6) with Turbolinks/Turbo event listeners for SPA survival
+- Fixed missing closing brace in `addCopyButtons()` that silently broke all copy functionality
+- Docs page weights changed to descending order, listing reversed to reading order (Installation first)
+- Duplicate TOC tables removed from docs index pages
+
 ## [1.2.0] - 2026-06-02
 
 ### Added
@@ -58,7 +89,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- Em dashes (—) replaced with hyphens in README, example site, and templates
+- Em dashes replaced with hyphens in README, example site, and templates
 - Module path changed to `github.com/adurrr/wavecast`
 
 ## [0.x] - hugo-podcast-shortcode (pre-rename)
@@ -93,7 +124,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-[Unreleased]: https://github.com/adurrr/wavecast/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/adurrr/wavecast/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/adurrr/wavecast/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/adurrr/wavecast/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/adurrr/wavecast/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/adurrr/wavecast/releases/tag/v1.0.0
