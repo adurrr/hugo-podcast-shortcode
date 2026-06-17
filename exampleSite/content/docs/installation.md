@@ -31,7 +31,7 @@ That's it. Hugo automatically discovers the shortcode (`layouts/_shortcodes/podc
 {{< admonition type="tip" title="Version Pinning" >}}
 Pin a specific release with a Git tag:
 ```shell
-cd themes/wavecast && git checkout v0.1.0
+cd themes/wavecast && git checkout v1.3.0
 ```
 {{< /admonition >}}
 

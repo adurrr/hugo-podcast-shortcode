@@ -31,7 +31,7 @@ Eso es todo. Hugo descubre automáticamente el shortcode (`layouts/_shortcodes/p
 {{< admonition type="tip" title="Fijar Versión" >}}
 Fija una versión específica con una etiqueta Git:
 ```
-cd themes/wavecast && git checkout v0.1.0
+cd themes/wavecast && git checkout v1.3.0
 ```
 {{< /admonition >}}
 
