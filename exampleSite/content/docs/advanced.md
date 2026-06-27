@@ -115,6 +115,48 @@ This is automatic: no configuration needed.
 
 ## Troubleshooting
 
+### Footer disappears on page navigation
+
+**Symptom:** Click play on an inline player, the footer bar appears. Click a
+nav link — the new page loads, the footer is gone, and the audio stops.
+
+**Root cause:** No navigation framework is loaded. The
+`data-turbo-permanent` / `data-turbolinks-permanent` / `hx-preserve`
+attributes on `<podcast-footer>` are inert HTML attributes with no effect on
+their own — they are read by htmx / Turbo / Turbolinks JS. If none of those
+libraries is loaded, the browser does a full page reload and the footer DOM
+element is destroyed and recreated with no `src`.
+
+**Diagnose:** In the browser console on any page, type:
+
+```js
+[window.htmx, window.Turbo, window.Turbolinks].filter(Boolean)
+// should print exactly one entry
+```
+If it prints an empty array, no framework is loaded.
+**Fix:** Load one — see [Homepage Setup → Framework Attributes]({{< ref
+"docs/homepage-setup.md#framework-attributes" >}}).
+
+### Inline player and footer out of sync after navigation
+
+**Symptom:** Volume / mute / playback rate changes on the inline player do
+not update the footer (or vice versa).
+
+**Root cause:** Some themes (especially ones that bundle a DOMContentLoaded
+init script) re-bind event handlers on every full page load, but not on
+htmx/Turbo swaps. If your theme has this pattern, hook the theme's re-init
+function to `htmx:afterSwap` / `turbo:render` / `turbolinks:render`.
+
+**Fix (Blowfish example):** add to your `extend-head.html`:
+
+```js
+if (window.htmx) {
+  document.addEventListener("htmx:afterSwap", () => {
+    // re-run your theme's page-load init here
+  });
+}
+```
+
 {{< admonition type="warning" title="Player doesn't appear" >}}
 
 - Check the browser console for JavaScript errors. The `<podcast-player>` custom element must be registered.

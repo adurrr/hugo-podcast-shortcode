@@ -23,43 +23,72 @@ Add this element just before the closing `</body>` tag in `layouts/_default/base
 The footer player is **opt-in**. If you don't add `<podcast-footer>` to your template, only the inline `<podcast-player>` components render, and no footer bar appears. The player still works perfectly without a footer.
 {{< /admonition >}}
 
-## Framework Attributes
-
-The `data-turbolinks-permanent`, `data-turbo-permanent`, and `hx-preserve` attributes ensure the footer survives page navigation when using these frameworks:
-
-| Framework | Attribute | What it does |
-|-----------|-----------|-------------|
-| **Turbolinks** | `data-turbolinks-permanent` | Prevents Turbolinks from replacing the footer on navigation |
-| **Turbo** | `data-turbo-permanent` | Prevents Turbo Drive from morphing/replacing the footer |
-| **htmx** | `hx-preserve` | Tells htmx to preserve the element during DOM swaps |
-
-If you don't use any of these frameworks, omit those attributes: the footer will still persist via `sessionStorage` for vanilla page loads.
-
 ## How Persistence Works
 
-The player survives page navigations using multiple strategies:
+The footer survives page navigations using two complementary strategies:
 
-1. **Framework hooks**: `data-turbolinks-permanent` / `data-turbo-permanent` / `hx-preserve` keep the footer DOM element alive during SPA navigations
-2. **sessionStorage fallback**: State saved to `sessionStorage` on `beforeunload`, restored on next page load
-3. **Vanilla HTML**: Traditional page loads restore position, volume, mute, and speed from `sessionStorage`
+1. **Framework DOM preservation** (required for seamless playback). One of these
+   frameworks must be loaded on the page:
+   - **htmx** (recommended — smallest, most predictable)
+   - **Turbo** (Hotwire — "Rails-y" feel, more aggressive)
+   - **Turbolinks 5** (legacy; vendored copy in `assets/js/vendor/turbolinks.js`)
 
-### State Saved
+   Without a framework, the footer is **destroyed and recreated** on every
+   navigation. The `<audio>` element is re-instantiated with no source and
+   playback stops, even though Wavecast will restore `currentTime` from
+   `sessionStorage` on the next page.
 
-| Field | Description |
-|-------|-------------|
-| `currentTime` | Playback position in seconds |
-| `paused` | Whether audio was paused |
-| `volume` | Volume level (0–1) |
-| `muted` | Mute state |
-| `playbackRate` | Playback speed multiplier |
+2. **State restoration via `sessionStorage`** (always active). On every
+   `beforeunload`, the footer saves `{currentTime, volume, muted, playbackRate, paused}`.
+   On the next page, the inline player on the same source restores position
+   (with a 1-hour staleness guard).
 
-### Position Restore Rules
+## Framework Attributes
 
-- **Exact URL match**: Position only restored when the saved `src` matches the current element's `src`
-- **Staleness guard**: Positions older than 1 hour are discarded
-- **Paused-state estimation**: If audio was paused, position is restored as-is
-- **Playing-state estimation**: If audio was playing, elapsed time since save is added
-- **Deferred to `loadedmetadata`**: Position set only after browser reports audio duration
+The footer element declares which framework to opt into:
+
+| Framework | Attribute on `<podcast-footer>` | What it does |
+|-----------|----------------------------------|--------------|
+| **htmx**  | `hx-preserve`                    | Tells htmx to keep the element during `hx-boost` swaps |
+| **Turbo** | `data-turbo-permanent`           | Tells Turbo Drive to morph-instead-of-replace the element |
+| **Turbolinks 5** | `data-turbolinks-permanent` | Tells Turbolinks to relocate the element into the new body |
+
+Wavecast's JS detects the first available framework on load (`window.htmx`,
+`window.Turbo`, `window.Turbolinks`) and logs the chosen adapter. The other
+attributes are harmless no-ops.
+
+## Quick setup per framework
+
+**htmx** (recommended):
+
+```html
+<!-- in <head> -->
+<script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"
+        integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2"
+        crossorigin="anonymous" defer></script>
+
+<!-- in <body> -->
+<body hx-boost="true">
+
+<podcast-footer id="podcast-footer" hx-preserve></podcast-footer>
+```
+**Turbo:**
+```html
+<!-- in <head> -->
+<script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.1/dist/turbo.es2017-esm.min.js"></script>
+
+<podcast-footer id="podcast-footer" data-turbo-permanent></podcast-footer>
+```
+**Turbolinks 5** (uses the copy bundled in the Wavecast module):
+```html
+<!-- in <head> -->
+<script src="{{ "js/vendor/turbolinks.js" | relURL }}"></script>
+
+<podcast-footer id="podcast-footer" data-turbolinks-permanent></podcast-footer>
+```
+
+Without one of these scripts, the persistence attributes are dead code —
+the browser ignores them, and the footer is re-created on every page load.
 
 ## Theme Toggle Integration
 
