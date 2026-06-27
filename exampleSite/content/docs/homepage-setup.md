@@ -115,7 +115,13 @@ body.dark podcast-player {
   --podcast-player-bg: #1e1e2e;
   --podcast-player-text: #e0e0e0;
 }
-```
+
+## Scrolling Long Titles
+
+When a playing episode has a title longer than the footer's title area, the
+title automatically scrolls horizontally so the full text is visible. Short
+titles render normally with no animation. The behavior respects
+`prefers-reduced-motion: reduce`, which falls back to ellipsis truncation.
 
 ## Example: Full baseof.html Footer Section
 

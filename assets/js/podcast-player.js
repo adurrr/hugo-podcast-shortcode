@@ -1529,6 +1529,7 @@ class PodcastFooter extends HTMLElement {
 
     // Sync UI with current audio state (audio may have survived reconnection)
     this._syncUI();
+    this._setupTitleMarquee();
   }
 
   /** Sync all UI elements with the current audio state. */
@@ -1546,6 +1547,42 @@ class PodcastFooter extends HTMLElement {
     this._els.volume.value = this._audio.muted ? 0 : this._audio.volume;
     this._els.rateBtn.textContent = this._audio.playbackRate + "×";
     this._onTimeUpdate(); // sync progress/time display
+  }
+
+  /**
+   * Measure the footer title for overflow and toggle the marquee animation.
+   * Called from connectedCallback (initial mount) and after every title change.
+   * Uses ResizeObserver to re-measure on container resize / font load.
+   * No-op if either element is missing.
+   */
+  _setupTitleMarquee() {
+    const wrap  = this._els.title;     // .title  — clipped container
+    const inner = this._els.titleText; // .title-text — scrollable span
+    if (!wrap || !inner) return;
+
+    const measure = () => {
+      // Threshold of 8px filters out sub-pixel rounding noise; below that the
+      // animation would be imperceptible but still cost compositor work.
+      const overflow = inner.scrollWidth - wrap.clientWidth;
+      if (overflow > 8) {
+        wrap.style.setProperty("--marquee-distance", overflow + "px");
+        const duration = Math.min(20, Math.max(6, overflow / 40));
+        wrap.style.setProperty("--marquee-duration", duration + "s");
+        wrap.setAttribute("data-overflow", "");
+      } else {
+        wrap.removeAttribute("data-overflow");
+        wrap.style.removeProperty("--marquee-distance");
+        wrap.style.removeProperty("--marquee-duration");
+      }
+    };
+
+    // rAF: clientWidth/scrollWidth aren't reliable until after first paint of the new text.
+    requestAnimationFrame(measure);
+
+    if (!this._titleResizeObserver && typeof ResizeObserver !== "undefined") {
+      this._titleResizeObserver = new ResizeObserver(() => requestAnimationFrame(measure));
+      this._titleResizeObserver.observe(wrap);
+    }
   }
 
   /** Set the mute button icon based on current muted/volume state. */
@@ -1574,6 +1611,8 @@ class PodcastFooter extends HTMLElement {
     window.removeEventListener("beforeunload", this._onBeforeUnload);
     this._unbindAudioEvents();
     this._unbindUIEvents();
+    this._titleResizeObserver?.disconnect();
+    this._titleResizeObserver = null;
   }
 
   /* ---- Shadow DOM template ---- */
@@ -1608,7 +1647,31 @@ class PodcastFooter extends HTMLElement {
         }
         .title {
           font-weight: 600; font-size: .85rem;
-          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+          overflow: hidden;
+        }
+        .title-text {
+          display: inline-block;
+          white-space: nowrap;
+          padding-right: 1.5em;
+        }
+        .title[data-overflow] .title-text {
+          animation: marquee var(--marquee-duration, 10s) linear infinite alternate;
+          will-change: transform;
+        }
+        .title:hover .title-text {
+          animation-play-state: paused;
+        }
+        @keyframes marquee {
+          0%, 12%  { transform: translateX(0); }
+          88%, 100% { transform: translateX(calc(-1 * var(--marquee-distance, 0px))); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .title[data-overflow] .title-text {
+            animation: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+          }
         }
         .source { font-size: .7rem; color: var(--podcast-player-text-muted, #888);
                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1693,7 +1756,7 @@ class PodcastFooter extends HTMLElement {
       <div class="footer" part="footer">
         <img class="cover" part="cover" src="" alt="" hidden>
         <div class="info">
-          <div class="title" part="title"></div>
+          <div class="title" part="title"><span class="title-text"></span></div>
           <div class="source" part="source"></div>
         </div>
         <div class="controls">
@@ -1737,6 +1800,7 @@ class PodcastFooter extends HTMLElement {
       footer:     this._shadow.querySelector(".footer"),
       cover:      this._shadow.querySelector(".cover"),
       title:      this._shadow.querySelector(".title"),
+      titleText:  this._shadow.querySelector(".title-text"),
       source:     this._shadow.querySelector(".source"),
       playBtn:    this._shadow.querySelector(".btn-play"),
       skipBack:   this._shadow.querySelector(".btn-skip-back"),
@@ -1800,7 +1864,7 @@ class PodcastFooter extends HTMLElement {
     }
 
     // New source — load and play
-    this._els.title.textContent = title || this._t("player_unknown_episode");
+    this._els.titleText.textContent = title || this._t("player_unknown_episode");
     this._els.source.textContent = src.replace(/^https?:\/\//, "").split("/")[0] || src;
 
     if (poster) {
@@ -1818,6 +1882,7 @@ class PodcastFooter extends HTMLElement {
     this._audio.volume = parseFloat(this._els.volume.value);
 
     this.setAttribute("active", "");
+    this._setupTitleMarquee();
   }
 
   /** React to pause events from inline <podcast-player> elements.
@@ -2086,7 +2151,7 @@ class PodcastFooter extends HTMLElement {
       this._els.volume.value = this._audio.muted ? 0 : this._audio.volume;
       this._setMuteIcon();
       this._els.rateBtn.textContent = (state.playbackRate || 1) + "×";
-      this._els.title.textContent = state.title || this._t("player_unknown_episode");
+      this._els.titleText.textContent = state.title || this._t("player_unknown_episode");
       this._els.source.textContent = state.src.replace(/^https?:\/\//, "").split("/")[0] || state.src;
 
       if (state.poster) {
@@ -2107,6 +2172,7 @@ class PodcastFooter extends HTMLElement {
 
       // Show the footer
       this.setAttribute("active", "");
+      this._setupTitleMarquee();
     } catch (_) {}
   }
 

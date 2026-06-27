@@ -237,6 +237,186 @@ test.describe("Podcast Player E2E", () => {
     });
   });
 
+  test.describe("Footer title scrolling", () => {
+    /** Synthesize a podcast-play event that activates the footer with the
+     *  given title. Used to drive the marquee code without depending on a
+     *  specific example post having a long title. */
+    const synthesizePlay = async (page, title) => {
+      await page.evaluate((t) => {
+        const footer = document.querySelector("podcast-footer");
+        if (footer) footer.setAttribute("active", "");
+        document.dispatchEvent(new CustomEvent("podcast-play", {
+          detail: {
+            src: "https://example.com/test.mp3",
+            title: t,
+            poster: "",
+          },
+        }));
+      }, title);
+      // Give the footer's requestAnimationFrame a chance to run.
+      await page.waitForTimeout(150);
+    };
+
+    test("footer shadow DOM contains a .title-text span inside .title", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      const hasInner = await footer.evaluate((el) => {
+        const title = el.shadowRoot?.querySelector(".title");
+        const inner = el.shadowRoot?.querySelector(".title-text");
+        return !!title && !!inner && title.contains(inner);
+      });
+      expect(hasInner).toBe(true);
+    });
+
+    test("short title does not set data-overflow on the footer title", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      // Use a known short title — the footer's available width is narrow
+      // enough that even the example post's "Episode 42: Hello World"
+      // overflows. Synthesizing the event with a deterministic short
+      // string makes the assertion independent of the post content.
+      await synthesizePlay(page, "Hi");
+
+      const result = await footer.evaluate((el) => {
+        const title = el.shadowRoot?.querySelector(".title");
+        return {
+          hasOverflow: title?.hasAttribute("data-overflow") ?? false,
+          distance: title?.style.getPropertyValue("--marquee-distance") ?? "",
+        };
+      });
+      expect(result.hasOverflow).toBe(false);
+      expect(result.distance).toBe("");
+    });
+
+    test("long title sets data-overflow, CSS vars, and runs the marquee animation", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      // Synthesize a long title to force overflow.
+      const longTitle = "A".repeat(500) + " — this is a very long episode title to force overflow";
+      await synthesizePlay(page, longTitle);
+
+      const result = await footer.evaluate((el) => {
+        const title = el.shadowRoot?.querySelector(".title");
+        const titleText = el.shadowRoot?.querySelector(".title-text");
+        if (!title || !titleText) return null;
+        const cs = getComputedStyle(titleText);
+        return {
+          hasOverflow: title.hasAttribute("data-overflow"),
+          distance: title.style.getPropertyValue("--marquee-distance"),
+          duration: title.style.getPropertyValue("--marquee-duration"),
+          animationName: cs.animationName,
+          animationPlayState: cs.animationPlayState,
+        };
+      });
+
+      expect(result).not.toBeNull();
+      expect(result.hasOverflow).toBe(true);
+      expect(result.distance).not.toBe("");
+      expect(result.duration).not.toBe("");
+      expect(result.animationName).toBe("marquee");
+      expect(result.animationPlayState).toBe("running");
+    });
+
+    test("prefers-reduced-motion: reduce disables the marquee animation", async ({ page }) => {
+      // Opt into reduced motion before the page loads so the CSS media
+      // query resolves to "reduce" for the duration of the test.
+      await page.emulateMedia({ reducedMotion: "reduce" });
+
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      const longTitle = "A".repeat(500) + " — long title under reduced motion";
+      await synthesizePlay(page, longTitle);
+
+      const result = await footer.evaluate((el) => {
+        const title = el.shadowRoot?.querySelector(".title");
+        const titleText = el.shadowRoot?.querySelector(".title-text");
+        if (!title || !titleText) return null;
+        const cs = getComputedStyle(titleText);
+        return {
+          hasOverflow: title.hasAttribute("data-overflow"),
+          animationName: cs.animationName,
+        };
+      });
+
+      expect(result).not.toBeNull();
+      // Detection still runs — the attribute is set.
+      expect(result.hasOverflow).toBe(true);
+      // But the animation is suppressed.
+      expect(result.animationName).toBe("none");
+    });
+
+    test("marquee state survives a page navigation (Turbolinks permanent)", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      const longTitle = "A".repeat(500) + " — long title that must survive navigation";
+      await synthesizePlay(page, longTitle);
+
+      // Sanity: the marquee is active before navigation.
+      const before = await footer.evaluate((el) => {
+        const title = el.shadowRoot?.querySelector(".title");
+        return {
+          hasOverflow: title?.hasAttribute("data-overflow") ?? false,
+          distance: title?.style.getPropertyValue("--marquee-distance") ?? "",
+        };
+      });
+      expect(before.hasOverflow).toBe(true);
+      expect(before.distance).not.toBe("");
+
+      // Navigate via a header link (Turbolinks).
+      await page.locator('header nav a', { hasText: 'Programs' }).click();
+      await page.waitForTimeout(1000);
+
+      // Footer is preserved (data-turbolinks-permanent) and still active.
+      await expect(footer).toHaveAttribute("active", "");
+      const after = await footer.evaluate((el) => {
+        const title = el.shadowRoot?.querySelector(".title");
+        return {
+          hasOverflow: title?.hasAttribute("data-overflow") ?? false,
+          distance: title?.style.getPropertyValue("--marquee-distance") ?? "",
+        };
+      });
+      expect(after.hasOverflow).toBe(true);
+      expect(after.distance).not.toBe("");
+    });
+
+    test("hovering the title pauses the marquee animation", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      const longTitle = "A".repeat(500) + " — long title for hover pause test";
+      await synthesizePlay(page, longTitle);
+
+      // Sanity: the animation is running before hover.
+      const before = await footer.evaluate((el) => {
+        const titleText = el.shadowRoot?.querySelector(".title-text");
+        return getComputedStyle(titleText).animationPlayState;
+      });
+      expect(before).toBe("running");
+
+      // Hover the title element (the part="title" exposes the parent .title
+      // so the :hover rule from the shadow stylesheet applies).
+      await footer.locator("[part='title']").hover();
+
+      // The :hover rule sets animation-play-state: paused.
+      const after = await footer.evaluate((el) => {
+        const titleText = el.shadowRoot?.querySelector(".title-text");
+        return getComputedStyle(titleText).animationPlayState;
+      });
+      expect(after).toBe("paused");
+    });
+  });
+
   test.describe("Mobile Responsive", () => {
     test("time-duration stays inside player bounds on narrow viewports", async ({ page }) => {
       // Test with a narrow mobile viewport (iPhone SE width)
