@@ -768,4 +768,266 @@ describe("PodcastPlayer Web Component", () => {
       expect(player._audio.muted).toBe(false);
     });
   });
+
+  /* ================================================================== */
+  /*  Footer title marquee (issue #63)                                  */
+  /* ================================================================== */
+
+  describe("footer title marquee", () => {
+    /** @type {HTMLElement} */
+    let footer;
+    /** @type {Array<FrameRequestCallback>} */
+    let rafCallbacks;
+    let origRaf;
+    let origResizeObserver;
+    /** ResizeObserver class captured so tests can assert the instance was created. */
+    let ResizeObserverSpy;
+
+    /** Flush any rAF callbacks queued via the mocked requestAnimationFrame. */
+    const flushRaf = () => {
+      const cbs = rafCallbacks.slice();
+      rafCallbacks = [];
+      cbs.forEach((cb) => cb(performance.now()));
+    };
+
+    beforeEach(() => {
+      // Clean up any leftover footers from previous tests in this describe
+      document.querySelectorAll("podcast-footer").forEach((e) => e.remove());
+
+      // jsdom does not implement requestAnimationFrame; install a mock that
+      // captures callbacks so tests can flush them deterministically.
+      rafCallbacks = [];
+      origRaf = globalThis.requestAnimationFrame;
+      globalThis.requestAnimationFrame = /** @type {any} */ ((cb) => {
+        rafCallbacks.push(cb);
+        return rafCallbacks.length;
+      });
+
+      // jsdom does not implement ResizeObserver. Install a spy class so we
+      // can assert it was instantiated, and so the footer's code path runs.
+      origResizeObserver = globalThis.ResizeObserver;
+      ResizeObserverSpy = class {
+        constructor() {}
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      };
+      globalThis.ResizeObserver = /** @type {any} */ (ResizeObserverSpy);
+
+      footer = document.createElement("podcast-footer");
+      document.body.appendChild(footer);
+    });
+
+    afterEach(() => {
+      footer.remove();
+      globalThis.requestAnimationFrame = origRaf;
+      if (origResizeObserver === undefined) {
+        delete globalThis.ResizeObserver;
+      } else {
+        globalThis.ResizeObserver = origResizeObserver;
+      }
+    });
+
+    it("renders an inner .title-text span nested inside .title", () => {
+      const title = footer.shadowRoot.querySelector(".title");
+      const titleText = footer.shadowRoot.querySelector(".title-text");
+      expect(title).not.toBeNull();
+      expect(titleText).not.toBeNull();
+      // .title-text must be a child of .title
+      expect(title.contains(titleText)).toBe(true);
+    });
+
+    it("caches _els.titleText as an HTMLSpanElement with class 'title-text'", () => {
+      expect(footer._els).toBeDefined();
+      expect(footer._els.titleText).not.toBeNull();
+      expect(footer._els.titleText).toBeInstanceOf(HTMLSpanElement);
+      expect(footer._els.titleText.classList.contains("title-text")).toBe(true);
+    });
+
+    it("writes the title into .title-text (not .title) on podcast-play", () => {
+      // The footer listens for podcast-play on `document` (not the element
+      // itself), so the event must be dispatched from `document` to reach
+      // the handler. This matches how inline <podcast-player> elements
+      // dispatch their play events in production.
+      document.dispatchEvent(new CustomEvent("podcast-play", {
+        detail: { src: "https://example.com/x.mp3", title: "Hello World" },
+      }));
+
+      // Inner span should hold the title text
+      expect(footer._els.titleText.textContent).toBe("Hello World");
+      // Parent .title's textContent concatenates descendants, so it must
+      // also include the title (this is a DOM-text-content invariant, asserted
+      // to document the nested structure).
+      expect(footer._els.title.textContent).toContain("Hello World");
+    });
+
+    it("writes the restored title into .title-text via _restorePlaybackState", () => {
+      // Clear storage and any prior state left from previous tests so we
+      // start from a known-empty baseline.
+      sessionStorage.removeItem("podcastPlayerState:footer");
+
+      // Remove the outer-beforeEach footer BEFORE seeding storage; the
+      // footer's `disconnectedCallback` saves its current state on remove,
+      // which would otherwise overwrite the seeded state.
+      footer.remove();
+      footer = null;
+
+      // Seed sessionStorage with the footer's PERSISTENCE_KEY before
+      // instantiating so the new element picks it up in its connectedCallback.
+      const saved = {
+        src: "https://example.com/restored.mp3",
+        currentTime: 5,
+        paused: true,
+        volume: 1,
+        muted: false,
+        playbackRate: 1,
+        timestamp: Date.now(),
+        title: "Restored Episode Title",
+        poster: "",
+      };
+      const FOOTER_KEY = "podcastPlayerState:footer";
+      sessionStorage.setItem(FOOTER_KEY, JSON.stringify(saved));
+
+      // Sanity: the storage must be set before the new footer is appended.
+      expect(sessionStorage.getItem(FOOTER_KEY)).not.toBeNull();
+
+      // Create a fresh footer — its connectedCallback calls
+      // _restorePlaybackState which should consume the seeded state.
+      footer = document.createElement("podcast-footer");
+      document.body.appendChild(footer);
+
+      // The fresh element's connectedCallback should have consumed storage.
+      expect(footer._els.titleText.textContent).toBe("Restored Episode Title");
+      // The saved state must be cleared after restoration (one-shot).
+      expect(sessionStorage.getItem(FOOTER_KEY)).toBeNull();
+    });
+
+    it("sets data-overflow and CSS vars when the inner text overflows", async () => {
+      // Mock the dimensions BEFORE the measurement runs.
+      Object.defineProperty(footer._els.title, "clientWidth", {
+        configurable: true, value: 100,
+      });
+      Object.defineProperty(footer._els.titleText, "scrollWidth", {
+        configurable: true, value: 200,
+      });
+
+      footer._setupTitleMarquee();
+      // rAF is mocked; flush it.
+      flushRaf();
+
+      expect(footer._els.title.hasAttribute("data-overflow")).toBe(true);
+      // overflow = 200 - 100 = 100
+      expect(footer._els.title.style.getPropertyValue("--marquee-distance"))
+        .toBe("100px");
+      // duration = Math.min(20, Math.max(6, 100 / 40)) = 6
+      expect(footer._els.title.style.getPropertyValue("--marquee-duration"))
+        .toBe("6s");
+    });
+
+    it("does NOT set data-overflow when the inner text fits", () => {
+      Object.defineProperty(footer._els.title, "clientWidth", {
+        configurable: true, value: 200,
+      });
+      Object.defineProperty(footer._els.titleText, "scrollWidth", {
+        configurable: true, value: 100,
+      });
+
+      footer._setupTitleMarquee();
+      flushRaf();
+
+      expect(footer._els.title.hasAttribute("data-overflow")).toBe(false);
+      expect(footer._els.title.style.getPropertyValue("--marquee-distance"))
+        .toBe("");
+      expect(footer._els.title.style.getPropertyValue("--marquee-duration"))
+        .toBe("");
+    });
+
+    it("re-measures after a new podcast-play event changes the title", () => {
+      // Start with a fitting title (no overflow)
+      Object.defineProperty(footer._els.title, "clientWidth", {
+        configurable: true, value: 500,
+      });
+      Object.defineProperty(footer._els.titleText, "scrollWidth", {
+        configurable: true, get() { return footer._els.titleText.textContent.length; },
+      });
+      // .title clientWidth is constant; .title-text scrollWidth scales with
+      // text length under our mock.
+
+      // Short title → fits
+      document.dispatchEvent(new CustomEvent("podcast-play", {
+        detail: { src: "https://example.com/short.mp3", title: "Hi" },
+      }));
+      flushRaf();
+      expect(footer._els.title.hasAttribute("data-overflow")).toBe(false);
+
+      // Long title → overflows (2 chars vs 500px width still fits, so make
+      // it 600 chars to force overflow).
+      const longTitle = "A".repeat(600);
+      document.dispatchEvent(new CustomEvent("podcast-play", {
+        detail: { src: "https://example.com/long.mp3", title: longTitle },
+      }));
+      flushRaf();
+      expect(footer._els.title.hasAttribute("data-overflow")).toBe(true);
+
+      // Back to a short title → overflow attribute removed.
+      document.dispatchEvent(new CustomEvent("podcast-play", {
+        detail: { src: "https://example.com/short2.mp3", title: "Hi again" },
+      }));
+      flushRaf();
+      expect(footer._els.title.hasAttribute("data-overflow")).toBe(false);
+    });
+
+    it("declares a marquee animation in the shadow style block", () => {
+      const css = footer.shadowRoot.querySelector("style").textContent;
+      expect(css).toContain("animation: marquee");
+      expect(css).toContain("@keyframes marquee");
+      expect(css).toContain("prefers-reduced-motion");
+    });
+
+    it("disables the marquee animation under prefers-reduced-motion: reduce", () => {
+      const css = footer.shadowRoot.querySelector("style").textContent;
+      // The reduced-motion guard must exist as a media query AND must set
+      // animation: none on the title-text child.
+      expect(css).toContain("@media (prefers-reduced-motion: reduce)");
+      // Look for the no-motion rule in the reduced-motion context. We
+      // assert the substring "animation: none" appears within the
+      // @media block by checking the larger combined string is present
+      // (substring matching the closing of the media query is loose by
+      // design — the test doesn't need to parse CSS).
+      const idx = css.indexOf("@media (prefers-reduced-motion: reduce)");
+      expect(idx).toBeGreaterThan(-1);
+      const reducedBlock = css.slice(idx);
+      expect(reducedBlock).toContain("animation: none");
+    });
+
+    it("creates a single ResizeObserver instance and reuses it", () => {
+      // First call from connectedCallback already created one (mocked class).
+      const first = footer._titleResizeObserver;
+      expect(first).toBeInstanceOf(ResizeObserverSpy);
+
+      // A second explicit call must NOT replace it.
+      footer._setupTitleMarquee();
+      const second = footer._titleResizeObserver;
+      expect(second).toBe(first);
+    });
+
+    it("is a no-op when ResizeObserver is not supported", () => {
+      // Re-create the footer with ResizeObserver unavailable.
+      footer.remove();
+      const savedRO = globalThis.ResizeObserver;
+      // Mimic environments without ResizeObserver.
+      // eslint-disable-next-line no-undef
+      delete globalThis.ResizeObserver;
+
+      footer = document.createElement("podcast-footer");
+      document.body.appendChild(footer);
+
+      // _setupTitleMarquee must not throw and must not set the field.
+      expect(() => footer._setupTitleMarquee()).not.toThrow();
+      expect(footer._titleResizeObserver).toBeUndefined();
+
+      // Restore for the afterEach cleanup.
+      globalThis.ResizeObserver = savedRO;
+    });
+  });
 });

@@ -86,7 +86,14 @@ body.dark podcast-player {
   --podcast-player-bg: #1e1e2e;
   --podcast-player-text: #e0e0e0;
 }
-```
+
+## Títulos Desplazables
+
+Cuando un episodio en reproducción tiene un título más largo que el área de
+título del pie, el título se desplaza horizontalmente de forma automática para
+mostrar todo el texto. Los títulos cortos se renderizan normalmente sin
+animación. El comportamiento respeta `prefers-reduced-motion: reduce`, que
+cae de vuelta a truncamiento con elipsis.
 
 ## Ejemplo: Sección de Pie en baseof.html Completa
 
