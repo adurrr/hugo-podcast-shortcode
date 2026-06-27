@@ -64,6 +64,24 @@ Hugo resolves the module and makes the shortcode, JS, and CSS available automati
 | Pinned, reproducible builds | Either: both support version pinning |
 | No git submodule or clone in your repo | **Module** (`hugo mod get`) |
 
+## Choose a Navigation Framework
+
+Wavecast's `<podcast-footer>` survives page navigation only if a framework
+that respects `data-turbo-permanent` / `data-turbolinks-permanent` /
+`hx-preserve` is loaded. **This is a separate step from installing Wavecast.**
+
+Pick one and follow the snippet in [Homepage Setup → Framework Attributes]({{< ref
+"docs/homepage-setup.md#framework-attributes" >}}):
+
+- **htmx** — ~14 KB, no dependencies, drop-in.
+- **Turbo** — ~22 KB, requires `<script type="module">` and may conflict with
+  other module scripts.
+- **Turbolinks 5** — vendored in `assets/js/vendor/turbolinks.js`, but is
+  in maintenance mode; prefer htmx or Turbo for new projects.
+
+If your theme already loads one of these (some Hugo themes ship with Turbolinks),
+no extra step is needed.
+
 ## Local Development / Demo
 
 Clone the repo and run the included example site:

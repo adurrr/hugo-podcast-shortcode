@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Documentation clarifies that a navigation framework (htmx / Turbo /
+  Turbolinks) is required for `<podcast-footer>` persistence. The previous
+  "sessionStorage fallback" wording was misleading — state is restored on
+  the next page, but the footer DOM element itself is destroyed on every
+  full-page navigation when no framework is loaded.
+
+### Added
+
+- One-time console log on init indicating which persistence adapter is
+  active (helps diagnose "footer disappears on navigation" issue).
+
 ## [1.3.0] - 2026-06-16
 
 ### Added

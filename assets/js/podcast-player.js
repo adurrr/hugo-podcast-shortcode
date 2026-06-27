@@ -1159,6 +1159,13 @@ class PodcastPlayer extends HTMLElement {
       this._persistenceAdapter = "vanilla";
     }
 
+    // 6. One-time diagnostic — log which persistence mode is active
+    if (!window.__wavecastAdapterLogged) {
+      window.__wavecastAdapterLogged = true;
+      const modes = { turbolinks: "Turbolinks", turbo: "Turbo", htmx: "htmx", vanilla: "vanilla (footer will be destroyed on navigation; load htmx/Turbo/Turbolinks)" };
+      console.info(`[podcast-player] persistence adapter: ${modes[this._persistenceAdapter] || this._persistenceAdapter}`);
+    }
+
     // 4. Vanilla safety net — save state before the page unloads
     window.addEventListener("beforeunload", this._onBeforeUnload);
 

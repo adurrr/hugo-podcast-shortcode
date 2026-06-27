@@ -68,6 +68,20 @@ Add the sticky footer to `layouts/_default/baseof.html` just before `</body>`:
 </podcast-footer>
 ```
 
+Pick a navigation framework and add the script to your `<head>`:
+
+```html
+<!--# if you want to use htmx -->
+<script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"
+        integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2"
+        crossorigin="anonymous" defer></script>
+<!--# ...and the body tag: <body hx-boost="true"> -->
+```
+
+Without a framework, the footer is destroyed on every navigation and the
+audio stops. See [docs/homepage-setup](https://adurrr.github.io/wavecast/docs/homepage-setup/)
+for Turbo and Turbolinks options.
+
 ---
 
 ## Installation
