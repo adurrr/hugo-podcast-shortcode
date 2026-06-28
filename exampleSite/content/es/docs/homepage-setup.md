@@ -119,6 +119,22 @@ El pie persistente muestra una pequeña etiqueta de fuente (el dominio del servi
 
 El mismo atributo puede establecerse en el `<podcast-footer url="...">` de nivel superior para sobrescribir lo que envíe el reproductor en línea. Las URL se sanitizan en tiempo de compilación y de ejecución; solo se aceptan los esquemas `http` y `https` al renderizar el enlace.
 
+## Tamaño del Pie
+
+El atributo `size` en `<podcast-footer>` controla el tamaño visual de la barra. Hay tres preajustes disponibles:
+
+- `size="small"` (por defecto): la barra compacta actual. Portada de 36px, columna de info de 140px, botones de 32px. Omitir el atributo `size` es equivalente a `size="small"`.
+- `size="medium"`: una barra más ancha con portada de 48px, columna de info de 240px, botones de 36px y fuentes ligeramente más grandes.
+- `size="large"`: un banner de ancho completo con portada de 64px, columna de info de 400px, botones de 44-56px y las fuentes más grandes.
+
+```html
+<podcast-footer id="podcast-footer" size="medium" data-turbo-permanent></podcast-footer>
+```
+
+En pantallas de menos de 768px de ancho, los tres tamaños colapsan al mismo diseño compacto que `size="small"` produce en escritorio. Los valores desconocidos (`size="huge"`, etc.) vuelven al diseño `small` por defecto.
+
+El atributo es puramente visual. La persistencia, la reproducción y la URL de la fuente de audio no se ven afectadas por `size`. Las variables de tema (`--podcast-player-bg`, `--podcast-player-text`, etc.) siguen funcionando como antes.
+
 ## Ejemplo: Sección de Pie en baseof.html Completa
 
 ```

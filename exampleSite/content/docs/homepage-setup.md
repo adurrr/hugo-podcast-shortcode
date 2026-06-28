@@ -147,6 +147,22 @@ The persistent footer shows a small source label (the audio host's domain) below
 
 The same attribute can be set on the top-level `<podcast-footer url="...">` to override whatever the inline player sends. URLs are sanitized at build time and at runtime; only `http` and `https` schemes are accepted when the link is rendered.
 
+## Footer Size
+
+The `size` attribute on `<podcast-footer>` controls the bar's visual footprint. Three presets are available:
+
+- `size="small"` (default): the current compact bar. 36px cover, 140px info column, 32px buttons. Omitting the `size` attribute is equivalent to `size="small"`.
+- `size="medium"`: a wider bar with a 48px cover, 240px info column, 36px buttons, and slightly larger fonts.
+- `size="large"`: a full-bleed banner with a 64px cover, 400px info column, 44-56px buttons, and the largest fonts.
+
+```html
+<podcast-footer id="podcast-footer" size="medium" data-turbo-permanent></podcast-footer>
+```
+
+On viewports narrower than 768px, all three sizes collapse to the same compact layout that `size="small"` produces on desktop. Unknown values (`size="huge"`, etc.) fall back to the default `small` layout.
+
+The attribute is purely visual. Persistence, playback, and the audio source URL are unaffected by `size`. Theme variables (`--podcast-player-bg`, `--podcast-player-text`, etc.) continue to work as before.
+
 ## Example: Full baseof.html Footer Section
 
 ```html

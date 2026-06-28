@@ -1711,7 +1711,7 @@ class PodcastFooter extends HTMLElement {
    *  override applies whether the attribute is present at parse time or
    *  changed at runtime via JavaScript. */
   static get observedAttributes() {
-    return ["url"];
+    return ["url", "size"];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -1727,6 +1727,10 @@ class PodcastFooter extends HTMLElement {
           this._setSourceLink(newValue || "");
         }
       }
+    } else if (name === "size") {
+      // No imperative work needed; the visual change is driven entirely by
+      // the :host([size="..."]) CSS selectors in the shadow style block.
+      // Unknown values are ignored by CSS, falling back to the default.
     }
   }
 
@@ -1737,31 +1741,67 @@ class PodcastFooter extends HTMLElement {
       <style>
         :host { display: none; }
         :host([active]) { display: block; }
+        /* Size variants — :host([size="..."]) declares the footprint variables.
+           The base rules below consume these via var() with the original
+           hardcoded value as the fallback, so omitting the attribute (default)
+           produces exactly today's layout. */
+        :host([size="medium"]) {
+          --podcast-footer-cover-size: 48px;
+          --podcast-footer-info-max-width: 240px;
+          --podcast-footer-btn-size: 36px;
+          --podcast-footer-btn-play-size: 44px;
+          --podcast-footer-skip-btn-size: 32px;
+          --podcast-footer-progress-min: 120px;
+          --podcast-footer-vol-width: 90px;
+          --podcast-footer-padding: 8px 16px;
+          --podcast-footer-min-height: 60px;
+          --podcast-footer-gap: 10px;
+          --podcast-footer-title-font: .95rem;
+          --podcast-footer-source-font: .8rem;
+          --podcast-footer-time-font: .85rem;
+        }
+        :host([size="large"]) {
+          --podcast-footer-cover-size: 64px;
+          --podcast-footer-info-max-width: 400px;
+          --podcast-footer-btn-size: 44px;
+          --podcast-footer-btn-play-size: 56px;
+          --podcast-footer-skip-btn-size: 36px;
+          --podcast-footer-progress-min: 180px;
+          --podcast-footer-vol-width: 110px;
+          --podcast-footer-padding: 12px 24px;
+          --podcast-footer-min-height: 72px;
+          --podcast-footer-gap: 12px;
+          --podcast-footer-title-font: 1.1rem;
+          --podcast-footer-source-font: .9rem;
+          --podcast-footer-time-font: 1rem;
+        }
         .footer {
           position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
           background: var(--podcast-player-bg, #1e1e2e);
           border-top: 1px solid var(--podcast-player-border, rgba(255,255,255,.06));
-          padding: 6px 12px;
-          display: flex; align-items: center; gap: 8px;
+          padding: var(--podcast-footer-padding, 6px 12px);
+          display: flex; align-items: center; gap: var(--podcast-footer-gap, 8px);
           font-family: system-ui, -apple-system, sans-serif;
           font-size: .85rem;
           color: var(--podcast-player-text, #e0e0e0);
           box-shadow: 0 -2px 12px rgba(0,0,0,.3);
-          min-height: 52px;
+          min-height: var(--podcast-footer-min-height, 52px);
           box-sizing: border-box;
           justify-content: center;
         }
         .cover {
-          width: 36px; height: 36px; border-radius: 4px;
+          width: var(--podcast-footer-cover-size, 36px);
+          height: var(--podcast-footer-cover-size, 36px);
+          border-radius: 4px;
           object-fit: cover; flex-shrink: 0; background: var(--podcast-player-surface, #2a2a3e);
         }
         .cover[hidden] { display: none; }
         .info {
-          flex: 0 0 auto; max-width: 140px; min-width: 0;
+          flex: 0 0 auto; max-width: var(--podcast-footer-info-max-width, 140px); min-width: 0;
           display: flex; flex-direction: column; gap: 2px;
         }
         .title {
-          font-weight: 600; font-size: .85rem;
+          font-weight: 600; font-size: var(--podcast-footer-title-font, .85rem);
           overflow: hidden;
         }
         .title-text {
@@ -1788,7 +1828,7 @@ class PodcastFooter extends HTMLElement {
             max-width: 100%;
           }
         }
-        .source { font-size: .7rem; color: var(--podcast-player-text-muted, #888);
+        .source { font-size: var(--podcast-footer-source-font, .7rem); color: var(--podcast-player-text-muted, #888);
                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
                    text-decoration: none; cursor: pointer; }
         .source:hover { color: var(--podcast-player-text, #e0e0e0);
@@ -1799,20 +1839,20 @@ class PodcastFooter extends HTMLElement {
         .controls { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
         .btn {
           background: transparent; border: none; color: var(--podcast-player-text, #e0e0e0);
-          width: 32px; height: 32px; border-radius: 50%;
+          width: var(--podcast-footer-btn-size, 32px); height: var(--podcast-footer-btn-size, 32px); border-radius: 50%;
           cursor: pointer; display: inline-flex; align-items: center;
           justify-content: center;
           transition: background .15s;
         }
         .btn:hover { background: var(--podcast-player-surface, #2a2a3e); }
-        .btn-play { width: 36px; height: 36px;
+        .btn-play { width: var(--podcast-footer-btn-play-size, 36px); height: var(--podcast-footer-btn-play-size, 36px);
                      background: var(--podcast-player-primary, #6366f1); color: #fff; }
         .btn-play:hover { background: var(--podcast-player-accent, #a78bfa); }
         .btn-skip-back,
-        .btn-skip-fwd { width: 28px; height: 28px; }
+        .btn-skip-fwd { width: var(--podcast-footer-skip-btn-size, 28px); height: var(--podcast-footer-skip-btn-size, 28px); }
         .btn-skip-back svg,
         .btn-skip-fwd svg { display: block; }
-        .progress-wrap { flex: 1; min-width: 80px; max-width: 400px; }
+        .progress-wrap { flex: 1; min-width: var(--podcast-footer-progress-min, 80px); max-width: 400px; }
         input[type="range"] {
           -webkit-appearance: none; appearance: none;
           width: 100%; height: 4px; border-radius: 2px;
@@ -1832,11 +1872,11 @@ class PodcastFooter extends HTMLElement {
           border: 2px solid var(--podcast-player-bg, #1e1e2e);
           cursor: pointer;
         }
-        .time { font-size: .75rem; color: var(--podcast-player-text-muted, #888);
+        .time { font-size: var(--podcast-footer-time-font, .75rem); color: var(--podcast-player-text-muted, #888);
                 font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; }
         .time-sep { color: var(--podcast-player-text-muted, #888); font-size: .75rem;
                     flex-shrink: 0; }
-        .vol-wrap { display: flex; align-items: center; gap: 2px; width: 70px; flex-shrink: 0; }
+        .vol-wrap { display: flex; align-items: center; gap: 2px; width: var(--podcast-footer-vol-width, 70px); flex-shrink: 0; }
         .vol-wrap[hidden] { display: none; }
         .mute-btn { width: 28px; height: 28px; border-radius: 50%; }
         .mute-btn svg { display: block; }
@@ -1858,6 +1898,23 @@ class PodcastFooter extends HTMLElement {
         .close svg { display: block; }
 
         @media (max-width: 768px) {
+          /* All size variants collapse to a compact layout on narrow viewports. */
+          :host([size="medium"]),
+          :host([size="large"]) {
+            --podcast-footer-cover-size: 28px;
+            --podcast-footer-info-max-width: 100px;
+            --podcast-footer-btn-size: 32px;
+            --podcast-footer-btn-play-size: 36px;
+            --podcast-footer-skip-btn-size: 28px;
+            --podcast-footer-progress-min: 60px;
+            --podcast-footer-vol-width: 50px;
+            --podcast-footer-padding: 4px 8px;
+            --podcast-footer-min-height: 48px;
+            --podcast-footer-gap: 6px;
+            --podcast-footer-title-font: .8rem;
+            --podcast-footer-source-font: .7rem;
+            --podcast-footer-time-font: .7rem;
+          }
           .footer { gap: 6px; padding: 4px 8px; font-size: .8rem; min-height: 48px; }
           .cover { width: 28px; height: 28px; }
           .info { max-width: 100px; }

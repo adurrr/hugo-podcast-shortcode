@@ -1412,4 +1412,215 @@ describe("PodcastPlayer Web Component", () => {
       expect(fresh._els.source.getAttribute("href")).toBe(expected);
     });
   });
+
+  /* ================================================================== */
+  /*  Footer size attribute (issue #62)                                 */
+  /* ================================================================== */
+
+  describe("footer size attribute", () => {
+    /** @type {HTMLElement} */
+    let footer;
+
+    beforeEach(() => {
+      // Clean up any leftover footers from previous tests.
+      document.querySelectorAll("podcast-footer").forEach((e) => e.remove());
+      sessionStorage.clear();
+
+      footer = document.createElement("podcast-footer");
+      document.body.appendChild(footer);
+    });
+
+    afterEach(() => {
+      document.querySelectorAll("podcast-footer").forEach((e) => e.remove());
+      sessionStorage.clear();
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  A. observedAttributes                                            */
+    /* ---------------------------------------------------------------- */
+
+    it("observedAttributes includes the 'size' attribute", () => {
+      // The component must opt-in to observing the 'size' attribute so
+      // that mutations trigger attributeChangedCallback (and the CSS
+      // :host([size="..."]) selectors pick up the change).
+      const PodcastFooter = customElements.get("podcast-footer");
+      expect(PodcastFooter).toBeDefined();
+      expect(PodcastFooter.observedAttributes).toContain("size");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  B/C. Reflecting the host attribute                               */
+    /* ---------------------------------------------------------------- */
+
+    it("setting size='medium' reflects the attribute on the host", () => {
+      footer.setAttribute("size", "medium");
+      expect(footer.getAttribute("size")).toBe("medium");
+    });
+
+    it("setting size='large' reflects the attribute on the host", () => {
+      footer.setAttribute("size", "large");
+      expect(footer.getAttribute("size")).toBe("large");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  D. Remove is allowed                                             */
+    /* ---------------------------------------------------------------- */
+
+    it("removing the size attribute is allowed (no error)", () => {
+      footer.setAttribute("size", "medium");
+      expect(footer.hasAttribute("size")).toBe(true);
+      expect(() => footer.removeAttribute("size")).not.toThrow();
+      expect(footer.hasAttribute("size")).toBe(false);
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  E. Unknown values are accepted                                    */
+    /* ---------------------------------------------------------------- */
+
+    it("unknown size values like 'huge' are accepted without validation", () => {
+      // The component must not validate the value; unknown values are
+      // ignored by CSS, falling back to the default layout. The
+      // attribute is stored on the host regardless.
+      expect(() => footer.setAttribute("size", "huge")).not.toThrow();
+      expect(footer.getAttribute("size")).toBe("huge");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  F. Shadow DOM style selectors                                    */
+    /* ---------------------------------------------------------------- */
+
+    it("Shadow DOM style block declares :host([size='medium']) and :host([size='large']) rules", () => {
+      const css = footer.shadowRoot.querySelector("style").textContent;
+      expect(css).toContain(':host([size="medium"])');
+      expect(css).toContain(':host([size="large"])');
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  G. Size-specific CSS custom properties                           */
+    /* ---------------------------------------------------------------- */
+
+    it(":host([size='medium']) declares the expected footprint variables", () => {
+      const css = footer.shadowRoot.querySelector("style").textContent;
+      // Assert a representative subset of the 13 vars (full enumeration
+      // makes the test brittle to value tweaks). The selected vars are
+      // the most distinctive for the medium footprint.
+      expect(css).toContain("--podcast-footer-cover-size: 48px;");
+      expect(css).toContain("--podcast-footer-info-max-width: 240px;");
+      expect(css).toContain("--podcast-footer-btn-size: 36px;");
+      expect(css).toContain("--podcast-footer-min-height: 60px;");
+    });
+
+    it(":host([size='large']) declares the expected footprint variables", () => {
+      const css = footer.shadowRoot.querySelector("style").textContent;
+      expect(css).toContain("--podcast-footer-cover-size: 64px;");
+      expect(css).toContain("--podcast-footer-info-max-width: 400px;");
+      expect(css).toContain("--podcast-footer-btn-size: 44px;");
+      expect(css).toContain("--podcast-footer-min-height: 72px;");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  H. var() with fallback in base rules                             */
+    /* ---------------------------------------------------------------- */
+
+    it("base rules consume the new --podcast-footer-* CSS vars", () => {
+      const css = footer.shadowRoot.querySelector("style").textContent;
+      // The base rules must use var(--podcast-footer-*, FALLBACK) so
+      // that omitting the size attribute falls through to the original
+      // hardcoded value. Spot-check four of the most-used rules.
+      expect(css).toContain("var(--podcast-footer-cover-size");
+      expect(css).toContain("var(--podcast-footer-info-max-width");
+      expect(css).toContain("var(--podcast-footer-btn-size");
+      expect(css).toContain("var(--podcast-footer-padding");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  I. Mobile media query overrides the size vars                    */
+    /* ---------------------------------------------------------------- */
+
+    it("mobile media query (max-width: 768px) overrides the size vars back to compact values", () => {
+      const css = footer.shadowRoot.querySelector("style").textContent;
+      // Locate the 768px media block by finding its opening and the next
+      // top-level @media. A loose substring match within the block is
+      // sufficient.
+      const idx = css.indexOf("@media (max-width: 768px)");
+      expect(idx).toBeGreaterThan(-1);
+      // Slice from the start of the @media rule to the next @media (or
+      // end of string) so we can scope our checks to this block.
+      const nextMedia = css.indexOf("@media", idx + 1);
+      const block = nextMedia > -1 ? css.slice(idx, nextMedia) : css.slice(idx);
+      // The block must contain BOTH the medium and large host selectors
+      // in the same rule (they target both size variants together).
+      expect(block).toContain(':host([size="medium"])');
+      expect(block).toContain(':host([size="large"])');
+      // And it must collapse the cover size back to the compact value.
+      expect(block).toContain("--podcast-footer-cover-size: 28px;");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  J. Default (no size attribute) equals today's layout             */
+    /* ---------------------------------------------------------------- */
+
+    it("default (no size attribute) uses the original hardcoded values as fallbacks", () => {
+      // Without a size attribute, the :host([size="..."]) selectors
+      // don't match, so the base rules use the var() fallback. The
+      // fallback is the original hardcoded value, so the layout is
+      // byte-equivalent to today (the pre-issue-#62 default).
+      const css = footer.shadowRoot.querySelector("style").textContent;
+      // .cover uses 36px as the fallback
+      expect(css).toContain("var(--podcast-footer-cover-size, 36px)");
+      // .info uses 140px as the fallback
+      expect(css).toContain("var(--podcast-footer-info-max-width, 140px)");
+      // .footer padding uses 6px 12px as the fallback
+      expect(css).toContain("var(--podcast-footer-padding, 6px 12px)");
+      // .btn uses 32px as the fallback
+      expect(css).toContain("var(--podcast-footer-btn-size, 32px)");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  K. attributeChangedCallback doesn't throw on size changes        */
+    /* ---------------------------------------------------------------- */
+
+    it("attributeChangedCallback does not throw when size is set, removed, or changed", () => {
+      expect(() => {
+        footer.setAttribute("size", "medium");
+        footer.removeAttribute("size");
+        footer.setAttribute("size", "large");
+        footer.setAttribute("size", "medium");
+        footer.setAttribute("size", "huge");  // unknown value
+        footer.removeAttribute("size");
+      }).not.toThrow();
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  L. Size attribute is independent of url                          */
+    /* ---------------------------------------------------------------- */
+
+    it("size attribute does not interfere with the url source link", () => {
+      // Set both attributes BEFORE dispatching the event. The url
+      // attribute should drive the source link via attributeChangedCallback;
+      // size is a no-op.
+      footer.setAttribute("url", "https://example.com/page");
+      footer.setAttribute("size", "medium");
+
+      // Synthesize a podcast-play event with a DIFFERENT inline url —
+      // the top-level url override must still win, regardless of the
+      // presence of the size attribute.
+      document.dispatchEvent(new CustomEvent("podcast-play", {
+        detail: {
+          src: "https://example.com/audio.mp3",
+          title: "Episode 1",
+          poster: "",
+          url: "https://inline.example.com",
+          currentTime: 0,
+        },
+      }));
+
+      // The top-level url override wins.
+      const expected = new URL("https://example.com/page", document.baseURI).href;
+      expect(footer._els.source.hidden).toBe(false);
+      expect(footer._els.source.getAttribute("href")).toBe(expected);
+      // And the size attribute is still present.
+      expect(footer.getAttribute("size")).toBe("medium");
+    });
+  });
 });
