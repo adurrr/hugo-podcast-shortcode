@@ -23,6 +23,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `url` shortcode parameter on `podcast-player` controls the footer
   source link: a URL makes the label clickable, `"none"` hides it,
   omitted auto-derives from the audio source (#64).
+- `size` attribute on `<podcast-footer>` controls the bar's visual
+  footprint: `"small"` (default) keeps the compact layout, `"medium"`
+  widens the bar with larger cover and controls, and `"large"` reserves
+  the most room for long titles; all three collapse to the compact
+  layout on narrow viewports (#62).
 
 ## [1.3.0] - 2026-06-16
 

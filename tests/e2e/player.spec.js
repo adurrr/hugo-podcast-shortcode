@@ -632,4 +632,147 @@ test.describe("Podcast Player E2E", () => {
       expect(result.href).toBe(expected);
     });
   });
+
+  test.describe("Footer size attribute", () => {
+    /** Synthesize a podcast-play event that activates the footer. Used
+     *  to drive the cover-sizing code path without depending on the
+     *  audio network. */
+    const synthesizePlay = async (page) => {
+      await page.evaluate(() => {
+        const footer = document.querySelector("podcast-footer");
+        if (footer) footer.setAttribute("active", "");
+        document.dispatchEvent(new CustomEvent("podcast-play", {
+          detail: {
+            src: "https://example.com/test.mp3",
+            title: "Size Test",
+            poster: "",
+            currentTime: 0,
+          },
+        }));
+      });
+      await page.waitForTimeout(150);
+    };
+
+    /** Read the rendered width (in px) of the footer's cover element.
+     *  Returns NaN if the cover can't be found. Uses page.evaluate
+     *  (not locator.evaluate) to avoid Playwright's auto-wait on
+     *  visibility — the footer host starts with `display: none` until
+     *  the `active` attribute is set, and locator.evaluate can hang
+     *  waiting for it to become "actionable" even when the shadow DOM
+     *  is fully laid out. */
+    const getCoverWidthPx = async (page) => {
+      const w = await page.evaluate(() => {
+        const footer = document.querySelector("podcast-footer");
+        const cover = footer?.shadowRoot?.querySelector(".cover");
+        if (!cover) return null;
+        // The CSS rule sets width as a length (e.g. "48px"). Strip the
+        // unit before returning a number.
+        return getComputedStyle(cover).width;
+      });
+      return w ? parseFloat(w) : NaN;
+    };
+
+    test("a. example site footer has size='medium' on every page", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+      await expect(footer).toHaveAttribute("size", "medium");
+    });
+
+    test("b. with size='medium', the cover is larger than the 36px default", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      // Activate the footer so its shadow DOM is fully laid out.
+      await synthesizePlay(page);
+
+      const widthPx = await getCoverWidthPx(page);
+      expect(widthPx).toBeGreaterThan(36);
+    });
+
+    test("c. setting size='small' at runtime shrinks the cover back to 36px", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      // Sanity: the example footer starts in "medium" mode.
+      await expect(footer).toHaveAttribute("size", "medium");
+
+      // Activate the footer (the example site has size='medium', so the
+      // cover should be > 36px here).
+      await synthesizePlay(page);
+      const mediumWidth = await getCoverWidthPx(page);
+      expect(mediumWidth).toBeGreaterThan(36);
+
+      // Override the size at runtime. There's no :host([size='small'])
+      // rule, so the CSS var falls back to the original hardcoded value
+      // of 36px.
+      await footer.evaluate((el) => el.setAttribute("size", "small"));
+      await page.waitForTimeout(150);
+
+      const smallWidth = await getCoverWidthPx(page);
+      expect(smallWidth).toBe(36);
+    });
+
+    test("d. setting size='large' makes the cover even bigger than medium", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      await synthesizePlay(page);
+      const mediumWidth = await getCoverWidthPx(page);
+      expect(mediumWidth).toBeGreaterThan(36);
+
+      // Flip to large — the :host([size='large']) rule sets the cover
+      // to 64px.
+      await footer.evaluate((el) => el.setAttribute("size", "large"));
+      await page.waitForTimeout(150);
+
+      const largeWidth = await getCoverWidthPx(page);
+      expect(largeWidth).toBeGreaterThan(mediumWidth);
+      expect(largeWidth).toBe(64);
+    });
+
+    test("e. on a narrow viewport, all size variants collapse to the compact layout", async ({ page }) => {
+      // Mobile viewport (iPhone SE width) — narrower than the 768px
+      // breakpoint that the size media query targets.
+      await page.setViewportSize({ width: 375, height: 812 });
+
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      // Force the largest variant — on desktop this would be 64px, but
+      // the @media (max-width: 768px) override collapses it to 28px.
+      await footer.evaluate((el) => el.setAttribute("size", "large"));
+      await synthesizePlay(page);
+      await page.waitForTimeout(150);
+
+      const widthPx = await getCoverWidthPx(page);
+      // The mobile media query sets --podcast-footer-cover-size: 28px,
+      // so the rendered cover must be 28px — NOT 64px.
+      expect(widthPx).toBe(28);
+    });
+
+    test("f. the size attribute survives a page navigation (Turbolinks permanent)", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      // Activate and override the size at runtime.
+      await synthesizePlay(page);
+      await footer.evaluate((el) => el.setAttribute("size", "large"));
+      await expect(footer).toHaveAttribute("size", "large");
+
+      // Navigate via a header link (Turbolinks).
+      await page.locator('header nav a', { hasText: 'Programs' }).click();
+      await page.waitForTimeout(1000);
+
+      // The footer is preserved (data-turbolinks-permanent) and the
+      // size attribute survives with the element.
+      await expect(footer).toHaveAttribute("active", "");
+      await expect(footer).toHaveAttribute("size", "large");
+    });
+  });
 });
