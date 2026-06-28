@@ -157,7 +157,7 @@ class PodcastPlayer extends HTMLElement {
   /** Attributes the component should react to. */
   static get observedAttributes() {
     return ["src", "title", "poster", "chapters", "type", "autoplay",
-      "data-preload", "persistent", "data-source"];
+      "data-preload", "persistent", "data-source", "url"];
   }
 
   /** Prefix for sessionStorage state key (instance ID appended). */
@@ -906,7 +906,7 @@ class PodcastPlayer extends HTMLElement {
         src: this._audio.src || this.getAttribute("src") || "",
         title: this.getAttribute("title") || "",
         poster: this.getAttribute("poster") || "",
-        url: this._audio.src || "",
+        url: this._resolveUrl(),
         currentTime: this._audio.currentTime,
       },
     }));
@@ -1329,6 +1329,40 @@ class PodcastPlayer extends HTMLElement {
     return `${m}:${pad(s)}`;
   }
 
+  /**
+   * Resolve the URL to use for the footer's source link.
+   * Priority: explicit `url` attribute (or "none" sentinel) > auto-derive from src.
+   * Auto-derivation strips the filename from the audio src.
+   * Returns:
+   *   - "none" when the user explicitly opted out
+   *   - an absolute http(s) URL string when a usable link can be determined
+   *   - "" when no usable URL can be determined (caller should hide the link)
+   */
+  _resolveUrl() {
+    const explicit = (this.getAttribute("url") || "").trim();
+    if (explicit.toLowerCase() === "none") return "none";
+    if (explicit) {
+      // Resolve relative URLs against the document base.
+      try {
+        return new URL(explicit, document.baseURI).href;
+      } catch (_) {
+        return "";
+      }
+    }
+    // Auto-derive from audio src.
+    const src = this._audio.src || this.getAttribute("src") || "";
+    if (!src) return "";
+    try {
+      const u = new URL(src, document.baseURI);
+      if (u.protocol !== "http:" && u.protocol !== "https:") return "";
+      // Strip filename, keep path up to last "/"
+      const lastSlash = u.href.lastIndexOf("/");
+      return lastSlash >= 0 ? u.href.substring(0, lastSlash + 1) : u.href;
+    } catch (_) {
+      return "";
+    }
+  }
+
   /** Highlight the currently playing chapter. */
   _updateActiveChapter() {
     const t = this._audio.currentTime;
@@ -1472,6 +1506,7 @@ class PodcastFooter extends HTMLElement {
       player_no_source: "No audio source available",
       player_close: "Close player",
       player_unknown_episode: "Unknown Episode",
+      player_source_link: "View episode",
     };
   }
 
@@ -1585,6 +1620,61 @@ class PodcastFooter extends HTMLElement {
     }
   }
 
+  /**
+   * Apply a URL to the footer's source link element, or hide it.
+   *   url === "none"          → hide the link entirely
+   *   url is empty/invalid    → hide the link (and clear href)
+   *   url is a valid http(s) URL → set the href, make the link visible
+   * The element is a real `<a>`, not a `<div>`, so the href is set directly.
+   * Sanitization: only http(s) protocols are accepted. Anything else
+   * (javascript:, data:, ftp:, malformed) results in the link being hidden.
+   * The most recently accepted URL is cached on `this._currentSourceUrl`
+   * so persistence (save/restore) round-trips the same value the user sees.
+   *
+   * Note: the link is only revealed if it already has text content. This
+   * prevents a top-level `<podcast-footer url="...">` attribute from
+   * flashing an empty link before any inline player has dispatched a
+   * podcast-play event.
+   */
+  _setSourceLink(url) {
+    const link = this._els.source;
+    if (!link) return;
+
+    if (typeof url === "string" && url.toLowerCase() === "none") {
+      link.hidden = true;
+      link.removeAttribute("href");
+      this._currentSourceUrl = "";
+      return;
+    }
+    if (!url) {
+      link.hidden = true;
+      link.removeAttribute("href");
+      this._currentSourceUrl = "";
+      return;
+    }
+    try {
+      const u = new URL(url, document.baseURI);
+      if (u.protocol !== "http:" && u.protocol !== "https:") {
+        link.hidden = true;
+        link.removeAttribute("href");
+        this._currentSourceUrl = "";
+        return;
+      }
+      link.href = u.href;
+      this._currentSourceUrl = u.href;
+      // Only reveal if the link has visible text (set by a podcast-play
+      // event). The footer renders no source label before a track starts.
+      if (link.textContent && link.textContent.trim()) {
+        link.hidden = false;
+        link.setAttribute("aria-label", this._t("player_source_link"));
+      }
+    } catch (_) {
+      link.hidden = true;
+      link.removeAttribute("href");
+      this._currentSourceUrl = "";
+    }
+  }
+
   /** Set the mute button icon based on current muted/volume state. */
   _setMuteIcon() {
     if (this._audio.muted || this._audio.volume === 0) {
@@ -1613,6 +1703,31 @@ class PodcastFooter extends HTMLElement {
     this._unbindUIEvents();
     this._titleResizeObserver?.disconnect();
     this._titleResizeObserver = null;
+  }
+
+  /** Attributes the component should react to. The `url` attribute lets a
+   *  page override whatever the inline player sent (e.g. wrap the footer's
+   *  source label in a clickable link to a specific episode page). The
+   *  override applies whether the attribute is present at parse time or
+   *  changed at runtime via JavaScript. */
+  static get observedAttributes() {
+    return ["url"];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
+    if (name === "url") {
+      // Cache the override so a later podcast-play event can prefer it
+      // over the inline player's URL. If the footer is already showing
+      // a source, apply immediately too.
+      this._topLevelUrlOverride = (newValue != null) ? newValue : null;
+      if (this._els && this._els.source) {
+        const link = this._els.source;
+        if (link.textContent && link.textContent.trim()) {
+          this._setSourceLink(newValue || "");
+        }
+      }
+    }
   }
 
   /* ---- Shadow DOM template ---- */
@@ -1674,7 +1789,13 @@ class PodcastFooter extends HTMLElement {
           }
         }
         .source { font-size: .7rem; color: var(--podcast-player-text-muted, #888);
-                   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+                   text-decoration: none; cursor: pointer; }
+        .source:hover { color: var(--podcast-player-text, #e0e0e0);
+                        text-decoration: underline; }
+        .source:focus-visible { outline: 2px solid var(--podcast-player-accent, #7c3aed);
+                                outline-offset: 2px; }
+        .source[hidden] { display: none; }
         .controls { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
         .btn {
           background: transparent; border: none; color: var(--podcast-player-text, #e0e0e0);
@@ -1757,7 +1878,7 @@ class PodcastFooter extends HTMLElement {
         <img class="cover" part="cover" src="" alt="" hidden>
         <div class="info">
           <div class="title" part="title"><span class="title-text"></span></div>
-          <div class="source" part="source"></div>
+          <a class="source" part="source" hidden></a>
         </div>
         <div class="controls">
           <button class="btn btn-skip-back" part="skip-back-btn"
@@ -1866,6 +1987,13 @@ class PodcastFooter extends HTMLElement {
     // New source — load and play
     this._els.titleText.textContent = title || this._t("player_unknown_episode");
     this._els.source.textContent = src.replace(/^https?:\/\//, "").split("/")[0] || src;
+    // Top-level <podcast-footer url="..."> always overrides what the inline
+    // player sent via the event detail.
+    const eventUrl = (e.detail && e.detail.url) || "";
+    const finalUrl = (this._topLevelUrlOverride != null)
+      ? this._topLevelUrlOverride
+      : eventUrl;
+    this._setSourceLink(finalUrl);
 
     if (poster) {
       this._els.cover.src = poster;
@@ -2120,6 +2248,7 @@ class PodcastFooter extends HTMLElement {
         timestamp:    Date.now(),
         title:        this._els.title.textContent,
         poster:       this._els.cover.getAttribute("src") || "",
+        url:          this._currentSourceUrl || "",
       };
       sessionStorage.setItem(PodcastFooter.PERSISTENCE_KEY, JSON.stringify(state));
     } catch (_) {}
@@ -2153,6 +2282,13 @@ class PodcastFooter extends HTMLElement {
       this._els.rateBtn.textContent = (state.playbackRate || 1) + "×";
       this._els.titleText.textContent = state.title || this._t("player_unknown_episode");
       this._els.source.textContent = state.src.replace(/^https?:\/\//, "").split("/")[0] || state.src;
+      // Top-level <podcast-footer url="..."> override (set in HTML or at
+      // runtime) takes precedence over the URL persisted from a prior
+      // session.
+      const restoreUrl = (this._topLevelUrlOverride != null)
+        ? this._topLevelUrlOverride
+        : (state.url || "");
+      this._setSourceLink(restoreUrl);
 
       if (state.poster) {
         this._els.cover.src = state.poster;

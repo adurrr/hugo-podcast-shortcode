@@ -95,6 +95,30 @@ mostrar todo el texto. Los títulos cortos se renderizan normalmente sin
 animación. El comportamiento respeta `prefers-reduced-motion: reduce`, que
 cae de vuelta a truncamiento con elipsis.
 
+## Vincular el Pie
+
+El pie persistente muestra una pequeña etiqueta de fuente (el dominio del servidor de audio) bajo el título del episodio. Por defecto esta etiqueta es un enlace al directorio padre del archivo de audio. El parámetro `url` del shortcode sobrescribe u oculta el enlace:
+
+- Omitido, derivado automáticamente: el enlace apunta al directorio padre del archivo de audio (ej. `src="https://example.com/episodes/foo.mp3"` produce el enlace `https://example.com/episodes/`).
+- Una URL: el enlace apunta a esa URL. Acepta `http://`, `https://` y rutas relativas al sitio que empiecen por `/`, `#` o `.`.
+- `"none"`: el enlace se oculta por completo. Útil para transmisiones de radio en vivo sin página de episodio.
+
+```go-html-template
+{{</* podcast-player
+  src="https://example.com/stream.mp3"
+  title="Transmisión en vivo"
+  url="https://example.com/shows/live"
+*/>}}
+
+{{</* podcast-player
+  src="https://example.com/stream.mp3"
+  title="Transmisión en vivo"
+  url="none"
+*/>}}
+```
+
+El mismo atributo puede establecerse en el `<podcast-footer url="...">` de nivel superior para sobrescribir lo que envíe el reproductor en línea. Las URL se sanitizan en tiempo de compilación y de ejecución; solo se aceptan los esquemas `http` y `https` al renderizar el enlace.
+
 ## Ejemplo: Sección de Pie en baseof.html Completa
 
 ```

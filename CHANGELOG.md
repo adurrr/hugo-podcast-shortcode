@@ -20,6 +20,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   active (helps diagnose "footer disappears on navigation" issue).
 - Footer player horizontally scrolls long episode titles when they overflow,
   with a `prefers-reduced-motion: reduce` fallback to ellipsis (#63).
+- `url` shortcode parameter on `podcast-player` controls the footer
+  source link: a URL makes the label clickable, `"none"` hides it,
+  omitted auto-derives from the audio source (#64).
 
 ## [1.3.0] - 2026-06-16
 

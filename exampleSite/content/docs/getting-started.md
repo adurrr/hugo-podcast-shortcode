@@ -44,6 +44,7 @@ After installing Wavecast, add a podcast player to any page with a single shortc
 |-----------|----------|---------|-------------|
 | `src` | **yes** |: | Audio URL or local file path |
 | `title` | no | `""` | Episode title in the player header |
+| `url` | no | `""` | Link target for the footer source label. Set to a URL (http/https or site-relative) to make the label clickable, or `"none"` to hide the link. Omit to auto-derive from the audio source. |
 | `poster` | no | `""` | Cover image URL |
 | `description` | no | `""` | Markdown description |
 | `type` | no | `"audio/mpeg"` | MIME type |

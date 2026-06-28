@@ -160,3 +160,50 @@ func TestPodcastPlayerShortcode_DefaultNoPersistent(t *testing.T) {
 		t.Errorf("expected no 'persistent' attribute when persistent=false")
 	}
 }
+
+func TestPodcastPlayerShortcode_WithUrl(t *testing.T) {
+	outputDir := buildHugoSite(t, "with-url")
+	assertFileContent(t, outputDir, "posts/test-episode/index.html",
+		`url="https://example.com/page"`)
+}
+
+func TestPodcastPlayerShortcode_UrlNone(t *testing.T) {
+	outputDir := buildHugoSite(t, "url-none")
+	assertFileContent(t, outputDir, "posts/test-episode/index.html",
+		`url="none"`)
+}
+
+func TestPodcastPlayerShortcode_UrlOmitted(t *testing.T) {
+	// Reuse an existing testdata site that does not pass `url`. The rendered
+	// HTML must NOT contain a `url="…"` attribute at all (the shortcode
+	// omits the attribute when empty).
+	outputDir := buildHugoSite(t, "required-src")
+	content := readOutputFile(t, outputDir, "posts/test-episode/index.html")
+	if strings.Contains(content, ` url="`) {
+		t.Errorf("expected no url attribute when omitted, got:\n%s", content)
+	}
+}
+
+func TestPodcastPlayerShortcode_BadUrlScheme(t *testing.T) {
+	root := testDir(t)
+	siteDir := filepath.Join(root, "tests", "hugo", "testdata", "bad-url-scheme")
+
+	cmd := exec.Command("hugo", "--source", siteDir)
+	cmd.Dir = siteDir
+
+	output, err := cmd.CombinedOutput()
+
+	// Build MUST fail because `url="javascript:alert(1)"` is rejected by
+	// the shortcode's allow-list (http/https/relative/fragment/dot-relative/none).
+	if err == nil {
+		t.Fatalf("expected build error for javascript: url, but build succeeded:\n%s", string(output))
+	}
+
+	// The error must mention the bad scheme so the user can debug the
+	// shortcode invocation. Accept any case-variant of "javascript:" or
+	// "scheme" — Hugo's error wrapping can vary by version.
+	combined := string(output)
+	if !strings.Contains(combined, "javascript:") && !strings.Contains(combined, "scheme") {
+		t.Errorf("expected error to mention the bad scheme, got:\n%s", combined)
+	}
+}

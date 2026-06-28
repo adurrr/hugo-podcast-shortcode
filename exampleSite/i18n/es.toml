@@ -59,6 +59,9 @@ other = "No hay fuente de audio disponible"
 [player_unknown_episode]
 other = "Episodio desconocido"
 
+[player_source_link]
+other = "Ver episodio"
+
 # ── Carousel ──
 [carousel_label]
 other = "Carrusel de imágenes"
