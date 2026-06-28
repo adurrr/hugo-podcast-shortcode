@@ -44,6 +44,7 @@ Después de instalar Wavecast, añade un reproductor de podcast a cualquier pág
 |-----------|----------|---------|-------------|
 | `src` | **sí** |: | URL de audio o ruta de archivo local |
 | `title` | no | `""` | Título del episodio en el reproductor |
+| `url` | no | `""` | Destino del enlace para la etiqueta de fuente del pie. Establece una URL (http/https o relativa al sitio) para hacer la etiqueta clickeable, o `"none"` para ocultar el enlace. Omite para derivar automáticamente desde la fuente de audio. |
 | `poster` | no | `""` | URL de la imagen de portada |
 | `description` | no | `""` | Descripción en Markdown |
 | `type` | no | `"audio/mpeg"` | Tipo MIME |

@@ -1030,4 +1030,386 @@ describe("PodcastPlayer Web Component", () => {
       globalThis.ResizeObserver = savedRO;
     });
   });
+
+  /* ================================================================== */
+  /*  Footer source link (issue #64)                                    */
+  /* ================================================================== */
+
+  describe("footer source link", () => {
+    /** @type {HTMLElement} */
+    let footer;
+    /** @type {HTMLElement} */
+    let player;
+
+    beforeEach(() => {
+      // Clean up any leftover footers / players from previous tests.
+      document.querySelectorAll("podcast-footer, podcast-player").forEach((e) => e.remove());
+      sessionStorage.clear();
+
+      footer = document.createElement("podcast-footer");
+      document.body.appendChild(footer);
+    });
+
+    afterEach(() => {
+      document.querySelectorAll("podcast-footer, podcast-player").forEach((e) => e.remove());
+      sessionStorage.clear();
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  Inline player: _resolveUrl                                       */
+    /* ---------------------------------------------------------------- */
+
+    it("inline player: _resolveUrl returns 'none' for the sentinel (case-insensitive)", () => {
+      player = document.createElement("podcast-player");
+      document.body.appendChild(player);
+
+      for (const v of ["none", "NONE", "None", "nOnE"]) {
+        player.setAttribute("url", v);
+        expect(player._resolveUrl()).toBe("none");
+      }
+    });
+
+    it("inline player: _resolveUrl returns the resolved absolute URL for an explicit value", () => {
+      player = document.createElement("podcast-player");
+      document.body.appendChild(player);
+
+      // Absolute URL is returned as-is.
+      player.setAttribute("url", "https://example.com/episode");
+      expect(player._resolveUrl()).toBe("https://example.com/episode");
+
+      // A relative URL is resolved against document.baseURI.
+      player.setAttribute("url", "/relative/path");
+      expect(player._resolveUrl()).toBe(new URL("/relative/path", document.baseURI).href);
+    });
+
+    it("inline player: _resolveUrl auto-derives from audio src when url is absent", () => {
+      player = document.createElement("podcast-player");
+      document.body.appendChild(player);
+
+      // src with a sub-path and filename — strips the filename, keeps the trailing slash.
+      player.setAttribute("src", "https://example.com/episodes/foo.mp3");
+      expect(player._resolveUrl()).toBe("https://example.com/episodes/");
+
+      // src with a top-level filename — strips to the root.
+      player.setAttribute("src", "https://example.com/foo.mp3");
+      expect(player._resolveUrl()).toBe("https://example.com/");
+
+      // src without a trailing slash — URL constructor normalizes to one, and
+      // the implementation strips to that trailing slash.
+      player.setAttribute("src", "https://example.com");
+      expect(player._resolveUrl()).toBe("https://example.com/");
+    });
+
+    it("inline player: _resolveUrl rejects non-http(s) audio src schemes", () => {
+      player = document.createElement("podcast-player");
+      document.body.appendChild(player);
+
+      // javascript: and data: schemes are explicitly not http(s), so the
+      // auto-derived URL must be empty (callers treat "" as "hide the link").
+      for (const bad of ["javascript:alert(1)", "data:text/html,<script>alert(1)</script>", "ftp://example.com/foo.mp3"]) {
+        player.setAttribute("src", bad);
+        expect(player._resolveUrl()).toBe("");
+      }
+    });
+
+    it("inline player: explicit url attribute wins over auto-derivation", () => {
+      player = document.createElement("podcast-player");
+      document.body.appendChild(player);
+
+      // Even though the audio src would auto-derive to the mp3's directory,
+      // an explicit `url` attribute must take precedence.
+      player.setAttribute("src", "https://example.com/episodes/foo.mp3");
+      player.setAttribute("url", "https://example.com/custom-page");
+      expect(player._resolveUrl()).toBe("https://example.com/custom-page");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  Footer: _setSourceLink                                           */
+    /* ---------------------------------------------------------------- */
+
+    it("footer: .source is rendered as an <a> element (not a <div>) in the shadow DOM", () => {
+      // The implementation upgraded the original <div class="source"> to
+      // <a class="source" href="" hidden> with part="source" preserved.
+      const source = footer.shadowRoot.querySelector(".source");
+      expect(source).not.toBeNull();
+      expect(source.tagName).toBe("A");
+    });
+
+    it("footer: _setSourceLink shows the link with a valid http(s) URL", () => {
+      // _setSourceLink only reveals the link when it already has visible
+      // text content (so an empty link doesn't flash before any track
+      // starts). Pre-populate the textContent to match the production
+      // code path that dispatches a podcast-play event.
+      footer._els.source.textContent = "example.com";
+
+      footer._setSourceLink("https://example.com/page");
+
+      // The URL is normalized through `new URL(...)` which canonicalizes
+      // it (this URL already has a path, so no trailing-slash change).
+      const expected = new URL("https://example.com/page", document.baseURI).href;
+      expect(footer._els.source.hidden).toBe(false);
+      expect(footer._els.source.getAttribute("href")).toBe(expected);
+      // The accepted URL is cached for persistence round-trips.
+      expect(footer._currentSourceUrl).toBe(expected);
+      // The localized aria-label is applied when the link is revealed.
+      expect(footer._els.source.getAttribute("aria-label")).toBe("View episode");
+    });
+
+    it("footer: _setSourceLink hides the link for 'none' (case-insensitive)", () => {
+      // Set textContent first so the unhide path WOULD otherwise reveal
+      // the link — this proves the "none" sentinel wins regardless.
+      footer._els.source.textContent = "should not be shown";
+
+      for (const v of ["none", "NONE", "None"]) {
+        footer._setSourceLink(v);
+        expect(footer._els.source.hidden).toBe(true);
+        expect(footer._els.source.hasAttribute("href")).toBe(false);
+        expect(footer._currentSourceUrl).toBe("");
+      }
+    });
+
+    it("footer: _setSourceLink hides the link for an empty string", () => {
+      // Even with textContent set, an empty string must hide the link.
+      footer._els.source.textContent = "should not be shown";
+      footer._setSourceLink("");
+
+      expect(footer._els.source.hidden).toBe(true);
+      expect(footer._els.source.hasAttribute("href")).toBe(false);
+      expect(footer._currentSourceUrl).toBe("");
+    });
+
+    it("footer: _setSourceLink rejects non-http(s) schemes", () => {
+      // Pre-populate textContent so the only thing keeping the link hidden
+      // is the URL rejection (not the empty-textContent guard).
+      footer._els.source.textContent = "should not be shown";
+
+      for (const bad of [
+        "javascript:alert(1)",
+        "data:text/html,<script>alert(1)</script>",
+        "ftp://example.com/",
+      ]) {
+        footer._setSourceLink(bad);
+        expect(footer._els.source.hidden).toBe(true);
+        expect(footer._els.source.hasAttribute("href")).toBe(false);
+        expect(footer._currentSourceUrl).toBe("");
+      }
+    });
+
+    it("footer: _setSourceLink hides the link for malformed URLs", () => {
+      footer._els.source.textContent = "should not be shown";
+
+      // "http://[invalid" makes the URL constructor throw (unmatched
+      // bracket in the authority), so the implementation's catch block
+      // hides the link.
+      footer._setSourceLink("http://[invalid");
+      expect(footer._els.source.hidden).toBe(true);
+      expect(footer._els.source.hasAttribute("href")).toBe(false);
+      expect(footer._currentSourceUrl).toBe("");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  podcast-play event dispatch                                      */
+    /* ---------------------------------------------------------------- */
+
+    it("footer: podcast-play with url field shows the link with that URL", () => {
+      // The footer listens for podcast-play on `document` (matching how
+      // inline <podcast-player> elements dispatch the event in production).
+      document.dispatchEvent(new CustomEvent("podcast-play", {
+        detail: {
+          src: "https://example.com/audio.mp3",
+          title: "Episode 1",
+          poster: "",
+          url: "https://example.com/page",
+          currentTime: 0,
+        },
+      }));
+
+      // After dispatch, the link should be visible and pointing at the
+      // explicit URL from the event detail. The URL is normalized through
+      // `new URL(...)` which canonicalizes hostnames (e.g. appends a
+      // trailing slash to bare hosts), so compare against the normalized
+      // form.
+      const expected = new URL("https://example.com/page", document.baseURI).href;
+      expect(footer._els.source.hidden).toBe(false);
+      expect(footer._els.source.getAttribute("href")).toBe(expected);
+      expect(footer._currentSourceUrl).toBe(expected);
+    });
+
+    it("footer: podcast-play with url='none' hides the link", () => {
+      document.dispatchEvent(new CustomEvent("podcast-play", {
+        detail: {
+          src: "https://example.com/audio.mp3",
+          title: "Episode 1",
+          poster: "",
+          url: "none",
+          currentTime: 0,
+        },
+      }));
+
+      // The "none" sentinel is honored even when the event carries one.
+      expect(footer._els.source.hidden).toBe(true);
+      expect(footer._els.source.hasAttribute("href")).toBe(false);
+      expect(footer._currentSourceUrl).toBe("");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  Top-level override on <podcast-footer>                           */
+    /* ---------------------------------------------------------------- */
+
+    it("footer: <podcast-footer url='...'> attribute overrides the event's url", () => {
+      // Set the override BEFORE dispatching the event.
+      footer.setAttribute("url", "https://override.example.com");
+
+      document.dispatchEvent(new CustomEvent("podcast-play", {
+        detail: {
+          src: "https://example.com/audio.mp3",
+          title: "Episode 1",
+          poster: "",
+          // Inline player's URL — must be ignored in favor of the override.
+          url: "https://inline.example.com",
+          currentTime: 0,
+        },
+      }));
+
+      // The URL is normalized through `new URL(...)`, which appends a
+      // trailing slash to a bare host. Compare against the canonical form.
+      const expected = new URL("https://override.example.com", document.baseURI).href;
+      expect(footer._els.source.hidden).toBe(false);
+      expect(footer._els.source.getAttribute("href")).toBe(expected);
+      expect(footer._currentSourceUrl).toBe(expected);
+    });
+
+    it("footer: <podcast-footer url='none'> override hides the link even when event has a URL", () => {
+      footer.setAttribute("url", "none");
+
+      document.dispatchEvent(new CustomEvent("podcast-play", {
+        detail: {
+          src: "https://example.com/audio.mp3",
+          title: "Episode 1",
+          poster: "",
+          url: "https://inline.example.com",
+          currentTime: 0,
+        },
+      }));
+
+      // Top-level "none" override beats the inline URL.
+      expect(footer._els.source.hidden).toBe(true);
+      expect(footer._els.source.hasAttribute("href")).toBe(false);
+    });
+
+    it("footer: changing <podcast-footer url='...'> at runtime updates the visible link", () => {
+      // URLs are normalized through `new URL(...)` which appends a
+      // trailing slash to bare hosts; compare against the canonical form.
+      const firstExpected  = new URL("https://first.example.com",  document.baseURI).href;
+      const secondExpected = new URL("https://second.example.com", document.baseURI).href;
+
+      // First, dispatch a play event that sets a URL.
+      document.dispatchEvent(new CustomEvent("podcast-play", {
+        detail: {
+          src: "https://example.com/audio.mp3",
+          title: "Episode 1",
+          poster: "",
+          url: "https://first.example.com",
+          currentTime: 0,
+        },
+      }));
+      expect(footer._els.source.getAttribute("href")).toBe(firstExpected);
+
+      // Now flip the top-level override to a different URL and dispatch
+      // again — the visible link must follow the override.
+      footer.setAttribute("url", "https://second.example.com");
+      document.dispatchEvent(new CustomEvent("podcast-play", {
+        detail: {
+          src: "https://example.com/other.mp3",
+          title: "Episode 2",
+          poster: "",
+          url: "https://other-inline.example.com",
+          currentTime: 0,
+        },
+      }));
+      expect(footer._els.source.hidden).toBe(false);
+      expect(footer._els.source.getAttribute("href")).toBe(secondExpected);
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  Persistence: save / restore url round-trip                       */
+    /* ---------------------------------------------------------------- */
+
+    it("footer: _savePlaybackState includes the currently displayed url", () => {
+      // Seed the footer's audio state so _savePlaybackState has something
+      // to persist (it bails out when audio.src is empty).
+      footer._audio.src = "https://example.com/audio.mp3";
+      footer._setSourceLink("https://example.com/page");
+
+      // Capture the raw sessionStorage entry before invoking save (the
+      // previous _setSourceLink may have left state on a different key).
+      footer._savePlaybackState();
+
+      const raw = sessionStorage.getItem("podcastPlayerState:footer");
+      expect(raw).not.toBeNull();
+      const state = JSON.parse(raw);
+      // The URL is normalized through `new URL(...)`; compare against the
+      // canonical form.
+      const expected = new URL("https://example.com/page", document.baseURI).href;
+      expect(state.url).toBe(expected);
+    });
+
+    it("footer: _restorePlaybackState applies the saved url to the link", () => {
+      // Seed storage with a saved state that includes a url.
+      const saved = {
+        src: "https://example.com/restored.mp3",
+        currentTime: 5,
+        paused: true,
+        volume: 1,
+        muted: false,
+        playbackRate: 1,
+        timestamp: Date.now(),
+        title: "Restored Episode",
+        poster: "",
+        url: "https://example.com/restored-page",
+      };
+      sessionStorage.setItem("podcastPlayerState:footer", JSON.stringify(saved));
+
+      // Create a fresh footer; connectedCallback calls _restorePlaybackState.
+      const fresh = document.createElement("podcast-footer");
+      document.body.appendChild(fresh);
+
+      // The saved url must be applied to the link (URL is normalized through
+      // `new URL(...)`).
+      const expected = new URL("https://example.com/restored-page", document.baseURI).href;
+      expect(fresh._els.source.hidden).toBe(false);
+      expect(fresh._els.source.getAttribute("href")).toBe(expected);
+      expect(fresh._currentSourceUrl).toBe(expected);
+      // One-shot restore: storage is consumed.
+      expect(sessionStorage.getItem("podcastPlayerState:footer")).toBeNull();
+    });
+
+    it("footer: top-level <podcast-footer url='...'> override beats the saved url on restore", () => {
+      // Seed storage with a saved url, but also set a top-level override.
+      // The override is applied first, so it should win on restore.
+      const saved = {
+        src: "https://example.com/restored.mp3",
+        currentTime: 5,
+        paused: true,
+        volume: 1,
+        muted: false,
+        playbackRate: 1,
+        timestamp: Date.now(),
+        title: "Restored Episode",
+        poster: "",
+        url: "https://saved.example.com",
+      };
+      sessionStorage.setItem("podcastPlayerState:footer", JSON.stringify(saved));
+
+      const fresh = document.createElement("podcast-footer");
+      fresh.setAttribute("url", "https://override.example.com");
+      document.body.appendChild(fresh);
+
+      // Top-level override wins — the URL is normalized through
+      // `new URL(...)` (bare host → trailing slash).
+      const expected = new URL("https://override.example.com", document.baseURI).href;
+      expect(fresh._els.source.hidden).toBe(false);
+      expect(fresh._els.source.getAttribute("href")).toBe(expected);
+    });
+  });
 });

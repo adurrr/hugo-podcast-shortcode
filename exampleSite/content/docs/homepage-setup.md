@@ -123,6 +123,30 @@ title automatically scrolls horizontally so the full text is visible. Short
 titles render normally with no animation. The behavior respects
 `prefers-reduced-motion: reduce`, which falls back to ellipsis truncation.
 
+## Linking the Footer
+
+The persistent footer shows a small source label (the audio host's domain) below the episode title. By default this label is a link to the audio file's parent directory. The `url` shortcode parameter overrides or hides the link:
+
+- Omitted, auto-derived: the link points at the audio file's parent directory (e.g. `src="https://example.com/episodes/foo.mp3"` makes the link `https://example.com/episodes/`).
+- A URL: the link points at that URL instead. Accepts `http://`, `https://`, and site-relative paths starting with `/`, `#`, or `.`.
+- `"none"`: the link is hidden entirely. Useful for live radio streams that have no episode page.
+
+```go-html-template
+{{</* podcast-player
+  src="https://example.com/stream.mp3"
+  title="Live Broadcast"
+  url="https://example.com/shows/live"
+*/>}}
+
+{{</* podcast-player
+  src="https://example.com/stream.mp3"
+  title="Live Broadcast"
+  url="none"
+*/>}}
+```
+
+The same attribute can be set on the top-level `<podcast-footer url="...">` to override whatever the inline player sends. URLs are sanitized at build time and at runtime; only `http` and `https` schemes are accepted when the link is rendered.
+
 ## Example: Full baseof.html Footer Section
 
 ```html

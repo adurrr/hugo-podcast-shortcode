@@ -452,4 +452,184 @@ test.describe("Podcast Player E2E", () => {
       }
     });
   });
+
+  test.describe("Footer source link", () => {
+    /** Synthesize a podcast-play event with a `url` field, used to drive
+     *  the footer's source-link code path without depending on the audio
+     *  network — the example posts use real SoundHelix mp3s which we
+     *  don't want to actually play in CI. */
+    const synthesizePlay = async (page, detail) => {
+      await page.evaluate((d) => {
+        const footer = document.querySelector("podcast-footer");
+        if (footer) footer.setAttribute("active", "");
+        document.dispatchEvent(new CustomEvent("podcast-play", {
+          detail: Object.assign({
+            src: "https://example.com/test.mp3",
+            title: "Test Episode",
+            poster: "",
+            currentTime: 0,
+          }, d),
+        }));
+      }, detail);
+      await page.waitForTimeout(150);
+    };
+
+    test("url-override post: footer link is visible and points at the configured href", async ({ page }) => {
+      await page.goto("posts/url-override/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      // Activate the footer via the inline player's play button.
+      const playBtn = page.locator("podcast-player").first()
+        .locator("[part='play-btn']");
+      await playBtn.click();
+      await expect(footer).toHaveAttribute("active", "");
+
+      const result = await footer.evaluate((el) => {
+        const a = el.shadowRoot?.querySelector(".source");
+        if (!a) return null;
+        return {
+          tagName: a.tagName,
+          href: a.getAttribute("href"),
+          hidden: a.hidden,
+        };
+      });
+      expect(result).not.toBeNull();
+      expect(result.tagName).toBe("A");
+      // The URL was normalized through `new URL(...)` in the implementation.
+      // Compare against the canonical form.
+      const expected = new URL("https://example.com/episodes/long-title-demo", page.url()).href;
+      expect(result.href).toBe(expected);
+      expect(result.hidden).toBe(false);
+    });
+
+    test("url-override post: footer link text is the domain (existing behavior preserved)", async ({ page }) => {
+      await page.goto("posts/url-override/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      // Activate the footer.
+      const playBtn = page.locator("podcast-player").first()
+        .locator("[part='play-btn']");
+      await playBtn.click();
+      await expect(footer).toHaveAttribute("active", "");
+
+      // The visible text label is the domain (stripped from the audio src,
+      // not from the explicit url). This preserves existing visual behavior.
+      const text = await footer.evaluate((el) => {
+        return el.shadowRoot?.querySelector(".source")?.textContent ?? "";
+      });
+      expect(text).toContain("soundhelix.com");
+    });
+
+    test("url-hidden post: footer link is hidden (no href)", async ({ page }) => {
+      await page.goto("posts/url-hidden/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      // Activate the footer.
+      const playBtn = page.locator("podcast-player").first()
+        .locator("[part='play-btn']");
+      await playBtn.click();
+      await expect(footer).toHaveAttribute("active", "");
+
+      const result = await footer.evaluate((el) => {
+        const a = el.shadowRoot?.querySelector(".source");
+        if (!a) return null;
+        return {
+          tagName: a.tagName,
+          hasHref: a.hasAttribute("href"),
+          hidden: a.hidden,
+        };
+      });
+      expect(result).not.toBeNull();
+      expect(result.tagName).toBe("A");
+      // "none" must clear the href and hide the link entirely.
+      expect(result.hasHref).toBe(false);
+      expect(result.hidden).toBe(true);
+    });
+
+    test("synthesized podcast-play with url='none' hides the link", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      await synthesizePlay(page, { url: "none" });
+
+      const result = await footer.evaluate((el) => {
+        const a = el.shadowRoot?.querySelector(".source");
+        if (!a) return null;
+        return {
+          hasHref: a.hasAttribute("href"),
+          hidden: a.hidden,
+        };
+      });
+      expect(result).not.toBeNull();
+      expect(result.hasHref).toBe(false);
+      expect(result.hidden).toBe(true);
+    });
+
+    test("synthesized podcast-play with a valid URL shows the link with that href", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      await synthesizePlay(page, { url: "https://example.com/page" });
+
+      const result = await footer.evaluate((el) => {
+        const a = el.shadowRoot?.querySelector(".source");
+        if (!a) return null;
+        return {
+          href: a.getAttribute("href"),
+          hidden: a.hidden,
+          ariaLabel: a.getAttribute("aria-label"),
+        };
+      });
+      expect(result).not.toBeNull();
+      expect(result.hidden).toBe(false);
+      const expected = new URL("https://example.com/page", page.url()).href;
+      expect(result.href).toBe(expected);
+      // The localized aria-label is applied when the link is revealed.
+      expect(result.ariaLabel).toBe("View episode");
+    });
+
+    test("top-level <podcast-footer url='...'> override beats the inline player's url", async ({ page }) => {
+      await page.goto("posts/test-episode/");
+      const footer = page.locator("podcast-footer");
+      await expect(footer).toBeAttached();
+
+      // Set the top-level override at runtime.
+      await footer.evaluate((el) => {
+        el.setAttribute("url", "https://override.example.com");
+      });
+
+      // Now dispatch a podcast-play with a DIFFERENT inline url. The
+      // override must win.
+      await page.evaluate(() => {
+        const footer = document.querySelector("podcast-footer");
+        if (footer) footer.setAttribute("active", "");
+        document.dispatchEvent(new CustomEvent("podcast-play", {
+          detail: {
+            src: "https://example.com/test.mp3",
+            title: "Test",
+            poster: "",
+            url: "https://inline.example.com",
+            currentTime: 0,
+          },
+        }));
+      });
+      await page.waitForTimeout(150);
+
+      const result = await footer.evaluate((el) => {
+        const a = el.shadowRoot?.querySelector(".source");
+        return {
+          href: a?.getAttribute("href"),
+          hidden: a?.hidden,
+        };
+      });
+      expect(result.hidden).toBe(false);
+      const expected = new URL("https://override.example.com", page.url()).href;
+      expect(result.href).toBe(expected);
+    });
+  });
 });
