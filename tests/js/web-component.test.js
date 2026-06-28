@@ -457,8 +457,8 @@ describe("PodcastPlayer Web Component", () => {
       const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
       const saved = {
         src: "https://example.com/a.mp3",
-        currentTime: 120,           // paused at 2:00
-        paused: true,               // was paused!
+        currentTime: 120, // paused at 2:00
+        paused: true, // was paused!
         volume: 1,
         muted: false,
         playbackRate: 1,
@@ -481,8 +481,8 @@ describe("PodcastPlayer Web Component", () => {
       const key = PodcastPlayer.PERSISTENCE_KEY + ":https://example.com/a.mp3";
       const saved = {
         src: "https://example.com/a.mp3",
-        currentTime: 60,            // was at 1:00
-        paused: false,              // was playing!
+        currentTime: 60, // was at 1:00
+        paused: false, // was playing!
         volume: 1,
         muted: false,
         playbackRate: 1,
@@ -704,11 +704,18 @@ describe("PodcastPlayer Web Component", () => {
 
       // Inline dispatches state change (mute with current volume)
       player.setAttribute("src", "https://example.com/test.mp3");
-      player.dispatchEvent(new CustomEvent("podcast-state-change", {
-        bubbles: true,
-        composed: true,
-        detail: { src: "https://example.com/test.mp3", volume: 0.8, muted: true, playbackRate: 1 }
-      }));
+      player.dispatchEvent(
+        new CustomEvent("podcast-state-change", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            src: "https://example.com/test.mp3",
+            volume: 0.8,
+            muted: true,
+            playbackRate: 1,
+          },
+        }),
+      );
 
       // Footer should have applied the changes
       expect(footer._audio.muted).toBe(true);
@@ -721,11 +728,18 @@ describe("PodcastPlayer Web Component", () => {
       footer.setAttribute("active", "");
 
       player.setAttribute("src", "https://example.com/test.mp3");
-      player.dispatchEvent(new CustomEvent("podcast-state-change", {
-        bubbles: true,
-        composed: true,
-        detail: { src: "https://example.com/test.mp3", volume: 0.5, muted: false, playbackRate: 1.5 }
-      }));
+      player.dispatchEvent(
+        new CustomEvent("podcast-state-change", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            src: "https://example.com/test.mp3",
+            volume: 0.5,
+            muted: false,
+            playbackRate: 1.5,
+          },
+        }),
+      );
 
       expect(footer._audio.volume).toBe(0.5);
       expect(footer._audio.muted).toBe(false);
@@ -738,11 +752,18 @@ describe("PodcastPlayer Web Component", () => {
       player._audio.volume = 1;
 
       footer._audio.src = "https://example.com/test.mp3";
-      footer.dispatchEvent(new CustomEvent("podcast-state-change", {
-        bubbles: true,
-        composed: true,
-        detail: { src: "https://example.com/test.mp3", volume: 0.2, muted: false, playbackRate: 2 }
-      }));
+      footer.dispatchEvent(
+        new CustomEvent("podcast-state-change", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            src: "https://example.com/test.mp3",
+            volume: 0.2,
+            muted: false,
+            playbackRate: 2,
+          },
+        }),
+      );
 
       // Inline UI should reflect footer state
       expect(player.shadowRoot.querySelector(".volume").value).toBe("0.2");
@@ -757,11 +778,18 @@ describe("PodcastPlayer Web Component", () => {
       player._audio.muted = false;
       player._audio.playbackRate = 1;
 
-      footer.dispatchEvent(new CustomEvent("podcast-state-change", {
-        bubbles: true,
-        composed: true,
-        detail: { src: "https://example.com/track-b.mp3", volume: 0.1, muted: true, playbackRate: 2 }
-      }));
+      footer.dispatchEvent(
+        new CustomEvent("podcast-state-change", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            src: "https://example.com/track-b.mp3",
+            volume: 0.1,
+            muted: true,
+            playbackRate: 2,
+          },
+        }),
+      );
 
       // Inline state should NOT change
       expect(player._audio.volume).toBe(1);
@@ -798,10 +826,12 @@ describe("PodcastPlayer Web Component", () => {
       // captures callbacks so tests can flush them deterministically.
       rafCallbacks = [];
       origRaf = globalThis.requestAnimationFrame;
-      globalThis.requestAnimationFrame = /** @type {any} */ ((cb) => {
-        rafCallbacks.push(cb);
-        return rafCallbacks.length;
-      });
+      globalThis.requestAnimationFrame = /** @type {any} */ (
+        (cb) => {
+          rafCallbacks.push(cb);
+          return rafCallbacks.length;
+        }
+      );
 
       // jsdom does not implement ResizeObserver. Install a spy class so we
       // can assert it was instantiated, and so the footer's code path runs.
@@ -849,9 +879,11 @@ describe("PodcastPlayer Web Component", () => {
       // itself), so the event must be dispatched from `document` to reach
       // the handler. This matches how inline <podcast-player> elements
       // dispatch their play events in production.
-      document.dispatchEvent(new CustomEvent("podcast-play", {
-        detail: { src: "https://example.com/x.mp3", title: "Hello World" },
-      }));
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: { src: "https://example.com/x.mp3", title: "Hello World" },
+        }),
+      );
 
       // Inner span should hold the title text
       expect(footer._els.titleText.textContent).toBe("Hello World");
@@ -905,10 +937,12 @@ describe("PodcastPlayer Web Component", () => {
     it("sets data-overflow and CSS vars when the inner text overflows", async () => {
       // Mock the dimensions BEFORE the measurement runs.
       Object.defineProperty(footer._els.title, "clientWidth", {
-        configurable: true, value: 100,
+        configurable: true,
+        value: 100,
       });
       Object.defineProperty(footer._els.titleText, "scrollWidth", {
-        configurable: true, value: 200,
+        configurable: true,
+        value: 200,
       });
 
       footer._setupTitleMarquee();
@@ -917,62 +951,70 @@ describe("PodcastPlayer Web Component", () => {
 
       expect(footer._els.title.hasAttribute("data-overflow")).toBe(true);
       // overflow = 200 - 100 = 100
-      expect(footer._els.title.style.getPropertyValue("--marquee-distance"))
-        .toBe("100px");
+      expect(footer._els.title.style.getPropertyValue("--marquee-distance")).toBe("100px");
       // duration = Math.min(20, Math.max(6, 100 / 40)) = 6
-      expect(footer._els.title.style.getPropertyValue("--marquee-duration"))
-        .toBe("6s");
+      expect(footer._els.title.style.getPropertyValue("--marquee-duration")).toBe("6s");
     });
 
     it("does NOT set data-overflow when the inner text fits", () => {
       Object.defineProperty(footer._els.title, "clientWidth", {
-        configurable: true, value: 200,
+        configurable: true,
+        value: 200,
       });
       Object.defineProperty(footer._els.titleText, "scrollWidth", {
-        configurable: true, value: 100,
+        configurable: true,
+        value: 100,
       });
 
       footer._setupTitleMarquee();
       flushRaf();
 
       expect(footer._els.title.hasAttribute("data-overflow")).toBe(false);
-      expect(footer._els.title.style.getPropertyValue("--marquee-distance"))
-        .toBe("");
-      expect(footer._els.title.style.getPropertyValue("--marquee-duration"))
-        .toBe("");
+      expect(footer._els.title.style.getPropertyValue("--marquee-distance")).toBe("");
+      expect(footer._els.title.style.getPropertyValue("--marquee-duration")).toBe("");
     });
 
     it("re-measures after a new podcast-play event changes the title", () => {
       // Start with a fitting title (no overflow)
       Object.defineProperty(footer._els.title, "clientWidth", {
-        configurable: true, value: 500,
+        configurable: true,
+        value: 500,
       });
       Object.defineProperty(footer._els.titleText, "scrollWidth", {
-        configurable: true, get() { return footer._els.titleText.textContent.length; },
+        configurable: true,
+        get() {
+          return footer._els.titleText.textContent.length;
+        },
       });
       // .title clientWidth is constant; .title-text scrollWidth scales with
       // text length under our mock.
 
       // Short title → fits
-      document.dispatchEvent(new CustomEvent("podcast-play", {
-        detail: { src: "https://example.com/short.mp3", title: "Hi" },
-      }));
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: { src: "https://example.com/short.mp3", title: "Hi" },
+        }),
+      );
       flushRaf();
       expect(footer._els.title.hasAttribute("data-overflow")).toBe(false);
 
       // Long title → overflows (2 chars vs 500px width still fits, so make
       // it 600 chars to force overflow).
       const longTitle = "A".repeat(600);
-      document.dispatchEvent(new CustomEvent("podcast-play", {
-        detail: { src: "https://example.com/long.mp3", title: longTitle },
-      }));
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: { src: "https://example.com/long.mp3", title: longTitle },
+        }),
+      );
       flushRaf();
       expect(footer._els.title.hasAttribute("data-overflow")).toBe(true);
 
       // Back to a short title → overflow attribute removed.
-      document.dispatchEvent(new CustomEvent("podcast-play", {
-        detail: { src: "https://example.com/short2.mp3", title: "Hi again" },
-      }));
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: { src: "https://example.com/short2.mp3", title: "Hi again" },
+        }),
+      );
       flushRaf();
       expect(footer._els.title.hasAttribute("data-overflow")).toBe(false);
     });
@@ -1106,7 +1148,11 @@ describe("PodcastPlayer Web Component", () => {
 
       // javascript: and data: schemes are explicitly not http(s), so the
       // auto-derived URL must be empty (callers treat "" as "hide the link").
-      for (const bad of ["javascript:alert(1)", "data:text/html,<script>alert(1)</script>", "ftp://example.com/foo.mp3"]) {
+      for (const bad of [
+        "javascript:alert(1)",
+        "data:text/html,<script>alert(1)</script>",
+        "ftp://example.com/foo.mp3",
+      ]) {
         player.setAttribute("src", bad);
         expect(player._resolveUrl()).toBe("");
       }
@@ -1214,15 +1260,17 @@ describe("PodcastPlayer Web Component", () => {
     it("footer: podcast-play with url field shows the link with that URL", () => {
       // The footer listens for podcast-play on `document` (matching how
       // inline <podcast-player> elements dispatch the event in production).
-      document.dispatchEvent(new CustomEvent("podcast-play", {
-        detail: {
-          src: "https://example.com/audio.mp3",
-          title: "Episode 1",
-          poster: "",
-          url: "https://example.com/page",
-          currentTime: 0,
-        },
-      }));
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: {
+            src: "https://example.com/audio.mp3",
+            title: "Episode 1",
+            poster: "",
+            url: "https://example.com/page",
+            currentTime: 0,
+          },
+        }),
+      );
 
       // After dispatch, the link should be visible and pointing at the
       // explicit URL from the event detail. The URL is normalized through
@@ -1236,15 +1284,17 @@ describe("PodcastPlayer Web Component", () => {
     });
 
     it("footer: podcast-play with url='none' hides the link", () => {
-      document.dispatchEvent(new CustomEvent("podcast-play", {
-        detail: {
-          src: "https://example.com/audio.mp3",
-          title: "Episode 1",
-          poster: "",
-          url: "none",
-          currentTime: 0,
-        },
-      }));
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: {
+            src: "https://example.com/audio.mp3",
+            title: "Episode 1",
+            poster: "",
+            url: "none",
+            currentTime: 0,
+          },
+        }),
+      );
 
       // The "none" sentinel is honored even when the event carries one.
       expect(footer._els.source.hidden).toBe(true);
@@ -1260,16 +1310,18 @@ describe("PodcastPlayer Web Component", () => {
       // Set the override BEFORE dispatching the event.
       footer.setAttribute("url", "https://override.example.com");
 
-      document.dispatchEvent(new CustomEvent("podcast-play", {
-        detail: {
-          src: "https://example.com/audio.mp3",
-          title: "Episode 1",
-          poster: "",
-          // Inline player's URL — must be ignored in favor of the override.
-          url: "https://inline.example.com",
-          currentTime: 0,
-        },
-      }));
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: {
+            src: "https://example.com/audio.mp3",
+            title: "Episode 1",
+            poster: "",
+            // Inline player's URL — must be ignored in favor of the override.
+            url: "https://inline.example.com",
+            currentTime: 0,
+          },
+        }),
+      );
 
       // The URL is normalized through `new URL(...)`, which appends a
       // trailing slash to a bare host. Compare against the canonical form.
@@ -1282,15 +1334,17 @@ describe("PodcastPlayer Web Component", () => {
     it("footer: <podcast-footer url='none'> override hides the link even when event has a URL", () => {
       footer.setAttribute("url", "none");
 
-      document.dispatchEvent(new CustomEvent("podcast-play", {
-        detail: {
-          src: "https://example.com/audio.mp3",
-          title: "Episode 1",
-          poster: "",
-          url: "https://inline.example.com",
-          currentTime: 0,
-        },
-      }));
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: {
+            src: "https://example.com/audio.mp3",
+            title: "Episode 1",
+            poster: "",
+            url: "https://inline.example.com",
+            currentTime: 0,
+          },
+        }),
+      );
 
       // Top-level "none" override beats the inline URL.
       expect(footer._els.source.hidden).toBe(true);
@@ -1300,33 +1354,37 @@ describe("PodcastPlayer Web Component", () => {
     it("footer: changing <podcast-footer url='...'> at runtime updates the visible link", () => {
       // URLs are normalized through `new URL(...)` which appends a
       // trailing slash to bare hosts; compare against the canonical form.
-      const firstExpected  = new URL("https://first.example.com",  document.baseURI).href;
+      const firstExpected = new URL("https://first.example.com", document.baseURI).href;
       const secondExpected = new URL("https://second.example.com", document.baseURI).href;
 
       // First, dispatch a play event that sets a URL.
-      document.dispatchEvent(new CustomEvent("podcast-play", {
-        detail: {
-          src: "https://example.com/audio.mp3",
-          title: "Episode 1",
-          poster: "",
-          url: "https://first.example.com",
-          currentTime: 0,
-        },
-      }));
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: {
+            src: "https://example.com/audio.mp3",
+            title: "Episode 1",
+            poster: "",
+            url: "https://first.example.com",
+            currentTime: 0,
+          },
+        }),
+      );
       expect(footer._els.source.getAttribute("href")).toBe(firstExpected);
 
       // Now flip the top-level override to a different URL and dispatch
       // again — the visible link must follow the override.
       footer.setAttribute("url", "https://second.example.com");
-      document.dispatchEvent(new CustomEvent("podcast-play", {
-        detail: {
-          src: "https://example.com/other.mp3",
-          title: "Episode 2",
-          poster: "",
-          url: "https://other-inline.example.com",
-          currentTime: 0,
-        },
-      }));
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: {
+            src: "https://example.com/other.mp3",
+            title: "Episode 2",
+            poster: "",
+            url: "https://other-inline.example.com",
+            currentTime: 0,
+          },
+        }),
+      );
       expect(footer._els.source.hidden).toBe(false);
       expect(footer._els.source.getAttribute("href")).toBe(secondExpected);
     });
@@ -1586,7 +1644,7 @@ describe("PodcastPlayer Web Component", () => {
         footer.removeAttribute("size");
         footer.setAttribute("size", "large");
         footer.setAttribute("size", "medium");
-        footer.setAttribute("size", "huge");  // unknown value
+        footer.setAttribute("size", "huge"); // unknown value
         footer.removeAttribute("size");
       }).not.toThrow();
     });
@@ -1605,15 +1663,17 @@ describe("PodcastPlayer Web Component", () => {
       // Synthesize a podcast-play event with a DIFFERENT inline url —
       // the top-level url override must still win, regardless of the
       // presence of the size attribute.
-      document.dispatchEvent(new CustomEvent("podcast-play", {
-        detail: {
-          src: "https://example.com/audio.mp3",
-          title: "Episode 1",
-          poster: "",
-          url: "https://inline.example.com",
-          currentTime: 0,
-        },
-      }));
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: {
+            src: "https://example.com/audio.mp3",
+            title: "Episode 1",
+            poster: "",
+            url: "https://inline.example.com",
+            currentTime: 0,
+          },
+        }),
+      );
 
       // The top-level url override wins.
       const expected = new URL("https://example.com/page", document.baseURI).href;
@@ -1621,6 +1681,693 @@ describe("PodcastPlayer Web Component", () => {
       expect(footer._els.source.getAttribute("href")).toBe(expected);
       // And the size attribute is still present.
       expect(footer.getAttribute("size")).toBe("medium");
+    });
+  });
+
+  /* ================================================================== */
+  /*  <podcast-live> Web Component (issue #65)                           */
+  /* ================================================================== */
+  //
+  // TDD RED — these tests exercise a <podcast-live> custom element that
+  // does NOT exist yet. They will fail (customElements.get returns
+  // undefined, shadowRoot is null, etc.) until the implementation lands.
+  //
+  // Design choices documented up-front (kept stable for the impl author):
+  //
+  //   • The "Listen Live" button is rendered with class .listen-live.
+  //     This name does not conflict with the player's .btn-play / .btn
+  //     classes (see assets/js/podcast-player.js around line 1842).
+  //
+  //   • Metadata slots:
+  //       .badge      — "LIVE" pill (animated when data-state="playing")
+  //       .title      — current track title text
+  //       .artist     — current track artist text
+  //       .time       — "HH:MM-HH:MM" start→end time string
+  //       .listen-live— the button that dispatches podcast-play
+  //
+  //   • State is exposed on the host as a `data-state` attribute with
+  //     one of: "idle" | "loading" | "playing" | "offline" | "error".
+  //     This mirrors the existing pattern (see :host([size="..."]) usage
+  //     in the footer).
+  //
+  //   • _fmtClockTime(date) is exposed as a STATIC method on the class so
+  //     unit tests can call it without instantiating the element.
+  //     Static access path: customElements.get("podcast-live")._fmtClockTime(d)
+  //
+  //   • Configurable intervals (ms) are read from attributes:
+  //       poll-interval-active (default 15000)
+  //       poll-interval-idle   (default 60000)
+  //
+  //   • Exponential-backoff delay sequence on error: 30000, 60000, 120000,
+  //     240000, then capped at 600000; reset to base on success.
+  //
+  //   • On disconnectedCallback, any in-flight fetch is aborted via
+  //     AbortController and any pending poll timer is cleared.
+
+  describe("podcast-live", () => {
+    /** @type {HTMLElement} */
+    let live;
+    /** @type {HTMLElement} */
+    let footer;
+    /** @type {ReturnType<typeof vi.fn> | undefined} */
+    let origFetch;
+
+    const VALID_API_URL = "https://station.example.com/api/live/nowplaying/test";
+    const LIVE_STREAM_URL = "https://station.example.com/radio.mp3";
+
+    /**
+     * Build a minimal "now playing" payload that resolves through the
+     * mock fetch. The component reads these fields off the JSON body.
+     */
+    const fakeNowPlaying = (overrides = {}) => ({
+      station: { listen_url: LIVE_STREAM_URL },
+      now_playing: {
+        song: { title: "Test Track", artist: "Test Artist" },
+        elapsed: 0,
+        duration: 0,
+        ...overrides,
+      },
+      ...overrides,
+    });
+
+    beforeEach(() => {
+      // Clean up any leftover live/footer instances from previous tests.
+      document.querySelectorAll("podcast-live, podcast-footer").forEach((e) => e.remove());
+
+      // Save and replace globalThis.fetch with a vi.fn() so tests can
+      // assert call counts. Tests that need a specific response use the
+      // `.mockResolvedValueOnce(...)` pattern.
+      origFetch = globalThis.fetch;
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(fakeNowPlaying()),
+      });
+
+      // A footer sibling is required for d2/d3 (single-stream integration).
+      // It is not required for the rest of the suite, but creating it
+      // unconditionally keeps state predictable.
+      footer = document.createElement("podcast-footer");
+      document.body.appendChild(footer);
+    });
+
+    afterEach(() => {
+      document.querySelectorAll("podcast-live, podcast-footer").forEach((e) => e.remove());
+      if (origFetch === undefined) {
+        delete globalThis.fetch;
+      } else {
+        globalThis.fetch = origFetch;
+      }
+      vi.useRealTimers();
+    });
+
+    /** Helper: create a <podcast-live> with the two required attributes set. */
+    const createLive = (overrides = {}) => {
+      const el = document.createElement("podcast-live");
+      el.setAttribute("data-azuracast-api-url", VALID_API_URL);
+      el.setAttribute("station-name", "test-station");
+      for (const [k, v] of Object.entries(overrides)) {
+        el.setAttribute(k, v);
+      }
+      document.body.appendChild(el);
+      return el;
+    };
+
+    /* ---------------------------------------------------------------- */
+    /*  A. Registration & rendering                                      */
+    /* ---------------------------------------------------------------- */
+
+    it("A1: registers a custom element named 'podcast-live'", () => {
+      expect(customElements.get("podcast-live")).toBeDefined();
+    });
+
+    it("A2: renders badge, title, artist, time and listen-live in the shadow root", () => {
+      live = createLive();
+      expect(live.shadowRoot).not.toBeNull();
+      expect(live.shadowRoot.querySelector(".badge")).not.toBeNull();
+      expect(live.shadowRoot.querySelector(".title")).not.toBeNull();
+      expect(live.shadowRoot.querySelector(".artist")).not.toBeNull();
+      expect(live.shadowRoot.querySelector(".time")).not.toBeNull();
+      expect(live.shadowRoot.querySelector(".listen-live")).not.toBeNull();
+    });
+
+    it("A3: exposes data-azuracast-api-url and station-name as readable attributes", () => {
+      live = createLive();
+      // The host element reflects the attributes regardless of whether
+      // the custom element is defined (setAttribute on an
+      // HTMLUnknownElement still works), so this is a sanity check on
+      // the DOM round-trip, not on custom-element behaviour.
+      expect(live.getAttribute("data-azuracast-api-url")).toBe(VALID_API_URL);
+      expect(live.getAttribute("station-name")).toBe("test-station");
+
+      // The component must OBSERVE the attributes so attributeChangedCallback
+      // fires when they are set (this is what kicks off the fetch).
+      const Cls = customElements.get("podcast-live");
+      expect(Cls).toBeDefined();
+      expect(Cls.observedAttributes).toContain("data-azuracast-api-url");
+      expect(Cls.observedAttributes).toContain("station-name");
+    });
+
+    it("A4: shadow root contains a <style> element", () => {
+      live = createLive();
+      expect(live.shadowRoot.querySelector("style")).not.toBeNull();
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  B. State machine                                                 */
+    /* ---------------------------------------------------------------- */
+
+    it("B1: initial data-state is 'idle'", () => {
+      live = createLive();
+      expect(live.getAttribute("data-state")).toBe("idle");
+    });
+
+    it("B2: transitions to 'loading' or 'playing' after a successful fetch", async () => {
+      live = createLive();
+      // Let the initial connectedCallback fetch resolve and the
+      // microtask queue drain.
+      await Promise.resolve();
+      await Promise.resolve();
+      const state = live.getAttribute("data-state");
+      expect(["loading", "playing"]).toContain(state);
+    });
+
+    it("B3: fetch failure transitions data-state to 'offline'", async () => {
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error("network down"));
+      live = createLive();
+      // Allow the rejection to propagate and the catch handler to run.
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(live.getAttribute("data-state")).toBe("offline");
+    });
+
+    it("B4: bad URL (javascript:/data:/http:/malformed) → 'error' and no fetch attempted", () => {
+      // Each sub-case must reject the URL without invoking fetch.
+      // We install a fresh vi.fn() as globalThis.fetch for each iteration
+      // and assert it was never called.
+      const badUrls = [
+        "javascript:alert(1)",
+        "data:text/html,<script>alert(1)</script>",
+        "http://insecure.example.com/api/live/nowplaying/test",
+        "not-a-url",
+        "http://[invalid",
+      ];
+      for (const bad of badUrls) {
+        // Reset DOM and mock between sub-cases.
+        document.querySelectorAll("podcast-live").forEach((e) => e.remove());
+        globalThis.fetch = vi.fn();
+
+        const el = document.createElement("podcast-live");
+        el.setAttribute("data-azuracast-api-url", bad);
+        el.setAttribute("station-name", "x");
+        document.body.appendChild(el);
+
+        expect(el.getAttribute("data-state")).toBe("error");
+        expect(globalThis.fetch).not.toHaveBeenCalled();
+        el.remove();
+      }
+    });
+
+    it("B5: disconnected component has no data-state set (or is fully cleaned up)", () => {
+      live = createLive();
+      const snapshot = live;
+      snapshot.remove();
+      // After removal, the element is detached and any state mutation
+      // it performed before removal must not be visible on a fresh
+      // element. We assert the cleanup by creating a new instance and
+      // confirming it starts at "idle" — i.e. the previous instance did
+      // not leak global state.
+      live = createLive();
+      expect(live.getAttribute("data-state")).toBe("idle");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  C. Polling                                                       */
+    /* ---------------------------------------------------------------- */
+    //
+    // The polling describe block installs fake timers in beforeEach and
+    // restores them in afterEach (the outer describe's afterEach also
+    // calls vi.useRealTimers() as a safety net).
+
+    describe("polling", () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it("C1: fetches exactly once on connectedCallback", async () => {
+        live = createLive();
+        // Drain any pending microtasks queued by the constructor.
+        // We deliberately use `await Promise.resolve()` instead of
+        // `vi.runOnlyPendingTimersAsync()` because the latter advances
+        // the fake clock and fires any future-scheduled timers, which
+        // would mask the "exactly once" assertion by triggering the
+        // 15000ms follow-up poll.
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+        expect(globalThis.fetch).toHaveBeenCalledWith(
+          VALID_API_URL,
+          expect.objectContaining({ signal: expect.any(AbortSignal) }),
+        );
+      });
+
+      it("C2: refetches after poll-interval-active (default 15000ms) when playing", async () => {
+        live = createLive();
+        // Drain the initial fetch (microtasks only — see C1).
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+
+        // Advance just below the active interval — must NOT refetch.
+        await vi.advanceTimersByTimeAsync(14999);
+        expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+
+        // Advance past the boundary — must refetch exactly once more.
+        // `advanceTimersByTimeAsync` drains microtasks too, so the new
+        // fetch's promise resolves and count increments by one.
+        await vi.advanceTimersByTimeAsync(2);
+        expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+      });
+
+      it("C3: refetches after poll-interval-idle (default 60000ms) when NOT playing", async () => {
+        // Force a fetch error so the component stays in 'offline' (not
+        // 'playing') for this test.
+        globalThis.fetch = vi.fn().mockRejectedValue(new Error("down"));
+        live = createLive();
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        // Initial fetch was attempted once.
+        expect(globalThis.fetch.mock.calls.length).toBe(1);
+
+        // Advance past the active interval (15000) — must NOT refetch
+        // because state is not 'playing'.
+        await vi.advanceTimersByTimeAsync(20000);
+        expect(globalThis.fetch.mock.calls.length).toBe(1);
+
+        // Advance past the idle interval (60000 cumulative) — must refetch.
+        await vi.advanceTimersByTimeAsync(40001);
+        expect(globalThis.fetch.mock.calls.length).toBeGreaterThanOrEqual(2);
+      });
+
+      it("C4: doubles the next delay on error (exponential backoff: 30s, 60s, 120s, ...)", async () => {
+        globalThis.fetch = vi.fn().mockRejectedValue(new Error("boom"));
+        live = createLive();
+        // Drain initial fetch + its microtask.
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        const initialCalls = globalThis.fetch.mock.calls.length;
+        expect(initialCalls).toBe(1);
+
+        // First retry should happen at 30000ms (base error delay).
+        await vi.advanceTimersByTimeAsync(29999);
+        expect(globalThis.fetch.mock.calls.length).toBe(1);
+
+        await vi.advanceTimersByTimeAsync(2);
+        expect(globalThis.fetch.mock.calls.length).toBe(2);
+
+        // Second retry should happen at 30000 + 60000 = 90000ms cumulative.
+        // The advance is 1ms short of the boundary so we can prove the
+        // 90000ms timer has NOT fired before that point.
+        await vi.advanceTimersByTimeAsync(59998);
+        expect(globalThis.fetch.mock.calls.length).toBe(2);
+
+        await vi.advanceTimersByTimeAsync(2);
+        expect(globalThis.fetch.mock.calls.length).toBe(3);
+      });
+
+      it("C5: a successful fetch after errors resets the delay to the base interval", async () => {
+        // First two fetches fail, third succeeds.
+        globalThis.fetch = vi
+          .fn()
+          .mockRejectedValueOnce(new Error("e1"))
+          .mockRejectedValueOnce(new Error("e2"))
+          .mockResolvedValue({
+            ok: true,
+            json: () => Promise.resolve(fakeNowPlaying()),
+          });
+
+        live = createLive();
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(globalThis.fetch.mock.calls.length).toBe(1);
+
+        // Trigger first error retry (30000ms).
+        await vi.advanceTimersByTimeAsync(30001);
+        expect(globalThis.fetch.mock.calls.length).toBe(2);
+
+        // Trigger second error retry (cumulative 90000ms).
+        await vi.advanceTimersByTimeAsync(60000);
+        expect(globalThis.fetch.mock.calls.length).toBe(3);
+
+        // Third call succeeds. The next retry should be at the base
+        // active interval (15000ms) — NOT the next backoff step.
+        // 1ms short of the boundary so we can prove the 15000ms timer
+        // has NOT fired before that point.
+        await vi.advanceTimersByTimeAsync(14998);
+        expect(globalThis.fetch.mock.calls.length).toBe(3);
+
+        await vi.advanceTimersByTimeAsync(2);
+        expect(globalThis.fetch.mock.calls.length).toBe(4);
+      });
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  D. Single-stream integration (event flow)                        */
+    /* ---------------------------------------------------------------- */
+
+    it("D1: clicking the .listen-live button dispatches podcast-play on document", async () => {
+      live = createLive();
+      // Drain the initial fetch so the component has a stream URL cached.
+      // The mock fetch resolves synchronously, so a few microtask ticks
+      // are sufficient.
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      const handler = vi.fn();
+      document.addEventListener("podcast-play", handler);
+
+      const btn = live.shadowRoot.querySelector(".listen-live");
+      btn.click();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      const event = handler.mock.calls[0][0];
+      expect(event).toBeInstanceOf(CustomEvent);
+      expect(event.type).toBe("podcast-play");
+      expect(event.bubbles).toBe(true);
+      expect(event.composed).toBe(true);
+      expect(event.detail).toBeDefined();
+      expect(event.detail.src).toBe(LIVE_STREAM_URL);
+      expect(typeof event.detail.title).toBe("string");
+      // currentTime is the live start offset (0 by default for a stream).
+      expect(event.detail.currentTime).toBe(0);
+
+      document.removeEventListener("podcast-play", handler);
+    });
+
+    it("D2: when a podcast-play event with the live URL arrives, data-state becomes 'playing'", async () => {
+      live = createLive();
+      // Drain initial fetch so the component is aware of the live URL.
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Simulate the footer (or any source) starting playback of the
+      // live stream. With the matching src, the live component should
+      // enter the 'playing' state.
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: {
+            src: LIVE_STREAM_URL,
+            title: "Live",
+            poster: "",
+            currentTime: 0,
+          },
+        }),
+      );
+
+      expect(live.getAttribute("data-state")).toBe("playing");
+    });
+
+    it("D3: a podcast-play event with a non-matching src does not change the live component's state", async () => {
+      live = createLive();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // First, drive the live component to 'playing' via a matching event.
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: { src: LIVE_STREAM_URL, title: "Live", poster: "", currentTime: 0 },
+        }),
+      );
+      expect(live.getAttribute("data-state")).toBe("playing");
+
+      // Now dispatch a podcast-play for a DIFFERENT source. The live
+      // component must not transition out of 'playing' (or be confused
+      // by the unrelated event).
+      document.dispatchEvent(
+        new CustomEvent("podcast-play", {
+          detail: {
+            src: "https://other.example.com/episode.mp3",
+            title: "Episode 99",
+            poster: "",
+            currentTime: 0,
+          },
+        }),
+      );
+
+      expect(live.getAttribute("data-state")).toBe("playing");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  E. 24H time formatting                                           */
+    /* ---------------------------------------------------------------- */
+
+    it("E1: _fmtClockTime(14:32) returns '14:32'", () => {
+      const Cls = customElements.get("podcast-live");
+      expect(typeof Cls._fmtClockTime).toBe("function");
+      expect(Cls._fmtClockTime(new Date(2026, 0, 1, 14, 32))).toBe("14:32");
+    });
+
+    it("E2: _fmtClockTime(00:00) returns '00:00'", () => {
+      const Cls = customElements.get("podcast-live");
+      expect(Cls._fmtClockTime(new Date(2026, 0, 1, 0, 0))).toBe("00:00");
+    });
+
+    it("E3: _fmtClockTime(23:59) returns '23:59'", () => {
+      const Cls = customElements.get("podcast-live");
+      expect(Cls._fmtClockTime(new Date(2026, 0, 1, 23, 59))).toBe("23:59");
+    });
+
+    it("E4: _fmtClockTime on an invalid Date returns '--:--'", () => {
+      const Cls = customElements.get("podcast-live");
+      expect(Cls._fmtClockTime(new Date("invalid"))).toBe("--:--");
+    });
+
+    it("E5: rendered .time reflects now-elapsed and now-elapsed+duration in 24H", async () => {
+      // Use fake timers so Date.now() is deterministic.
+      vi.useFakeTimers();
+      // Pick a "now" that yields a clean local-time 14:30:00.
+      const realNow = new Date(2026, 0, 15, 14, 30, 0).getTime();
+      vi.setSystemTime(realNow);
+
+      // Mock fetch to return a track that started 60s ago and lasts 240s.
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve(
+            fakeNowPlaying({
+              elapsed: 60,
+              duration: 240,
+            }),
+          ),
+      });
+
+      live = createLive();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      const time = live.shadowRoot.querySelector(".time");
+      expect(time).not.toBeNull();
+      // start = now - elapsed = 14:30 - 60s = 14:29
+      // end   = start + duration = 14:29 + 240s = 14:33
+      const text = time.textContent;
+      expect(text).toContain("14:29");
+      expect(text).toContain("14:33");
+
+      vi.useRealTimers();
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  F. URL sanitization                                              */
+    /* ---------------------------------------------------------------- */
+    //
+    // These tests verify the four "bad URL" categories listed in the
+    // spec. The component MUST refuse to fetch and MUST set
+    // data-state="error". Each sub-case gets its own fresh fetch mock
+    // so we can assert it was not invoked.
+
+    it("F1: javascript: URL → data-state='error' and no fetch", () => {
+      globalThis.fetch = vi.fn();
+      live = document.createElement("podcast-live");
+      live.setAttribute("data-azuracast-api-url", "javascript:alert(1)");
+      live.setAttribute("station-name", "x");
+      document.body.appendChild(live);
+
+      expect(live.getAttribute("data-state")).toBe("error");
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+    });
+
+    it("F2: data: URL → data-state='error' and no fetch", () => {
+      globalThis.fetch = vi.fn();
+      live = document.createElement("podcast-live");
+      live.setAttribute("data-azuracast-api-url", "data:text/html,<script>x</script>");
+      live.setAttribute("station-name", "x");
+      document.body.appendChild(live);
+
+      expect(live.getAttribute("data-state")).toBe("error");
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+    });
+
+    it("F3: http:// (non-https) URL → data-state='error' and no fetch", () => {
+      globalThis.fetch = vi.fn();
+      live = document.createElement("podcast-live");
+      live.setAttribute("data-azuracast-api-url", "http://insecure.example.com/api/nowplaying/x");
+      live.setAttribute("station-name", "x");
+      document.body.appendChild(live);
+
+      expect(live.getAttribute("data-state")).toBe("error");
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+    });
+
+    it("F4: malformed URL → data-state='error' and no fetch", () => {
+      globalThis.fetch = vi.fn();
+      live = document.createElement("podcast-live");
+      // "not-a-url" lacks a scheme; the URL constructor will throw.
+      live.setAttribute("data-azuracast-api-url", "not-a-url");
+      live.setAttribute("station-name", "x");
+      document.body.appendChild(live);
+
+      expect(live.getAttribute("data-state")).toBe("error");
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  G. CSS animation                                                 */
+    /* ---------------------------------------------------------------- */
+
+    it("G1: shadow style block declares @keyframes live-pulse", () => {
+      live = createLive();
+      const css = live.shadowRoot.querySelector("style").textContent;
+      expect(css).toContain("@keyframes live-pulse");
+    });
+
+    it("G2: @media (prefers-reduced-motion: reduce) disables the live-pulse animation", () => {
+      live = createLive();
+      const css = live.shadowRoot.querySelector("style").textContent;
+      const idx = css.indexOf("@media (prefers-reduced-motion: reduce)");
+      expect(idx).toBeGreaterThan(-1);
+      const block = css.slice(idx);
+      // Inside the reduced-motion block, the animation must be set to
+      // "none" (or otherwise neutralized). "animation: none" is the
+      // canonical expression.
+      expect(block).toContain("animation: none");
+    });
+
+    it("G3: badge has an accessible name conveying 'live broadcasting'", () => {
+      live = createLive();
+      const badge = live.shadowRoot.querySelector(".badge");
+      expect(badge).not.toBeNull();
+      // The spec gives the exact aria-label string.
+      expect(badge.getAttribute("aria-label")).toBe("Live radio currently broadcasting");
+    });
+
+    /* ---------------------------------------------------------------- */
+    /*  H. Cleanup                                                       */
+    /* ---------------------------------------------------------------- */
+
+    it("H1: disconnectedCallback clears the pending poll timer", async () => {
+      vi.useFakeTimers();
+      live = createLive();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      // The component must have made its initial fetch — that's the
+      // precondition for the "no further fetch after disconnect" check
+      // to be meaningful. In the TDD-red state the component does not
+      // exist, so this assertion fails.
+      const callsAfterConnect = globalThis.fetch.mock.calls.length;
+      expect(callsAfterConnect).toBe(1);
+
+      // Disconnect, then advance well past the active interval. No new
+      // fetch should fire because the poll timer was cleared.
+      live.remove();
+      await vi.advanceTimersByTimeAsync(60000);
+
+      expect(globalThis.fetch.mock.calls.length).toBe(callsAfterConnect);
+      vi.useRealTimers();
+    });
+
+    it("H2: disconnectedCallback aborts the in-flight fetch (late response is ignored)", async () => {
+      // Mock fetch with a promise that does NOT resolve until we
+      // explicitly resolve it. The component must abort via the
+      // AbortSignal, so when we resolve late, the component's state
+      // should not change.
+      let resolveFetch;
+      const latePromise = new Promise((resolve) => {
+        resolveFetch = resolve;
+      });
+      globalThis.fetch = vi.fn().mockReturnValue(latePromise);
+
+      live = createLive();
+      // The initial fetch is now pending. Disconnect.
+      live.remove();
+
+      // Now resolve the "late" fetch — well after the component is
+      // gone. A correct implementation ignores the response because
+      // the AbortController fired. We assert no further fetch happens
+      // and the mock's signal was aborted.
+      const fetchOpts = globalThis.fetch.mock.calls[0][1];
+      expect(fetchOpts).toBeDefined();
+      expect(fetchOpts.signal).toBeDefined();
+      expect(fetchOpts.signal.aborted).toBe(true);
+
+      // Resolving the late promise must not throw inside the (already
+      // disconnected) component.
+      expect(() =>
+        resolveFetch({
+          ok: true,
+          json: () => Promise.resolve(fakeNowPlaying()),
+        }),
+      ).not.toThrow();
+    });
+
+    it("H3: multiple connect/disconnect cycles do not leak timers or global state", async () => {
+      vi.useFakeTimers();
+      // Capture the timer count after a clean baseline.
+      const baselineTimers = vi.getTimerCount();
+
+      // The component must have been registered and have observed
+      // attribute changes — verify it exists so the connect/disconnect
+      // exercise below is meaningful. Fails in the TDD-red state.
+      expect(customElements.get("podcast-live")).toBeDefined();
+
+      let totalFetches = 0;
+      for (let i = 0; i < 3; i++) {
+        const el = document.createElement("podcast-live");
+        el.setAttribute("data-azuracast-api-url", VALID_API_URL);
+        el.setAttribute("station-name", "x");
+        document.body.appendChild(el);
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        totalFetches = globalThis.fetch.mock.calls.length;
+        el.remove();
+      }
+
+      // After cycling, the pending-timer count should match the
+      // baseline (i.e. nothing left dangling) AND no extra fetches
+      // should have been issued after the last disconnect.
+      expect(vi.getTimerCount()).toBe(baselineTimers);
+      const callsAfterAllCycles = globalThis.fetch.mock.calls.length;
+      // Advance well past the poll interval. No new fetch should fire
+      // because the (disconnected) elements have no live timers.
+      await vi.advanceTimersByTimeAsync(120000);
+      expect(globalThis.fetch.mock.calls.length).toBe(callsAfterAllCycles);
+      // Sanity: at least one fetch happened per cycle (3 total).
+      expect(totalFetches).toBe(3);
+      vi.useRealTimers();
     });
   });
 });

@@ -108,6 +108,13 @@
   </footer>
 
   <podcast-footer id="podcast-footer" size="medium" data-turbolinks-permanent data-turbo-permanent hx-preserve></podcast-footer>
+  <podcast-live
+    id="podcast-live"
+    data-azuracast-api-url="https://radio.erb.pw/api/live/nowplaying/subspace"
+    station-name="Quantum Radio"
+    data-turbolinks-permanent
+    data-turbo-permanent
+    hx-preserve></podcast-live>
 
   <script nonce="{{ $cspNonce }}">
     (function() {
@@ -186,6 +193,7 @@
     "player_episode" "player_close" "player_region"
     "player_error" "player_no_source" "player_unknown_episode"
     "player_source_link"
+    "player_live_badge" "player_listen_live" "player_live_now_playing" "player_live_offline"
     "code_copy_title" "code_copy_label" "code_copied" "code_copied_label"
   -}}
   <script nonce="{{ $cspNonce }}">

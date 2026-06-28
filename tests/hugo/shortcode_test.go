@@ -207,3 +207,44 @@ func TestPodcastPlayerShortcode_BadUrlScheme(t *testing.T) {
 		t.Errorf("expected error to mention the bad scheme, got:\n%s", combined)
 	}
 }
+
+func TestPodcastPlayerShortcode_WithLiveMode(t *testing.T) {
+	outputDir := buildHugoSite(t, "with-live-mode")
+	content := readOutputFile(t, outputDir, "posts/test-episode/index.html")
+	if !strings.Contains(content, `data-azuracast-api-url="https://example.com/api/live/nowplaying/test"`) {
+		t.Errorf("expected data-azuracast-api-url attribute in output, got:\n%s", content)
+	}
+	if !strings.Contains(content, " live-mode") {
+		t.Errorf("expected live-mode boolean attribute in output, got:\n%s", content)
+	}
+	if strings.Contains(content, `live-mode="`) {
+		t.Errorf("live-mode should be a boolean attribute (no value), got:\n%s", content)
+	}
+}
+
+func TestPodcastPlayerShortcode_LiveModeOmitted(t *testing.T) {
+	// Reuses the with-url testdata which has no live-mode or api-url params.
+	outputDir := buildHugoSite(t, "with-url")
+	content := readOutputFile(t, outputDir, "posts/test-episode/index.html")
+	if strings.Contains(content, "data-azuracast-api-url") {
+		t.Errorf("expected no data-azuracast-api-url when omitted, got:\n%s", content)
+	}
+	if strings.Contains(content, " live-mode") {
+		t.Errorf("expected no live-mode when omitted, got:\n%s", content)
+	}
+}
+
+func TestPodcastPlayerShortcode_BadAzuracastApiUrl(t *testing.T) {
+	root := testDir(t)
+	siteDir := filepath.Join(root, "tests", "hugo", "testdata", "bad-azuracast-api-url")
+	cmd := exec.Command("hugo", "--source", siteDir)
+	cmd.Dir = siteDir
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("expected build error for http:// api URL, but build succeeded:\n%s", output)
+	}
+	combined := strings.ToLower(string(output))
+	if !strings.Contains(combined, "https") {
+		t.Errorf("expected error to mention the https scheme, got:\n%s", output)
+	}
+}

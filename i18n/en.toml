@@ -62,6 +62,18 @@ other = "Unknown Episode"
 [player_source_link]
 other = "View episode"
 
+[player_live_badge]
+other = "LIVE"
+
+[player_listen_live]
+other = "Listen Live"
+
+[player_live_now_playing]
+other = "Now Playing"
+
+[player_live_offline]
+other = "Offline"
+
 # ── Carousel ──
 [carousel_label]
 other = "Image carousel"

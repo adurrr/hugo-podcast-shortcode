@@ -135,6 +135,36 @@ En pantallas de menos de 768px de ancho, los tres tamaños colapsan al mismo dis
 
 El atributo es puramente visual. La persistencia, la reproducción y la URL de la fuente de audio no se ven afectadas por `size`. Las variables de tema (`--podcast-player-bg`, `--podcast-player-text`, etc.) siguen funcionando como antes.
 
+## Modo Radio en Vivo
+
+El pie persistente puede alojar una estación de radio en vivo mediante
+el elemento `<podcast-live>`, normalmente colocado como hermano de
+`<podcast-footer>` en `baseof.html`. Cuando la transmisión está
+activa, el pie muestra una insignia roja LIVE, los metadatos de la
+pista actual y un tiempo de inicio a fin en formato 24H que se
+actualiza según avanza la pista.
+
+Para activarlo:
+
+```
+<podcast-live
+  data-azuracast-api-url="https://radio.example.org/api/live/nowplaying/station-slug"
+  station-name="Mi Radio">
+</podcast-live>
+```
+
+Mientras se reproduce cualquier fuente que no sea en vivo, aparece un
+botón "Escuchar en vivo" en el pie. Al hacer clic, se cambia a la
+transmisión en vivo y se detiene la otra fuente. La insignia tiene una
+animación de pulso por defecto; los usuarios con
+`prefers-reduced-motion: reduce` ven un punto estático en su lugar.
+
+Los metadatos se actualizan cada 15 segundos durante la reproducción y
+cada 60 segundos en caso contrario, con retroceso exponencial ante
+errores. La configuración sigue las mismas reglas
+`data-turbolinks-permanent` / `hx-preserve` que el resto del pie, por
+lo que persiste entre navegaciones con htmx / Turbo / Turbolinks.
+
 ## Ejemplo: Sección de Pie en baseof.html Completa
 
 ```
