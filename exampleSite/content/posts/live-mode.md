@@ -11,6 +11,11 @@ draft: false
   live-mode="true"
 >}}
 
+{{< podcast-live
+  data-azuracast-api-url="https://radio.erb.pw/api/live/nowplaying/subspace"
+  station-name="Quantum Radio"
+>}}
+
 This page demonstrates the live radio mode. The footer shows a "Listen
 Live" button and displays the current track from Quantum Radio on
 radio.erb.pw (station: subspace). The metadata refreshes automatically.

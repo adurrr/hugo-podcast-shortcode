@@ -1,0 +1,11 @@
+{{- $apiUrl := .Get "data-azuracast-api-url" -}}
+{{- $stationName := .Get "station-name" -}}
+{{- if and $apiUrl (not (hasPrefix $apiUrl "https://")) -}}
+  {{- errorf "podcast-live: data-azuracast-api-url must use HTTPS, got %q" $apiUrl -}}
+{{- end -}}
+<podcast-live
+  {{- with $apiUrl }} data-azuracast-api-url="{{ . }}"{{ end }}
+  {{- with $stationName }} station-name="{{ . }}"{{ end }}
+  data-turbolinks-permanent
+  data-turbo-permanent
+  hx-preserve></podcast-live>

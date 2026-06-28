@@ -40,7 +40,13 @@
 
 {{- /* ---- 1. Validate required params ---- */ -}}
 {{- $src := .Get "src" -}}
-{{- if not $src -}}
+{{- $sourceHint := .Get "source" -}}
+{{- $liveModeHint := eq (.Get "live-mode") "true" -}}
+{{- /* Live-radio mode resolves the audio URL from the AzuraCast nowplaying
+   API at runtime, so an empty src is permitted when source=azuracast or
+   live-mode is set. The AzuraCast adapter will fail loudly if the
+   API URL is also missing or invalid. */ -}}
+{{- if and (not $src) (not (or (eq $sourceHint "azuracast") $liveModeHint)) -}}
   {{- errorf "podcast-player: required 'src' parameter is missing. See %s" .Position -}}
 {{- end -}}
 {{- /* Validate audio URL scheme */ -}}
