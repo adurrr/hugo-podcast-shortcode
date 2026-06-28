@@ -35,6 +35,38 @@ If `src` is provided alongside `source="azuracast"`, it's used directly without 
 
 **Auto-detection**: triggered when the URL contains `azuracast` or `.stream.`.
 
+### Live Mode
+
+For sites that run an AzuraCast live radio stream, the `<podcast-live>`
+component shows a "Listen Live" button in the persistent footer with
+real-time now-playing metadata: track title, artist, and 24H start-to-end
+time. The stream itself is played through the regular `<podcast-footer>`,
+so existing single-stream enforcement, persistence, and theming all
+work without changes.
+
+To enable live mode, add a `<podcast-live>` element as a sibling of
+`<podcast-footer>` in your `baseof.html`:
+
+```go-html-template
+<podcast-live
+  data-azuracast-api-url="https://radio.example.org/api/live/nowplaying/station-slug"
+  station-name="My Radio">
+</podcast-live>
+```
+
+The metadata refreshes every 15 seconds while the stream is playing
+and every 60 seconds otherwise. On fetch errors the polling backs off
+exponentially (30s, 60s, 120s, ..., max 10 minutes) until it recovers.
+
+A "Listen Live" button also appears inside the regular footer when a
+non-live source is playing; clicking it switches to the live stream and
+stops the other source. The flow is governed by the same event protocol
+as the rest of the player (`podcast-play` / `podcast-pause` events).
+
+The badge has a pulse animation by default; `prefers-reduced-motion:
+reduce` disables it. The animation is at most 1.5 Hz, well within the
+3 Hz seizure-safety threshold.
+
 ### iVoox
 
 Fetches the iVoox episode page and extracts the audio URL from:

@@ -163,6 +163,34 @@ On viewports narrower than 768px, all three sizes collapse to the same compact l
 
 The attribute is purely visual. Persistence, playback, and the audio source URL are unaffected by `size`. Theme variables (`--podcast-player-bg`, `--podcast-player-text`, etc.) continue to work as before.
 
+## Live Radio Mode
+
+The persistent footer can host a live radio station via the
+`<podcast-live>` element, typically placed as a sibling of
+`<podcast-footer>` in `baseof.html`. When the live stream is playing,
+the footer shows a red LIVE badge, the current track metadata, and a
+24H start-to-end time that updates as the track progresses.
+
+To enable:
+
+```go-html-template
+<podcast-live
+  data-azuracast-api-url="https://radio.example.org/api/live/nowplaying/station-slug"
+  station-name="My Radio">
+</podcast-live>
+```
+
+While any non-live source is playing, a "Listen Live" button appears
+in the footer. Clicking it switches to the live stream and stops the
+other source. The live badge has a pulse animation by default; users
+with `prefers-reduced-motion: reduce` see a static dot instead.
+
+The metadata refreshes every 15 seconds while playing and every 60
+seconds otherwise, with exponential backoff on errors. The configuration
+follows the same `data-turbolinks-permanent` / `hx-preserve` rules as
+the rest of the footer, so it persists across htmx / Turbo / Turbolinks
+navigation.
+
 ## Example: Full baseof.html Footer Section
 
 ```html

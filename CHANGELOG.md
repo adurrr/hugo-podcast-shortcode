@@ -28,6 +28,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   widens the bar with larger cover and controls, and `"large"` reserves
   the most room for long titles; all three collapse to the compact
   layout on narrow viewports (#62).
+- `<podcast-live>` Web Component adds live radio support to the
+  persistent footer: real-time now-playing metadata (title, artist,
+  24H start/end time) from an AzuraCast `nowplaying` API, a "Listen
+  Live" CTA in the footer when other audio is playing, a pulsing LIVE
+  badge that respects `prefers-reduced-motion: reduce`, exponential
+  backoff on polling errors, and single-stream enforcement with the
+  existing podcast playback (#65).
 
 ## [1.3.0] - 2026-06-16
 
