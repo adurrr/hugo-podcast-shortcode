@@ -19,7 +19,7 @@
     "eslint": "^10.4.1",
     "jsdom": "^29.1.1",
     "prettier": "^3.8.4",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "turbolinks": "^5.2.0"
